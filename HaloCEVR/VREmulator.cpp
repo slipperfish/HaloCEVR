@@ -136,15 +136,10 @@ void VREmulator::PreDrawEye(struct Renderer* renderer, float deltaTime, int eye)
 
 	RenderTarget* primaryRenderTarget = Helpers::GetRenderTargets();
 
-	for (int i = 0; i < 1; i++)
-	{
-		//primaryRenderTarget->renderSurface = eye == 0 ? SharedTarget_L : SharedTarget_R;
-		primaryRenderTarget[i].renderSurface = EyeSurface_Game[eye][i];
-		//primaryRenderTarget->renderTexture = eye == 0 ? LeftEyeTexture : RightEyeTexture;
-		primaryRenderTarget[i].renderTexture = EyeTexture_Game[eye][i];
-		primaryRenderTarget[i].width = 600;
-		primaryRenderTarget[i].height = 600;
-	}
+	primaryRenderTarget[0].renderSurface = EyeSurface_Game[eye][0];
+	primaryRenderTarget[0].renderTexture = EyeTexture_Game[eye][0];
+	primaryRenderTarget[0].width = 600;
+	primaryRenderTarget[0].height = 600;
 }
 
 void VREmulator::PostDrawEye(struct Renderer* renderer, float deltaTime, int eye)
@@ -217,115 +212,6 @@ void VREmulator::CreateSharedTarget()
 	D3DSURFACE_DESC Desc2;
 
 	Helpers::GetRenderTargets()[1].renderSurface->GetDesc(&Desc2);
-
-	Logger::log << (Desc.Format) << ", " << Desc2.Format << std::endl;
-
-	/*
-	* Old way, creating separate render targets and textures
-	
-	HRESULT result = Helpers::GetDirect3DDevice9()->CreateTexture(600, 600, 1, 1, Desc.Format, D3DPOOL_DEFAULT, &LeftEyeTexture, 0);
-
-	if (FAILED(result))
-	{
-		Logger::log << "Failed to create left eye texture: " << result << std::endl;
-	}
-
-	result = Helpers::GetDirect3DDevice9()->CreateTexture(600, 600, 1, 1, Desc.Format, D3DPOOL_DEFAULT, &RightEyeTexture, 0);
-
-	if (FAILED(result))
-	{
-		Logger::log << "Failed to create right eye texture: " << result << std::endl;
-	}
-
-	result = Helpers::GetDirect3DDevice9()->CreateRenderTarget(600, 600, Desc.Format, Desc.MultiSampleType, Desc.MultiSampleQuality, FALSE, &SharedTarget_L, &SharedHandleL);
-
-	if (FAILED(result))
-	{
-		Logger::log << "Failed to create shared render target: " << result << std::endl;
-	}
-
-	result = MirrorDevice->CreateRenderTarget(600, 600, Desc.Format, Desc.MultiSampleType, Desc.MultiSampleQuality, FALSE, &SharedTarget_L_M, &SharedHandleL);
-
-	if (FAILED(result))
-	{
-		Logger::log << "Failed to create copy of render target: " << result << std::endl;
-	}
-
-	result = Helpers::GetDirect3DDevice9()->CreateRenderTarget(600, 600, Desc.Format, Desc.MultiSampleType, Desc.MultiSampleQuality, FALSE, &SharedTarget_R, &SharedHandleR);
-
-	if (FAILED(result))
-	{
-		Logger::log << "Failed to create shared render target: " << result << std::endl;
-	}
-
-	result = MirrorDevice->CreateRenderTarget(600, 600, Desc.Format, Desc.MultiSampleType, Desc.MultiSampleQuality, FALSE, &SharedTarget_R_M, &SharedHandleR);
-
-	if (FAILED(result))
-	{
-		Logger::log << "Failed to create copy of render target: " << result << std::endl;
-	}
-	*/
-
-	/*
-	* Newer way, creating shared textures + extracting surfaces
-
-	HRESULT result = Helpers::GetDirect3DDevice9()->CreateTexture(600, 600, 1, 1, Desc.Format, D3DPOOL_DEFAULT, &LeftEyeTexture, &SharedHandleL);
-
-	if (FAILED(result))
-	{
-		Logger::log << "Failed to create left eye texture: " << result << std::endl;
-	}
-
-	result = Helpers::GetDirect3DDevice9()->CreateTexture(600, 600, 1, 1, Desc.Format, D3DPOOL_DEFAULT, &RightEyeTexture, &SharedHandleR);
-
-	if (FAILED(result))
-	{
-		Logger::log << "Failed to create right eye texture: " << result << std::endl;
-	}
-
-	result = MirrorDevice->CreateTexture(600, 600, 1, 1, Desc.Format, D3DPOOL_DEFAULT, &LeftEyeTexture_M, &SharedHandleL);
-
-	if (FAILED(result))
-	{
-		Logger::log << "Failed to create mirror left eye texture: " << result << std::endl;
-	}
-
-	result = MirrorDevice->CreateTexture(600, 600, 1, 1, Desc.Format, D3DPOOL_DEFAULT, &RightEyeTexture_M, &SharedHandleR);
-
-	if (FAILED(result))
-	{
-		Logger::log << "Failed to create mirror right eye texture: " << result << std::endl;
-	}
-
-	result = LeftEyeTexture->GetSurfaceLevel(0, &SharedTarget_L);
-
-	if (FAILED(result))
-	{
-		Logger::log << "Failed to get render surface from left texture: " << result << std::endl;
-	}
-
-	result = LeftEyeTexture_M->GetSurfaceLevel(0, &SharedTarget_L_M);
-
-	if (FAILED(result))
-	{
-		Logger::log << "Failed to get render surface from left mirror texture: " << result << std::endl;
-	}
-
-	result = RightEyeTexture->GetSurfaceLevel(0, &SharedTarget_R);
-
-	if (FAILED(result))
-	{
-		Logger::log << "Failed to get render surface from right texture: " << result << std::endl;
-	}
-
-	result = RightEyeTexture_M->GetSurfaceLevel(0, &SharedTarget_R_M);
-
-	if (FAILED(result))
-	{
-		Logger::log << "Failed to get render surface from right mirror texture: " << result << std::endl;
-	}
-	*/
-
 
 	const UINT WIDTH = 600;
 	const UINT HEIGHT = 600;

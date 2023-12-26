@@ -56,23 +56,6 @@ void Game::OnInitDirectX()
 		return;
 	}
 
-	//*
-	sRect* Window = reinterpret_cast<sRect*>(0x69c634);
-	Window->top = 0;
-	Window->left = 0;
-	Window->right = 600;
-	Window->bottom = 600;
-
-	(*reinterpret_cast<short*>(0x69c642)) = 600 - 8;
-	(*reinterpret_cast<short*>(0x69c640)) = 600 - 8;
-	//*/
-
-	D3DPRESENT_PARAMETERS* present = reinterpret_cast<D3DPRESENT_PARAMETERS*>(0x7c04a0);
-	present->BackBufferWidth = 600;
-	present->BackBufferHeight = 600;
-	present->PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
-
-	Helpers::GetDirect3DDevice9()->Reset(present);
 	
 	vrEmulator.Init();
 }
@@ -85,19 +68,6 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 
 	StoreRenderTargets();
 
-	IDirect3DSurface9* BackBuffer;
-
-	Helpers::GetDirect3DDevice9()->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &BackBuffer);
-
-	D3DSURFACE_DESC Desc;
-
-	BackBuffer->GetDesc(&Desc);
-
-	Logger::log << Desc.Width << ", " << Desc.Height << std::endl;
-
-	BackBuffer->Release();
-
-	//*
 	sRect* Window = reinterpret_cast<sRect*>(0x69c634);
 	Window->top = 0;
 	Window->left = 0;
@@ -106,28 +76,8 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 
 	(*reinterpret_cast<short*>(0x69c642)) = 600 - 8;
 	(*reinterpret_cast<short*>(0x69c640)) = 600 - 8;
-	//*/
 
 	vrEmulator.PreDrawFrame(renderer, deltaTime);
-	
-	/*
-	D3DSURFACE_DESC desc;
-
-	Logger::log << "Pre frame" << std::endl;
-	for (int i = 0; i < 8; i++)
-	{
-		Logger::log << i << ": ";
-		Logger::log << Helpers::GetRenderTargets()[i].width;
-		Logger::log << "x";
-		Logger::log << Helpers::GetRenderTargets()[i].height;
-		Logger::log << " vs ";
-		Helpers::GetRenderTargets()[i].renderSurface->GetDesc(&desc);
-		Logger::log << desc.Width;
-		Logger::log << "x";
-		Logger::log << desc.Height;
-		Logger::log << std::endl;
-	}
-	*/
 }
 
 void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
@@ -145,73 +95,15 @@ void Game::PostDrawEye(struct Renderer* renderer, float deltaTime, int eye)
 void Game::PreDrawMirror(struct Renderer* renderer, float deltaTime)
 {
 	RestoreRenderTargets();
-
-	D3DSURFACE_DESC Desc;
-	gameRenderTargets[0].renderSurface->GetDesc(&Desc);
-
-	//for (int i = 0; i < 8; i++)
-	//{
-	//	Logger::log << i << ": " << primaryRenderTarget[i].width << "x" << primaryRenderTarget[i].height << std::endl;
-	//}
-
-
-	/*
-	sRect* Window = reinterpret_cast<sRect*>(0x69c634);
-	Window->top = 0;
-	Window->left = 0;
-	Window->right = Desc.Width;
-	Window->bottom = Desc.Height;
-
-	(*reinterpret_cast<short*>(0x69c642)) = Desc.Width - 8;
-	(*reinterpret_cast<short*>(0x69c640)) = Desc.Height - 8;
-	*/
-
-	for (CameraFrustum* f : { &renderer->frustum, &renderer->frustum2 })
-	{
-		f->Viewport.right = Desc.Width;
-		f->Viewport.bottom = Desc.Height;
-		f->oViewport.right = Desc.Width;
-		f->oViewport.bottom = Desc.Height;
-	}
 }
 
 void Game::PostDrawMirror(struct Renderer* renderer, float deltaTime)
 {
-
+	// Do something here to copy the image into the backbuffer correctly
 }
 
 void Game::PostDrawFrame(struct Renderer* renderer, float deltaTime)
 {
-	// Copy VR View back onto real screen (broken)
-
-	/*
-	IDirect3DSurface9* GameSurface = nullptr;
-
-	HRESULT result = Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &GameSurface);
-
-	if (FAILED(result))
-	{
-		Logger::log << "Failed to get game surface: " << result << std::endl;
-	}
-
-	result = Helpers::GetDirect3DDevice9()->BeginScene();
-	if (FAILED(result))
-	{
-		Logger::log << "Failed to call begin scene: " << result << std::endl;
-	}
-	result = Helpers::GetDirect3DDevice9()->StretchRect(SharedTarget, nullptr, GameSurface, nullptr, D3DTEXF_NONE);
-	if (FAILED(result))
-	{
-		Logger::log << "Failed to copy to shared target: " << result << std::endl;
-	}
-	result = Helpers::GetDirect3DDevice9()->EndScene();
-	if (FAILED(result))
-	{
-		Logger::log << "Failed to call end scene: " << result << std::endl;
-	}
-	GameSurface->Release();
-	*/
-
 	vrEmulator.PostDrawFrame(renderer, deltaTime);
 }
 
