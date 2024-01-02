@@ -239,7 +239,7 @@ HRESULT __stdcall IDirect3DDevice9ExWrapper::EndScene(void)
 
 HRESULT __stdcall IDirect3DDevice9ExWrapper::Clear(DWORD Count, const D3DRECT* pRects, DWORD Flags, D3DCOLOR Color, float Z, DWORD Stencil)
 {
-    return Real->Clear(Color, pRects, Flags, Color, Z, Stencil);
+    return Real->Clear(Count, pRects, Flags, Color, Z, Stencil);
 }
 
 HRESULT __stdcall IDirect3DDevice9ExWrapper::SetTransform(D3DTRANSFORMSTATETYPE State, const D3DMATRIX* pMatrix)
