@@ -23,6 +23,7 @@ public:
 	static inline Hook<Func_DrawHUD> DrawHUD;
 	static inline Hook<Func_DrawMenu> DrawMenu;
 	static inline Hook<Func_DrawScope> DrawScope;
+	static inline Hook<Func_DrawLoadingScreen> DrawLoadingScreen;
 	static inline Hook<Func_UpdateCameraRotation> UpdateCameraRotation;	// Unused
 	static inline Hook<Func_SetViewportSize> SetViewportSize; // Unused
 
@@ -32,6 +33,7 @@ public:
 	static void H_DrawHUD();
 	static void H_DrawMenu();
 	static void __stdcall H_DrawScope(void* param1);
+	static void H_DrawLoadingScreen();
 	static void H_UpdateCameraRotation();
 	static void H_SetViewportSize();
 

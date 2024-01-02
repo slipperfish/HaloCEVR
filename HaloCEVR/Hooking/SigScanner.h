@@ -31,6 +31,7 @@ public:
 	Offset DrawHUD =				{ "halo.exe", 0x094730, "83 ec 40 66 83 3d ?? ?? ?? ?? ff ?? ?? ?? ?? ?? ?? 8d 04 24" };
 	Offset DrawMenu =				{ "halo.exe", 0x0984c0, "33 c9 83 ec 14 66 3d ff ff 0f 94 c1 53 33 db 49 23 c8" };
 	Offset DrawScope =				{ "halo.exe", 0x12d8a0, "8b 44 24 04 83 ec 4c e8 ?? ?? ?? ?? 8b c8 85 c9" };
+	Offset DrawLoadingScreen =		{ "halo.exe", 0x10bdc0, "55 8b ec 83 e4 f8 81 ec 5c 02 00 00 53 56 8b 75 08"};
 
 	Offset SetViewportSize =		{ "halo.exe", 0xc8da0, "83 ec 10 53 55 56 57 8b f8 33 c0 83 ff 01 0f 9e c0" };
 

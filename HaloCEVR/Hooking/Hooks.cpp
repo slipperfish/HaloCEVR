@@ -13,6 +13,7 @@ void Hooks::InitHooks()
 	CREATEHOOK(DrawHUD);
 	CREATEHOOK(DrawMenu);
 	CREATEHOOK(DrawScope);
+	CREATEHOOK(DrawLoadingScreen);
 	//CREATEHOOK(UpdateCameraRotation);
 	//CREATEHOOK(SetViewportSize);
 
@@ -29,6 +30,7 @@ void Hooks::EnableAllHooks()
 	DrawHUD.EnableHook();
 	DrawMenu.EnableHook();
 	DrawScope.EnableHook();
+	DrawLoadingScreen.EnableHook();
 	//UpdateCameraRotation.EnableHook();
 	//SetViewportSize.EnableHook();
 
@@ -40,6 +42,12 @@ void Hooks::EnableAllHooks()
 	//NOPInstructions(0x50c55d, 5);
 	// Remove scope
 	//NOPInstructions(0x494a80, 5);
+
+	// Sets up loading view, but removing on affects left eye
+	//NOPInstructions(0x50be40, 5);
+
+	//NOPInstructions(0x50bf81, 5);
+	//NOPInstructions(0x50be4f, 5);
 }
 
 void Hooks::SetByte(long long Address, byte Byte)
@@ -163,6 +171,67 @@ void Hooks::H_DrawScope(void* param1)
 	if (Game::instance.GetRenderState() == ERenderState::GAME)
 	{
 		DrawScope.Original(param1);
+	}
+}
+
+
+void __declspec(naked) Hooks::H_DrawLoadingScreen()
+{
+	// Function has two params
+	// int param1 : EAX
+	// Renderer* renderer : Stack[0x4]
+
+	static int param1;
+	static Renderer* param2;
+
+	_asm
+	{
+		// Grab param1
+		mov param1, eax
+		// Grab param2
+		mov eax, [esp + 0x4]
+		mov param2, eax
+
+		pushad
+	}
+
+	if (Game::instance.PreDrawLoading(param1, param2))
+	{
+
+		_asm
+		{
+			popad
+
+			// Re-push parameters
+			push eax
+			mov eax, param1
+		}
+
+		DrawLoadingScreen.Original();
+
+		_asm
+		{
+			pushad
+		}
+
+		Game::instance.PostDrawLoading(param1, param2);
+
+		_asm
+		{
+			popad
+
+			add esp, 0x4
+			ret
+		}
+	}
+	else
+	{
+		_asm
+		{
+			popad
+
+			ret
+		}
 	}
 }
 

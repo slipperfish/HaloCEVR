@@ -7,3 +7,4 @@ typedef void(*Func_SetViewportSize)();
 typedef void(__stdcall* Func_DrawHUD)();
 typedef void(*Func_DrawMenu)();
 typedef void(__stdcall* Func_DrawScope)(void*);
+typedef void(*Func_DrawLoadingScreen)();

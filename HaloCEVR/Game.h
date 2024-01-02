@@ -30,6 +30,9 @@ public:
 	bool PreDrawMenu();
 	void PostDrawMenu();
 
+	bool PreDrawLoading(int param1, struct Renderer* renderer);
+	void PostDrawLoading(int param1, struct Renderer* renderer);
+
 	bool GetDrawMirror() const { return c_DrawMirror->Value(); }
 
 	ERenderState GetRenderState() const { return RenderState; }

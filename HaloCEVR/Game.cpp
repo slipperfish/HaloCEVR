@@ -106,7 +106,12 @@ void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
 void Game::PostDrawEye(struct Renderer* renderer, float deltaTime, int eye)
 {
 	// UI should be drawn via an overlay
-	//Helpers::GetDirect3DDevice9()->StretchRect(UISurface, NULL, Helpers::GetRenderTargets()[0].renderSurface, NULL, D3DTEXF_NONE);
+	RECT TargetRect;
+	TargetRect.left = 0;
+	TargetRect.right = 100;
+	TargetRect.top = 0;
+	TargetRect.bottom = 100;
+	Helpers::GetDirect3DDevice9()->StretchRect(UISurface, NULL, Helpers::GetRenderTargets()[0].renderSurface, &TargetRect, D3DTEXF_NONE);
 
 	// TODO: Remove this, if not used. Can do post draw stuff at end of frame
 	//vrEmulator.PostDrawEye(renderer, deltaTime, eye);
@@ -181,6 +186,33 @@ void Game::PostDrawMenu()
 
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, UIRealSurface);
 	UIRealSurface->Release();
+}
+
+
+bool Game::PreDrawLoading(int param1, struct Renderer* renderer)
+{
+	// Only render UI once per frame
+	if (GetRenderState() != ERenderState::LEFT_EYE)
+	{
+		// ...but try to avoid breaking the game view (for now at least)
+		return GetRenderState() == ERenderState::GAME;
+	}
+
+	UIRealSurface = Helpers::GetRenderTargets()[1].renderSurface;
+	Helpers::GetRenderTargets()[1].renderSurface = UISurface;
+
+	return true;
+}
+
+void Game::PostDrawLoading(int param1, struct Renderer* renderer)
+{
+	// Only render UI once per frame
+	if (GetRenderState() != ERenderState::LEFT_EYE)
+	{
+		return;
+	}
+
+	Helpers::GetRenderTargets()[1].renderSurface = UIRealSurface;
 }
 
 void Game::CreateConsole()
