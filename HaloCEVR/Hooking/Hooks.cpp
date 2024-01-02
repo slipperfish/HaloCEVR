@@ -1,15 +1,20 @@
 #include "Hooks.h"
 #include "../Helpers/Player.h"
+#include "../Helpers/Renderer.h"
+#include "../Helpers/DX9.h"
 #include "../Game.h"
 
 #define CREATEHOOK(Func) Func##.CreateHook(o.##Func##, &H_##Func##)
 
 void Hooks::InitHooks()
 {
-	//CREATEHOOK(UpdateCameraRotation);
 	CREATEHOOK(InitDirectX);
 	CREATEHOOK(DrawFrame);
-	CREATEHOOK(SetViewportSize);
+	CREATEHOOK(DrawHUD);
+	CREATEHOOK(DrawMenu);
+	CREATEHOOK(DrawScope);
+	//CREATEHOOK(UpdateCameraRotation);
+	//CREATEHOOK(SetViewportSize);
 
 	// These are handled with a direct patch, so manually scan them
 	SigScanner::UpdateOffset(o.TabOutVideo);
@@ -19,24 +24,59 @@ void Hooks::InitHooks()
 
 void Hooks::EnableAllHooks()
 {
-	//UpdateCameraRotation.EnableHook();
 	InitDirectX.EnableHook();
 	DrawFrame.EnableHook();
-	SetViewportSize.EnableHook();
+	DrawHUD.EnableHook();
+	DrawMenu.EnableHook();
+	DrawScope.EnableHook();
+	//UpdateCameraRotation.EnableHook();
+	//SetViewportSize.EnableHook();
 
 	P_FixTabOut();
+
+	// Remove HUD
+	//NOPInstructions(0x50c551, 5);
+	// Remove Menus
+	//NOPInstructions(0x50c55d, 5);
+	// Remove scope
+	//NOPInstructions(0x494a80, 5);
 }
 
-void Hooks::SetByte(Offset& Offset, long long Byte, byte opcode)
+void Hooks::SetByte(long long Address, byte Byte)
 {
-	LPVOID Addr = reinterpret_cast<LPVOID>(Offset.Address + Byte);
+	byte bytes[1]{ Byte };
+	SetBytes(Address, 1, bytes);
+}
+
+void Hooks::SetBytes(long long Address, int Length, byte* Bytes)
+{
+	LPVOID Addr = reinterpret_cast<LPVOID>(Address);
 	DWORD OldProt;
-	VirtualProtect(Addr, 1, PAGE_EXECUTE_READWRITE, &OldProt);
-	*reinterpret_cast<byte*>(Offset.Address + Byte) = opcode;
+	VirtualProtect(Addr, Length, PAGE_EXECUTE_READWRITE, &OldProt);
+	for (int i = 0; i < Length; i++)
+	{
+		*reinterpret_cast<char*>(Address + i) = Bytes[i];
+	}
 	if (OldProt != PAGE_EXECUTE_READWRITE)
 	{
 		DWORD NewProt;
-		VirtualProtect(Addr, 1, OldProt, &NewProt);
+		VirtualProtect(Addr, Length, OldProt, &NewProt);
+	}
+}
+
+void Hooks::NOPInstructions(long long Address, int Length)
+{
+	LPVOID Addr = reinterpret_cast<LPVOID>(Address);
+	DWORD OldProt;
+	VirtualProtect(Addr, Length, PAGE_EXECUTE_READWRITE, &OldProt);
+	for (int i = 0; i < Length; i++)
+	{
+		*reinterpret_cast<byte*>(Address + i) = 0x90;
+	}
+	if (OldProt != PAGE_EXECUTE_READWRITE)
+	{
+		DWORD NewProt;
+		VirtualProtect(Addr, Length, OldProt, &NewProt);
 	}
 }
 
@@ -65,14 +105,6 @@ void __declspec(naked) Hooks::H_UpdateCameraRotation()
 
 void Hooks::H_InitDirectX()
 {
-	/*
-	sRect* Window = reinterpret_cast<sRect*>(0x69c634);
-	Window->top = 0;
-	Window->left = 0;
-	Window->right = 600;
-	Window->bottom = 600;
-	*/
-
 	InitDirectX.Original();
 
 	Game::instance.OnInitDirectX();
@@ -96,44 +128,42 @@ void Hooks::H_DrawFrame(Renderer* param1, short param2, short* param3, float tic
 	Game::instance.PostDrawFrame(param1, deltaTime);
 }
 
-#include "../Helpers/Renderer.h"
-
-int numViews = 0;
-sRect* otherVP;
-sRect* vp;
-
-void OnSetViewportSize()
+void Hooks::H_DrawHUD()
 {
-	//Logger::log << "(" << (int)Game::instance.GetDrawState() << ") " << "Num Views = " << numViews << std::endl;
-	if (otherVP)
+	if (Game::instance.PreDrawHUD())
 	{
-		//Logger::log << "Other VP: " << otherVP->left << "-" << otherVP->right << ", " << otherVP->top << "-" << otherVP->bottom << std::endl;
+		DrawHUD.Original();
+		Game::instance.PostDrawHUD();
+	}
+}
+
+void __declspec(naked) Hooks::H_DrawMenu()
+{
+	// Original function uses AX register as param_1
+	_asm
+	{
+		pushad
 	}
 
-	if (vp)
+	if (Game::instance.PreDrawMenu())
 	{
-		//Logger::log << "VP: " << vp->left << "-" << vp->right << ", " << vp->top << "-" << vp->bottom << std::endl;
+		DrawMenu.Original();
+		Game::instance.PostDrawMenu();
 	}
 
-	/*
-	sRect* windowRect = reinterpret_cast<sRect*>(0x69c634);
+	_asm
+	{
+		popad
+		ret
+	}
+}
 
-	windowRect->right = 600;
-	windowRect->bottom = 600;
-
-	
-	otherVP->left = 0;
-	otherVP->top = 0;
-
-	otherVP->right = 600;
-	otherVP->bottom = 600;
-
-	vp->left = 8;
-	vp->top = 8;
-
-	vp->right = 592;
-	vp->bottom = 592;
-	//*/
+void Hooks::H_DrawScope(void* param1)
+{
+	if (Game::instance.GetRenderState() == ERenderState::GAME)
+	{
+		DrawScope.Original(param1);
+	}
 }
 
 void __declspec(naked) Hooks::H_SetViewportSize()
@@ -154,11 +184,11 @@ void __declspec(naked) Hooks::H_SetViewportSize()
 	// Yoink some of the parameters
 	_asm
 	{
-		mov numViews, eax
-		mov vp, ecx
+		//mov numViews, eax
+		//mov vp, ecx
 		push eax
 		mov eax, [esp + 0x4]
-		mov otherVP, eax
+		//mov otherVP, eax
 		pop eax
 	}
 
@@ -170,7 +200,7 @@ void __declspec(naked) Hooks::H_SetViewportSize()
 		PUSHAD
 	}
 
-	OnSetViewportSize();
+	//OnSetViewportSize();
 	
 	// Restore registers
 	_asm
@@ -193,12 +223,11 @@ void Hooks::P_FixTabOut()
 	// Attempting to patch this out with minhook would be painful
 	
 	// Always jump past the first check
-	SetByte(o.TabOutVideo, 6, 0xEB);
+	SetByte(o.TabOutVideo.Address + 6, 0xEB);
 	// NOP a JNZ in the second check
-	SetByte(o.TabOutVideo2, 0, 0x90);
-	SetByte(o.TabOutVideo2, 1, 0x90);
+	NOPInstructions(o.TabOutVideo2.Address, 2);
 	// Always jump past the final check
-	SetByte(o.TabOutVideo3, 6, 0xEB);
+	SetByte(o.TabOutVideo3.Address + 6, 0xEB);
 
 	// TODO: There's a more complex patch I think to do with fullscreen
 }

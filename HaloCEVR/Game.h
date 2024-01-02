@@ -6,6 +6,8 @@
 #include "VREmulator.h"
 #include "Helpers/RenderTarget.h"
 
+enum class ERenderState { UNKNOWN, LEFT_EYE, RIGHT_EYE, GAME};
+
 class Game
 {
 public:
@@ -22,8 +24,15 @@ public:
 	void PostDrawMirror(struct Renderer* renderer, float deltaTime);
 	void PostDrawFrame(struct Renderer* renderer, float deltaTime);
 
+	bool PreDrawHUD();
+	void PostDrawHUD();
+
+	bool PreDrawMenu();
+	void PostDrawMenu();
 
 	bool GetDrawMirror() const { return c_DrawMirror->Value(); }
+
+	ERenderState GetRenderState() const { return RenderState; }
 
 protected:
 
@@ -50,6 +59,11 @@ protected:
 	VREmulator vrEmulator;
 
 	RenderTarget gameRenderTargets[8];
+
+	struct IDirect3DSurface9* UISurface;
+	struct IDirect3DSurface9* UIRealSurface;
+
+	ERenderState RenderState = ERenderState::UNKNOWN;
 
 	//======Configs======//
 

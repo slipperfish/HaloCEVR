@@ -56,44 +56,66 @@ void Game::OnInitDirectX()
 		return;
 	}
 
+	HRESULT res = Helpers::GetDirect3DDevice9()->CreateRenderTarget(600, 600, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_NONE, 0, TRUE, &UISurface, NULL);
 	
+	if (FAILED(res))
+	{
+		Logger::log << "Couldn't create UI render target: " << res << std::endl;
+	}
+
 	vrEmulator.Init();
 }
 
 void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 {
+	RenderState = ERenderState::UNKNOWN;
+
 	CalcFPS(deltaTime);
 	
 	// WaitGetPoses will go here most likely
 
 	StoreRenderTargets();
 
-	sRect* Window = reinterpret_cast<sRect*>(0x69c634);
+	sRect* Window = Helpers::GetWindowRect();
 	Window->top = 0;
 	Window->left = 0;
 	Window->right = 600;
 	Window->bottom = 600;
 
-	(*reinterpret_cast<short*>(0x69c642)) = 600 - 8;
-	(*reinterpret_cast<short*>(0x69c640)) = 600 - 8;
+	//(*reinterpret_cast<short*>(0x69c642)) = 600 - 8;
+	//(*reinterpret_cast<short*>(0x69c640)) = 600 - 8;
+
+	// Clear UI surface
+	IDirect3DSurface9* CurrentSurface = nullptr;
+	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &CurrentSurface);
+	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, UISurface);
+	Helpers::GetDirect3DDevice9()->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, CurrentSurface);
+	CurrentSurface->Release();
 
 	vrEmulator.PreDrawFrame(renderer, deltaTime);
 }
 
 void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
 {
+	RenderState = eye == 0 ? ERenderState::LEFT_EYE : ERenderState::RIGHT_EYE;
 	vrEmulator.PreDrawEye(renderer, deltaTime, eye);
 }
 
 
 void Game::PostDrawEye(struct Renderer* renderer, float deltaTime, int eye)
 {
+	// UI should be drawn via an overlay
+	//Helpers::GetDirect3DDevice9()->StretchRect(UISurface, NULL, Helpers::GetRenderTargets()[0].renderSurface, NULL, D3DTEXF_NONE);
+
 	// TODO: Remove this, if not used. Can do post draw stuff at end of frame
 	//vrEmulator.PostDrawEye(renderer, deltaTime, eye);
 }
 
 void Game::PreDrawMirror(struct Renderer* renderer, float deltaTime)
 {
+	RenderState = ERenderState::GAME;
+
 	RestoreRenderTargets();
 }
 
@@ -105,6 +127,60 @@ void Game::PostDrawMirror(struct Renderer* renderer, float deltaTime)
 void Game::PostDrawFrame(struct Renderer* renderer, float deltaTime)
 {
 	vrEmulator.PostDrawFrame(renderer, deltaTime);
+}
+
+bool Game::PreDrawHUD()
+{
+	// Only render UI once per frame
+	if (GetRenderState() != ERenderState::LEFT_EYE)
+	{
+		// ...but try to avoid breaking the game view (for now at least)
+		return GetRenderState() == ERenderState::GAME;
+	}
+
+	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &UIRealSurface);
+	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, UISurface);
+
+	return true;
+}
+
+void Game::PostDrawHUD()
+{
+	// Only render UI once per frame
+	if (GetRenderState() != ERenderState::LEFT_EYE)
+	{
+		return;
+	}
+
+	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, UIRealSurface);
+	UIRealSurface->Release();
+}
+
+bool Game::PreDrawMenu()
+{
+	// Only render UI once per frame
+	if (GetRenderState() != ERenderState::LEFT_EYE)
+	{
+		// ...but try to avoid breaking the game view (for now at least)
+		return GetRenderState() == ERenderState::GAME;
+	}
+
+	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &UIRealSurface);
+	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, UISurface);
+
+	return true;
+}
+
+void Game::PostDrawMenu()
+{
+	// Only render UI once per frame
+	if (GetRenderState() != ERenderState::LEFT_EYE)
+	{
+		return;
+	}
+
+	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, UIRealSurface);
+	UIRealSurface->Release();
 }
 
 void Game::CreateConsole()

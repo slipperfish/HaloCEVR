@@ -168,6 +168,7 @@
     <ClCompile Include="Helpers\Camera.cpp" />
     <ClCompile Include="Helpers\DX9.cpp" />
     <ClCompile Include="Helpers\Player.cpp" />
+    <ClCompile Include="Helpers\Renderer.cpp" />
     <ClCompile Include="Helpers\RenderTarget.cpp" />
     <ClCompile Include="Hooking\Hooks.cpp" />
     <ClCompile Include="Hooking\SigScanner.cpp" />

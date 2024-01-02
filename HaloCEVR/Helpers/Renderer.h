@@ -42,3 +42,8 @@ struct Renderer
 	CameraFrustum frustum2;
 };
 static_assert(sizeof(Renderer) == 0xac);
+
+namespace Helpers
+{
+	sRect* GetWindowRect();
+}
