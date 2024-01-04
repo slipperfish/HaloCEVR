@@ -30,6 +30,11 @@ struct Vector3
 		return { x - v.x, y - v.y, z - v.z };
 	}
 
+	Vector3 operator- ()
+	{
+		return { -x, -y, -z };
+	}
+
 	Vector3 operator*(float scalar) const
 	{
 		return { x * scalar, y * scalar, z * scalar };

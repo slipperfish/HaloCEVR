@@ -4,6 +4,7 @@
 #include "Helpers/DX9.h"
 #include "Helpers/RenderTarget.h"
 #include "Helpers/Renderer.h"
+#include "Helpers/Camera.h"
 
 void Game::Init()
 {
@@ -213,6 +214,15 @@ void Game::PostDrawLoading(int param1, struct Renderer* renderer)
 	}
 
 	Helpers::GetRenderTargets()[1].renderSurface = UIRealSurface;
+}
+
+void Game::UpdateViewModel(Vector3* pos, Vector3* facing, Vector3* up)
+{
+	// For now just move it to be in a consistent position
+	Vector3& camPos = Helpers::GetCamera().position;
+	pos->x = camPos.x;
+	pos->y = camPos.y;
+	pos->z = camPos.z;
 }
 
 void Game::CreateConsole()

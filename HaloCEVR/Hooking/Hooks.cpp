@@ -14,6 +14,7 @@ void Hooks::InitHooks()
 	CREATEHOOK(DrawMenu);
 	CREATEHOOK(DrawScope);
 	CREATEHOOK(DrawLoadingScreen);
+	CREATEHOOK(SetViewModelPosition);
 	//CREATEHOOK(UpdateCameraRotation);
 	//CREATEHOOK(SetViewportSize);
 
@@ -27,27 +28,21 @@ void Hooks::EnableAllHooks()
 {
 	InitDirectX.EnableHook();
 	DrawFrame.EnableHook();
+	// TODO: This doesn't account for all UI. Known broken elements:
+	// multiplayer pickups
+	// multiplayer gametype
+	// multiplayer join screen (briefly?)
+	// blips on motion sensor
 	DrawHUD.EnableHook();
 	DrawMenu.EnableHook();
 	DrawScope.EnableHook();
 	DrawLoadingScreen.EnableHook();
+	SetViewModelPosition.EnableHook();
 	//UpdateCameraRotation.EnableHook();
 	//SetViewportSize.EnableHook();
 
 	P_FixTabOut();
 
-	// Remove HUD
-	//NOPInstructions(0x50c551, 5);
-	// Remove Menus
-	//NOPInstructions(0x50c55d, 5);
-	// Remove scope
-	//NOPInstructions(0x494a80, 5);
-
-	// Sets up loading view, but removing on affects left eye
-	//NOPInstructions(0x50be40, 5);
-
-	//NOPInstructions(0x50bf81, 5);
-	//NOPInstructions(0x50be4f, 5);
 }
 
 void Hooks::SetByte(long long Address, byte Byte)
@@ -232,6 +227,41 @@ void __declspec(naked) Hooks::H_DrawLoadingScreen()
 
 			ret
 		}
+	}
+}
+
+void __declspec(naked) Hooks::H_SetViewModelPosition()
+{
+	static Vector3* pos;
+	static Vector3* facing;
+	static Vector3* up;
+
+	_asm
+	{
+		mov pos, ecx
+		mov ecx, [esp + 0x10]
+		mov facing, ecx
+		push ecx
+		mov ecx, [esp + 0x10]
+		mov up, ecx
+		push ecx
+		mov ecx, [esp + 0x10]
+		push ecx
+		mov ecx, [esp + 0x10]
+		push ecx
+		mov ecx, pos
+	}
+
+	_asm { pushad }
+	Game::instance.UpdateViewModel(pos, facing, up);
+	_asm { popad }
+
+	SetViewModelPosition.Original();
+
+	_asm
+	{
+		add esp, 0x10
+		ret
 	}
 }
 

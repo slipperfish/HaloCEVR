@@ -33,6 +33,8 @@ public:
 	bool PreDrawLoading(int param1, struct Renderer* renderer);
 	void PostDrawLoading(int param1, struct Renderer* renderer);
 
+	void UpdateViewModel(struct Vector3* pos, struct Vector3* facing, struct Vector3* up);
+
 	bool GetDrawMirror() const { return c_DrawMirror->Value(); }
 
 	ERenderState GetRenderState() const { return RenderState; }
