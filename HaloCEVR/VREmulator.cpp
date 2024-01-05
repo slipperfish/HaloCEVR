@@ -119,8 +119,8 @@ void VREmulator::PreDrawEye(struct Renderer* renderer, float deltaTime, int eye)
 
 	Vector3 rightVec = renderer->frustum.facingDirection.Cross(renderer->frustum.upDirection);
 
-	renderer->frustum.position += rightVec * DIST * (float)(3 * eye - 1);
-	renderer->frustum2.position += rightVec * DIST * (float)(3 * eye - 1);
+	renderer->frustum.position += rightVec * DIST * (float)(2 * eye - 1);
+	renderer->frustum2.position += rightVec * DIST * (float)(2 * eye - 1);
 
 	for (CameraFrustum* f : { &renderer->frustum, &renderer->frustum2 })
 	{

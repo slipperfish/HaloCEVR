@@ -5,6 +5,7 @@
 #include "Config/Config.h"
 #include "VREmulator.h"
 #include "Helpers/RenderTarget.h"
+#include "Helpers/Vector3.h"
 
 enum class ERenderState { UNKNOWN, LEFT_EYE, RIGHT_EYE, GAME};
 
@@ -69,6 +70,9 @@ protected:
 	struct IDirect3DSurface9* UIRealSurface;
 
 	ERenderState RenderState = ERenderState::UNKNOWN;
+
+	Vector3 frustumPos;
+	Vector3 frustum2Pos;
 
 	//======Configs======//
 

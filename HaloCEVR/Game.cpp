@@ -94,12 +94,19 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, CurrentSurface);
 	CurrentSurface->Release();
 
+	frustumPos = renderer->frustum.position;
+	frustum2Pos = renderer->frustum2.position;
+
 	vrEmulator.PreDrawFrame(renderer, deltaTime);
 }
 
 void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
 {
 	RenderState = eye == 0 ? ERenderState::LEFT_EYE : ERenderState::RIGHT_EYE;
+
+	renderer->frustum.position = frustumPos;
+	renderer->frustum2.position = frustum2Pos;
+
 	vrEmulator.PreDrawEye(renderer, deltaTime, eye);
 }
 
@@ -121,6 +128,9 @@ void Game::PostDrawEye(struct Renderer* renderer, float deltaTime, int eye)
 void Game::PreDrawMirror(struct Renderer* renderer, float deltaTime)
 {
 	RenderState = ERenderState::GAME;
+
+	renderer->frustum.position = frustumPos;
+	renderer->frustum2.position = frustum2Pos;
 
 	RestoreRenderTargets();
 }
