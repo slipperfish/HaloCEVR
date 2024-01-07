@@ -1,3 +1,4 @@
+#define EMULATE_VR 1
 #include "Game.h"
 #include "Logger.h"
 #include "Hooking/Hooks.h"
@@ -5,6 +6,14 @@
 #include "Helpers/RenderTarget.h"
 #include "Helpers/Renderer.h"
 #include "Helpers/Camera.h"
+
+#if EMULATE_VR
+#include "VR/VREmulator.h"
+#else
+#include "VR/OpenVR.h"
+#endif
+#include "DirectXWrappers/IDirect3DDevice9ExWrapper.h"
+
 
 void Game::Init()
 {
@@ -15,6 +24,12 @@ void Game::Init()
 	CreateConsole();
 
 	PatchGame();
+
+#if EMULATE_VR
+	vr = new VREmulator();
+#else
+
+#endif
 
 	Logger::log << "HaloCEVR initialised" << std::endl;
 }
@@ -49,7 +64,7 @@ void Game::Shutdown()
 
 void Game::OnInitDirectX()
 {
-	Logger::log << "DirectX Created" << std::endl;
+	Logger::log << "Game has finished DirectX initialisation" << std::endl;
 
 	if (!Helpers::GetDirect3DDevice9())
 	{
@@ -57,14 +72,9 @@ void Game::OnInitDirectX()
 		return;
 	}
 
-	HRESULT res = Helpers::GetDirect3DDevice9()->CreateRenderTarget(600, 600, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_NONE, 0, TRUE, &UISurface, NULL);
-	
-	if (FAILED(res))
-	{
-		Logger::log << "Couldn't create UI render target: " << res << std::endl;
-	}
+	vr->Init();
 
-	vrEmulator.Init();
+	UISurface = vr->GetUISurface();
 }
 
 void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
@@ -73,15 +83,15 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 
 	CalcFPS(deltaTime);
 	
-	// WaitGetPoses will go here most likely
+	vr->UpdatePoses();
 
 	StoreRenderTargets();
 
 	sRect* Window = Helpers::GetWindowRect();
 	Window->top = 0;
 	Window->left = 0;
-	Window->right = 600;
-	Window->bottom = 600;
+	Window->right = vr->GetViewWidth();
+	Window->bottom = vr->GetViewHeight();
 
 	//(*reinterpret_cast<short*>(0x69c642)) = 600 - 8;
 	//(*reinterpret_cast<short*>(0x69c640)) = 600 - 8;
@@ -97,7 +107,7 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 	frustumPos = renderer->frustum.position;
 	frustum2Pos = renderer->frustum2.position;
 
-	vrEmulator.PreDrawFrame(renderer, deltaTime);
+	vr->PreDrawFrame(renderer, deltaTime);
 }
 
 void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
@@ -107,22 +117,52 @@ void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
 	renderer->frustum.position = frustumPos;
 	renderer->frustum2.position = frustum2Pos;
 
-	vrEmulator.PreDrawEye(renderer, deltaTime, eye);
+	// For performance reasons, we should prevent the game from calling SceneStart/SceneEnd for each eye
+	if (eye == 0)
+	{
+		reinterpret_cast<IDirect3DDevice9ExWrapper*>(Helpers::GetDirect3DDevice9())->bIgnoreNextEnd = true;
+	}
+	else
+	{
+		reinterpret_cast<IDirect3DDevice9ExWrapper*>(Helpers::GetDirect3DDevice9())->bIgnoreNextStart = true;
+	}
+
+	vr->UpdateCameraFrustum(&renderer->frustum, eye);
+	vr->UpdateCameraFrustum(&renderer->frustum2, eye);
+
+	for (CameraFrustum* f : { &renderer->frustum, &renderer->frustum2 })
+	{
+		f->Viewport.left = 0;
+		f->Viewport.top = 0;
+		f->Viewport.right = vr->GetViewWidth();
+		f->Viewport.bottom = vr->GetViewHeight();
+		f->oViewport.left = 0;
+		f->oViewport.top = 0;
+		f->oViewport.right = vr->GetViewWidth();
+		f->oViewport.bottom = vr->GetViewHeight();
+	}
+
+	RenderTarget* primaryRenderTarget = Helpers::GetRenderTargets();
+
+	primaryRenderTarget[0].renderSurface = vr->GetRenderSurface(eye);
+	primaryRenderTarget[0].renderTexture = vr->GetRenderTexture(eye);
+	primaryRenderTarget[0].width = vr->GetViewWidth();
+	primaryRenderTarget[0].height = vr->GetViewHeight();
 }
 
 
 void Game::PostDrawEye(struct Renderer* renderer, float deltaTime, int eye)
 {
 	// UI should be drawn via an overlay
+
+#if EMULATE_VR
 	RECT TargetRect;
 	TargetRect.left = 0;
 	TargetRect.right = 100;
 	TargetRect.top = 0;
 	TargetRect.bottom = 100;
 	Helpers::GetDirect3DDevice9()->StretchRect(UISurface, NULL, Helpers::GetRenderTargets()[0].renderSurface, &TargetRect, D3DTEXF_NONE);
-
-	// TODO: Remove this, if not used. Can do post draw stuff at end of frame
-	//vrEmulator.PostDrawEye(renderer, deltaTime, eye);
+#endif
 }
 
 void Game::PreDrawMirror(struct Renderer* renderer, float deltaTime)
@@ -142,7 +182,7 @@ void Game::PostDrawMirror(struct Renderer* renderer, float deltaTime)
 
 void Game::PostDrawFrame(struct Renderer* renderer, float deltaTime)
 {
-	vrEmulator.PostDrawFrame(renderer, deltaTime);
+	vr->PostDrawFrame(renderer, deltaTime);
 }
 
 bool Game::PreDrawHUD()
@@ -233,6 +273,16 @@ void Game::UpdateViewModel(Vector3* pos, Vector3* facing, Vector3* up)
 	pos->x = camPos.x;
 	pos->y = camPos.y;
 	pos->z = camPos.z;
+}
+
+float Game::MetresToWorld(float m)
+{
+	return m / 3.048f;
+}
+
+float Game::WorldToMetres(float w)
+{
+	return w * 3.048f;
 }
 
 void Game::CreateConsole()

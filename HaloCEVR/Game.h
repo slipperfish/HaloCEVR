@@ -3,7 +3,7 @@
 #include <windows.h>
 #include <d3d9.h>
 #include "Config/Config.h"
-#include "VREmulator.h"
+#include "VR/IVR.h"
 #include "Helpers/RenderTarget.h"
 #include "Helpers/Vector3.h"
 
@@ -40,6 +40,9 @@ public:
 
 	ERenderState GetRenderState() const { return RenderState; }
 
+	static float MetresToWorld(float m);
+	static float WorldToMetres(float w);
+
 protected:
 
 	void CreateConsole();
@@ -62,7 +65,7 @@ protected:
 
 	Config config;
 
-	VREmulator vrEmulator;
+	IVR* vr;
 
 	RenderTarget gameRenderTargets[8];
 

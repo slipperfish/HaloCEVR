@@ -174,7 +174,7 @@
     <ClCompile Include="Hooking\SigScanner.cpp" />
     <ClCompile Include="DirectXWrappers\IDirect3D9ExWrapper.cpp" />
     <ClCompile Include="DirectXWrappers\IDirect3DDevice9ExWrapper.cpp" />
-    <ClCompile Include="VREmulator.cpp" />
+    <ClCompile Include="VR\VREmulator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config\Config.h" />
@@ -193,7 +193,8 @@
     <ClInclude Include="DirectXWrappers\IDirect3D9ExWrapper.h" />
     <ClInclude Include="DirectXWrappers\IDirect3DDevice9ExWrapper.h" />
     <ClInclude Include="Logger.h" />
-    <ClInclude Include="VREmulator.h" />
+    <ClInclude Include="VR\VREmulator.h" />
+    <ClInclude Include="VR\IVR.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

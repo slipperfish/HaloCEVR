@@ -45,7 +45,7 @@
     <ClCompile Include="Helpers\RenderTarget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="VREmulator.cpp">
+    <ClCompile Include="VR\VREmulator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Helpers\Renderer.cpp">
@@ -95,13 +95,16 @@
     <ClInclude Include="Helpers\RenderTarget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VREmulator.h">
+    <ClInclude Include="VR\VREmulator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Helpers\Renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Helpers\Vector4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VR\IVR.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

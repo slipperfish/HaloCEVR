@@ -6,6 +6,8 @@
 
 #define CREATEHOOK(Func) Func##.CreateHook(o.##Func##, &H_##Func##)
 
+bool bPotentiallyFoundChimera = false;
+
 void Hooks::InitHooks()
 {
 	CREATEHOOK(InitDirectX);
@@ -19,9 +21,9 @@ void Hooks::InitHooks()
 	//CREATEHOOK(SetViewportSize);
 
 	// These are handled with a direct patch, so manually scan them
-	SigScanner::UpdateOffset(o.TabOutVideo);
-	SigScanner::UpdateOffset(o.TabOutVideo2);
-	SigScanner::UpdateOffset(o.TabOutVideo3);
+	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo) < 0;
+	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo2) < 0;
+	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo3) < 0;
 }
 
 void Hooks::EnableAllHooks()
@@ -41,7 +43,15 @@ void Hooks::EnableAllHooks()
 	//UpdateCameraRotation.EnableHook();
 	//SetViewportSize.EnableHook();
 
-	P_FixTabOut();
+	// If we think the user has chimera installed, don't try to patch their patches
+	if (!bPotentiallyFoundChimera)
+	{
+		P_FixTabOut();
+	}
+
+	// Maybe removes camera shake from camera?
+	// Hard to tell, but definitely doesn't fix viewmodel going ballistic
+	//NOPInstructions(0x45788f, 6);
 
 }
 

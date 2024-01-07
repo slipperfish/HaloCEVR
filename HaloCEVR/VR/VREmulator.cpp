@@ -1,11 +1,12 @@
 #include <d3d9.h>
 #include "VREmulator.h"
-#include "Helpers/DX9.h"
-#include "Helpers/RenderTarget.h"
-#include "Helpers/Camera.h"
-#include "Helpers/Renderer.h"
-#include "Logger.h"
-#include "DirectXWrappers/IDirect3DDevice9ExWrapper.h"
+#include "../Helpers/DX9.h"
+#include "../Helpers/RenderTarget.h"
+#include "../Helpers/Camera.h"
+#include "../Helpers/Renderer.h"
+#include "../Logger.h"
+#include "../DirectXWrappers/IDirect3DDevice9ExWrapper.h"
+#include "../Game.h"
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -84,6 +85,36 @@ void VREmulator::Init()
 	Logger::log << "Created Mirror D3D window" << std::endl;
 }
 
+void VREmulator::UpdatePoses()
+{
+	// Pretend we're waiting for the poses
+	Sleep(2);
+}
+
+void VREmulator::UpdateCameraFrustum(CameraFrustum* frustum, int eye)
+{
+	const float DIST = Game::MetresToWorld(64.0f / 1000.0f);
+
+	Vector3 rightVec = frustum->facingDirection.Cross(frustum->upDirection);
+
+	frustum->position += rightVec * DIST * (float)(2 * eye - 1);
+}
+
+IDirect3DSurface9* VREmulator::GetRenderSurface(int eye)
+{
+	return EyeSurface_Game[eye][0];
+}
+
+IDirect3DTexture9* VREmulator::GetRenderTexture(int eye)
+{
+	return EyeTexture_Game[eye][0];
+}
+
+IDirect3DSurface9* VREmulator::GetUISurface()
+{
+	return UISurface;
+}
+
 void VREmulator::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 {
 	if (!MirrorDevice)
@@ -101,48 +132,7 @@ void VREmulator::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 	}
 }
 
-void VREmulator::PreDrawEye(struct Renderer* renderer, float deltaTime, int eye)
-{
-	// Set camera here
-
-	if (eye == 0)
-	{
-		reinterpret_cast<IDirect3DDevice9ExWrapper*>(Helpers::GetDirect3DDevice9())->bIgnoreNextEnd = true;
-	}
-	else
-	{
-		reinterpret_cast<IDirect3DDevice9ExWrapper*>(Helpers::GetDirect3DDevice9())->bIgnoreNextStart = true;
-	}
-	
-	// I read somewhere a halo unit is 3.048 metres
-	const float DIST = (64.0f / 1000.0f) / 3.048f;
-
-	Vector3 rightVec = renderer->frustum.facingDirection.Cross(renderer->frustum.upDirection);
-
-	renderer->frustum.position += rightVec * DIST * (float)(2 * eye - 1);
-	renderer->frustum2.position += rightVec * DIST * (float)(2 * eye - 1);
-
-	for (CameraFrustum* f : { &renderer->frustum, &renderer->frustum2 })
-	{
-		f->Viewport.left = 0;
-		f->Viewport.top = 0;
-		f->Viewport.right = 600;
-		f->Viewport.bottom = 600;
-		f->oViewport.left = 0;
-		f->oViewport.top = 0;
-		f->oViewport.right = 600;
-		f->oViewport.bottom = 600;
-	}
-
-	RenderTarget* primaryRenderTarget = Helpers::GetRenderTargets();
-
-	primaryRenderTarget[0].renderSurface = EyeSurface_Game[eye][0];
-	primaryRenderTarget[0].renderTexture = EyeTexture_Game[eye][0];
-	primaryRenderTarget[0].width = 600;
-	primaryRenderTarget[0].height = 600;
-}
-
-void VREmulator::PostDrawEye(struct Renderer* renderer, float deltaTime, int eye)
+void VREmulator::DrawEye(struct Renderer* renderer, float deltaTime, int eye)
 {
 	IDirect3DSurface9* MirrorSurface = nullptr;
 	HRESULT result = MirrorDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &MirrorSurface);
@@ -186,8 +176,8 @@ void VREmulator::PostDrawFrame(struct Renderer* renderer, float deltaTime)
 		pEventQuery->Release();
 	}
 
-	PostDrawEye(renderer, deltaTime, 0);
-	PostDrawEye(renderer, deltaTime, 1);
+	DrawEye(renderer, deltaTime, 0);
+	DrawEye(renderer, deltaTime, 1);
 
 	HRESULT result = MirrorDevice->EndScene();
 	if (FAILED(result))
@@ -213,11 +203,18 @@ void VREmulator::CreateSharedTarget()
 
 	Helpers::GetRenderTargets()[1].renderSurface->GetDesc(&Desc2);
 
-	const UINT WIDTH = 600;
-	const UINT HEIGHT = 600;
+	const UINT WIDTH = GetViewWidth();
+	const UINT HEIGHT = GetViewHeight();
 
 	CreateTexAndSurface(0, WIDTH, HEIGHT, Desc.Usage, Desc.Format);
 	CreateTexAndSurface(1, WIDTH, HEIGHT, Desc2.Usage, Desc2.Format);
+
+	HRESULT res = Helpers::GetDirect3DDevice9()->CreateRenderTarget(WIDTH, HEIGHT, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_NONE, 0, TRUE, &UISurface, NULL);
+
+	if (FAILED(res))
+	{
+		Logger::log << "Couldn't create UI render target: " << res << std::endl;
+	}
 }
 
 
