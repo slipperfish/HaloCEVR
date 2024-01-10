@@ -1,6 +1,7 @@
 #include "IDirect3D9ExWrapper.h"
 #include "IDirect3DDevice9ExWrapper.h"
 #include "../Logger.h"
+#include "../Game.h"
 
 HRESULT IDirect3D9ExWrapper::CreateDevice(UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags, D3DPRESENT_PARAMETERS* pPresentationParameters, IDirect3DDevice9** ppReturnedDeviceInterface)
 {
@@ -9,10 +10,11 @@ HRESULT IDirect3D9ExWrapper::CreateDevice(UINT Adapter, D3DDEVTYPE DeviceType, H
 	Logger::log << "Given present params: " << pPresentationParameters->PresentationInterval << ", " << pPresentationParameters->BackBufferWidth << ", " << pPresentationParameters->BackBufferHeight << std::endl;
 	pPresentationParameters->PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 	
-	if (pPresentationParameters->BackBufferWidth != 1200)
+	if (pPresentationParameters->BackBufferWidth != 1200 || pPresentationParameters->BackBufferHeight != 600)
 	{
-		pPresentationParameters->BackBufferWidth = 600;
-		pPresentationParameters->BackBufferHeight = 600;
+		pPresentationParameters->BackBufferWidth = Game::instance.BackBufferWidth;
+		pPresentationParameters->BackBufferHeight = Game::instance.BackBufferHeight;
+		Logger::log << "New dimensions: " << Game::instance.BackBufferWidth << "x" << Game::instance.BackBufferHeight << std::endl;
 	}
 
 	IDirect3DDevice9Ex* RealDevice = nullptr;

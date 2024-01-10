@@ -1,4 +1,4 @@
-#define EMULATE_VR 1
+#define EMULATE_VR 0
 #include "Game.h"
 #include "Logger.h"
 #include "Hooking/Hooks.h"
@@ -28,8 +28,13 @@ void Game::Init()
 #if EMULATE_VR
 	vr = new VREmulator();
 #else
-
+	vr = new OpenVR();
 #endif
+
+	vr->Init();
+
+	BackBufferWidth = vr->GetViewWidth();
+	BackBufferHeight = vr->GetViewHeight();
 
 	Logger::log << "HaloCEVR initialised" << std::endl;
 }
@@ -72,7 +77,7 @@ void Game::OnInitDirectX()
 		return;
 	}
 
-	vr->Init();
+	vr->OnGameFinishInit();
 
 	UISurface = vr->GetUISurface();
 }
@@ -93,8 +98,8 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 	Window->right = vr->GetViewWidth();
 	Window->bottom = vr->GetViewHeight();
 
-	//(*reinterpret_cast<short*>(0x69c642)) = 600 - 8;
-	//(*reinterpret_cast<short*>(0x69c640)) = 600 - 8;
+	//(*reinterpret_cast<short*>(0x69c642)) = vr->GetViewWidth() - 8;
+	//(*reinterpret_cast<short*>(0x69c640)) = vr->GetViewHeight() - 8;
 
 	// Clear UI surface
 	IDirect3DSurface9* CurrentSurface = nullptr;
@@ -104,8 +109,8 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, CurrentSurface);
 	CurrentSurface->Release();
 
-	frustumPos = renderer->frustum.position;
-	frustum2Pos = renderer->frustum2.position;
+	frustum1 = renderer->frustum;
+	frustum2 = renderer->frustum2;
 
 	vr->PreDrawFrame(renderer, deltaTime);
 }
@@ -114,8 +119,8 @@ void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
 {
 	RenderState = eye == 0 ? ERenderState::LEFT_EYE : ERenderState::RIGHT_EYE;
 
-	renderer->frustum.position = frustumPos;
-	renderer->frustum2.position = frustum2Pos;
+	renderer->frustum = frustum1;
+	renderer->frustum2 = frustum2;
 
 	// For performance reasons, we should prevent the game from calling SceneStart/SceneEnd for each eye
 	if (eye == 0)
@@ -169,8 +174,8 @@ void Game::PreDrawMirror(struct Renderer* renderer, float deltaTime)
 {
 	RenderState = ERenderState::GAME;
 
-	renderer->frustum.position = frustumPos;
-	renderer->frustum2.position = frustum2Pos;
+	renderer->frustum = frustum1;
+	renderer->frustum2 = frustum2;
 
 	RestoreRenderTargets();
 }

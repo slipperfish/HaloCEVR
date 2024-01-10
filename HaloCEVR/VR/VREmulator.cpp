@@ -85,6 +85,10 @@ void VREmulator::Init()
 	Logger::log << "Created Mirror D3D window" << std::endl;
 }
 
+void VREmulator::OnGameFinishInit()
+{
+}
+
 void VREmulator::UpdatePoses()
 {
 	// Pretend we're waiting for the poses
@@ -95,7 +99,7 @@ void VREmulator::UpdateCameraFrustum(CameraFrustum* frustum, int eye)
 {
 	const float DIST = Game::MetresToWorld(64.0f / 1000.0f);
 
-	Vector3 rightVec = frustum->facingDirection.Cross(frustum->upDirection);
+	Vector3 rightVec = frustum->facingDirection.cross(frustum->upDirection);
 
 	frustum->position += rightVec * DIST * (float)(2 * eye - 1);
 }

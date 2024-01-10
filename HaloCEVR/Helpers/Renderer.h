@@ -1,7 +1,6 @@
 #pragma once
 #include <cstdint>
-#include "Vector3.h"
-#include "Vector4.h"
+#include "../Maths/Vectors.h"
 
 struct sRect
 {

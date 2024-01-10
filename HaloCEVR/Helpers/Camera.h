@@ -1,5 +1,5 @@
 #pragma once
-#include "Vector3.h"
+#include "../Maths/Vectors.h"
 #include <cstdint>
 
 struct Camera

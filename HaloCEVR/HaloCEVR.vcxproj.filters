@@ -51,6 +51,12 @@
     <ClCompile Include="Helpers\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="VR\OpenVR.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Maths\Matrices.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Hooking\FunctionTypedefs.h">
@@ -69,9 +75,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Helpers\Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Helpers\Vector3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Helpers\Player.h">
@@ -101,10 +104,16 @@
     <ClInclude Include="Helpers\Renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Helpers\Vector4.h">
+    <ClInclude Include="VR\IVR.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VR\IVR.h">
+    <ClInclude Include="VR\OpenVR.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Maths\Matrices.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Maths\Vectors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

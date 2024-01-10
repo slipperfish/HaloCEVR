@@ -1,5 +1,6 @@
 #include "IDirect3DDevice9ExWrapper.h"
 #include "../Logger.h"
+#include "../Game.h"
 
 HRESULT __stdcall IDirect3DDevice9ExWrapper::QueryInterface(REFIID riid, void** ppvObj)
 {
@@ -83,10 +84,10 @@ UINT __stdcall IDirect3DDevice9ExWrapper::GetNumberOfSwapChains(void)
 
 HRESULT __stdcall IDirect3DDevice9ExWrapper::Reset(D3DPRESENT_PARAMETERS* pPresentationParameters)
 {
-	if (pPresentationParameters->BackBufferWidth != 1200)
+	if (pPresentationParameters->BackBufferWidth != 1200 || pPresentationParameters->BackBufferHeight != 600)
 	{
-		pPresentationParameters->BackBufferWidth = 600;
-		pPresentationParameters->BackBufferHeight = 600;
+		pPresentationParameters->BackBufferWidth = Game::instance.BackBufferWidth;
+		pPresentationParameters->BackBufferHeight = Game::instance.BackBufferHeight;
 	}
 	return Real->Reset(pPresentationParameters);
 }

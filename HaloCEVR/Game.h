@@ -4,8 +4,9 @@
 #include <d3d9.h>
 #include "Config/Config.h"
 #include "VR/IVR.h"
+#include "Helpers/Renderer.h"
 #include "Helpers/RenderTarget.h"
-#include "Helpers/Vector3.h"
+#include "Maths/Vectors.h"
 
 enum class ERenderState { UNKNOWN, LEFT_EYE, RIGHT_EYE, GAME};
 
@@ -43,6 +44,9 @@ public:
 	static float MetresToWorld(float m);
 	static float WorldToMetres(float w);
 
+	UINT BackBufferWidth = 600;
+	UINT BackBufferHeight = 600;
+
 protected:
 
 	void CreateConsole();
@@ -74,8 +78,8 @@ protected:
 
 	ERenderState RenderState = ERenderState::UNKNOWN;
 
-	Vector3 frustumPos;
-	Vector3 frustum2Pos;
+	CameraFrustum frustum1;
+	CameraFrustum frustum2;
 
 	//======Configs======//
 

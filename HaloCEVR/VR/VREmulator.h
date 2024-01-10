@@ -1,11 +1,14 @@
 #pragma once
 #include "IVR.h"
+#include <wtypes.h>
+#include <d3d9.h>
 
 class VREmulator : public IVR
 {
 public:
 	// Start Interface IVR
 	void Init();
+	void OnGameFinishInit();
 	void UpdatePoses();
 	void PreDrawFrame(struct Renderer* renderer, float deltaTime);
 	void PostDrawFrame(struct Renderer* renderer, float deltaTime);
@@ -14,6 +17,7 @@ public:
 
 	int GetViewWidth() { return 600; }
 	int GetViewHeight() { return 600; }
+	float GetAspect() { return 1.0f; }
 	virtual struct IDirect3DSurface9* GetRenderSurface(int eye);
 	virtual struct IDirect3DTexture9* GetRenderTexture(int eye);
 	virtual struct IDirect3DSurface9* GetUISurface();
