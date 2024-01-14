@@ -60,6 +60,10 @@ protected:
 	void StoreRenderTargets();
 	void RestoreRenderTargets();
 
+	bool bNeedsRecentre = true;
+	Vector3 Offset;
+
+
 	float TimeSinceFPSUpdate = 0.0f;
 	int FramesSinceFPSUpdate = 0;
 
@@ -75,6 +79,7 @@ protected:
 
 	struct IDirect3DSurface9* UISurface;
 	struct IDirect3DSurface9* UIRealSurface;
+	struct IDirect3DSurface9* UIRealSurface2;
 
 	ERenderState RenderState = ERenderState::UNKNOWN;
 

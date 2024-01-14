@@ -32,6 +32,19 @@ void OpenVR::Init()
 		return;
 	}
 
+	VROverlay = vr::VROverlay();
+
+	if (!VROverlay)
+	{
+		Logger::log << "[OpenVR] VROverlay failed" << std::endl;
+		return;
+	}
+
+	VROverlay->CreateOverlay("UIOverlay", "UIOverlay", &UIOverlay);
+	VROverlay->SetOverlayFlag(UIOverlay, vr::VROverlayFlags_IsPremultiplied, true);
+
+	VROverlay->ShowOverlay(UIOverlay);
+
 	VRSystem->GetRecommendedRenderTargetSize(&RecommendedWidth, &RecommendedHeight);
 
 	// Voodoo magic to convert normal view frustums into asymmetric ones through selective cropping
@@ -85,6 +98,15 @@ void OpenVR::OnGameFinishInit()
 	CreateTexAndSurface(1, RecommendedWidth, RecommendedHeight, Desc.Usage, Desc.Format);
 	// UI Layer
 	CreateTexAndSurface(2, RecommendedWidth, RecommendedHeight, Desc2.Usage, Desc2.Format);
+
+	VROverlay->SetOverlayWidthInMeters(UIOverlay, 4.0f);
+	vr::HmdMatrix34_t overlayTransform = {
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 2.0f,
+		0.0f, 0.0f, 1.0f, -3.0f
+	};
+
+	VROverlay->SetOverlayTransformAbsolute(UIOverlay, vr::ETrackingUniverseOrigin::TrackingUniverseStanding, &overlayTransform);
 
 	Logger::log << "[OpenVR] Finished Initialisation" << std::endl;
 }
@@ -180,6 +202,14 @@ void OpenVR::PostDrawFrame(Renderer* renderer, float deltaTime)
 		Logger::log << "[OpenVR] Could not submit right eye texture: " << error << std::endl;
 	}
 
+	vr::Texture_t uiTex{ (void*)VRRenderTexture[2], vr::TextureType_DirectX, vr::ColorSpace_Auto };
+	vr::EVROverlayError oError = VROverlay->SetOverlayTexture(UIOverlay, &uiTex);
+
+	if (error != vr::EVROverlayError::VROverlayError_None)
+	{
+		Logger::log << "[OpenVR] Could not submit ui texture: " << error << std::endl;
+	}
+
 	// TODO: UI via an overlay here
 
 	VRCompositor->PostPresentHandoff();
@@ -193,7 +223,7 @@ void OpenVR::UpdateCameraFrustum(CameraFrustum* frustum, int eye)
 
 	Matrix4 eyeMatrix = GetHMDMatrixPoseEye((vr::Hmd_Eye) eye);
 
-	Matrix4 headMatrix = ConvertSteamVRMatrixToMatrix4(RenderPoses[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking);
+	Matrix4 headMatrix = GetHMDTransform(true);
 
 	Matrix4 viewMatrix = (headMatrix * eyeMatrix.invert()).scale(Game::MetresToWorld(WORLD_SCALE));
 
@@ -206,9 +236,9 @@ void OpenVR::UpdateCameraFrustum(CameraFrustum* frustum, int eye)
 	frustum->facingDirection = (rotationMatrix * frustum->facingDirection).normalize();
 	frustum->upDirection = (rotationMatrix * frustum->upDirection).normalize();
 
-	Vector4 NewPos = viewMatrix * Vector4(0.0f, 0.0f, 0.0f, 1.0f);
+	Vector3 NewPos = viewMatrix * Vector3(0.0f, 0.0f, 0.0f);
 
-	frustum->position = frustum->position + GetVector3(NewPos);
+	frustum->position = frustum->position + NewPos;
 }
 
 int OpenVR::GetViewWidth()
@@ -224,6 +254,18 @@ int OpenVR::GetViewHeight()
 float OpenVR::GetAspect()
 {
 	return Aspect;
+}
+
+Matrix4 OpenVR::GetHMDTransform(bool bRenderPose)
+{
+	if (bRenderPose)
+	{
+		return ConvertSteamVRMatrixToMatrix4(RenderPoses[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking);
+	}
+	else
+	{
+		return ConvertSteamVRMatrixToMatrix4(GamePoses[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking);
+	}
 }
 
 IDirect3DSurface9* OpenVR::GetRenderSurface(int eye)

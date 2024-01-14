@@ -24,6 +24,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 void VREmulator::Init()
 {
+}
+
+void VREmulator::OnGameFinishInit()
+{
 	HWND hWnd;
 	WNDCLASSEX wc;
 	HINSTANCE hInstance = GetModuleHandle(NULL);
@@ -83,10 +87,6 @@ void VREmulator::Init()
 	CreateSharedTarget();
 
 	Logger::log << "Created Mirror D3D window" << std::endl;
-}
-
-void VREmulator::OnGameFinishInit()
-{
 }
 
 void VREmulator::UpdatePoses()

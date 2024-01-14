@@ -24,35 +24,35 @@ void Hooks::InitHooks()
 	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo) < 0;
 	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo2) < 0;
 	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo3) < 0;
+	SigScanner::UpdateOffset(o.CutsceneFPSCap);
 }
 
 void Hooks::EnableAllHooks()
 {
 	InitDirectX.EnableHook();
 	DrawFrame.EnableHook();
-	// TODO: This doesn't account for all UI. Known broken elements:
-	// multiplayer pickups
-	// multiplayer gametype
-	// multiplayer join screen (briefly?)
-	// blips on motion sensor
 	DrawHUD.EnableHook();
 	DrawMenu.EnableHook();
-	DrawScope.EnableHook();
+	//DrawScope.EnableHook();
 	DrawLoadingScreen.EnableHook();
 	SetViewModelPosition.EnableHook();
 	//UpdateCameraRotation.EnableHook();
 	//SetViewportSize.EnableHook();
 
+	P_RemoveCutsceneFPSCap();
+
 	// If we think the user has chimera installed, don't try to patch their patches
 	if (!bPotentiallyFoundChimera)
 	{
 		P_FixTabOut();
+
+		// TODO: Test this (and get a proper signature etc)
+		//NOPInstructions(0x4c90ea, 6);
 	}
 
 	// Maybe removes camera shake from camera?
 	// Hard to tell, but definitely doesn't fix viewmodel going ballistic
 	//NOPInstructions(0x45788f, 6);
-
 }
 
 void Hooks::SetByte(long long Address, byte Byte)
@@ -250,10 +250,10 @@ void __declspec(naked) Hooks::H_SetViewModelPosition()
 	{
 		mov pos, ecx
 		mov ecx, [esp + 0x10]
-		mov facing, ecx
+		mov up, ecx
 		push ecx
 		mov ecx, [esp + 0x10]
-		mov up, ecx
+		mov facing, ecx
 		push ecx
 		mov ecx, [esp + 0x10]
 		push ecx
@@ -339,4 +339,11 @@ void Hooks::P_FixTabOut()
 	SetByte(o.TabOutVideo3.Address + 6, 0xEB);
 
 	// TODO: There's a more complex patch I think to do with fullscreen
+}
+
+void Hooks::P_RemoveCutsceneFPSCap()
+{
+	// Instead of setting the flag for capping the fps to 1 when we are in a cutscene, just clear it
+	byte bytes[2]{ 0x32, 0xdb };
+	SetBytes(o.CutsceneFPSCap.Address, 2, bytes);
 }

@@ -1,4 +1,4 @@
-#define EMULATE_VR 0
+#define EMULATE_VR 1
 #include "Game.h"
 #include "Logger.h"
 #include "Hooking/Hooks.h"
@@ -105,12 +105,18 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 	IDirect3DSurface9* CurrentSurface = nullptr;
 	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &CurrentSurface);
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, UISurface);
-	Helpers::GetDirect3DDevice9()->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+	Helpers::GetDirect3DDevice9()->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(0, 0, 0, 0), 1.0f, 0);
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, CurrentSurface);
 	CurrentSurface->Release();
 
 	frustum1 = renderer->frustum;
 	frustum2 = renderer->frustum2;
+
+	if (bNeedsRecentre)
+	{
+		bNeedsRecentre = false;
+		Offset = (vr->GetHMDTransform(true) * Vector3(0.0f, 0.0f, 0.0f)) * MetresToWorld(1.0f);
+	}
 
 	vr->PreDrawFrame(renderer, deltaTime);
 }
@@ -121,6 +127,12 @@ void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
 
 	renderer->frustum = frustum1;
 	renderer->frustum2 = frustum2;
+
+	// Apply offsets
+	{
+		renderer->frustum.position -= Offset;
+		renderer->frustum2.position -= Offset;
+	}
 
 	// For performance reasons, we should prevent the game from calling SceneStart/SceneEnd for each eye
 	if (eye == 0)
@@ -163,9 +175,9 @@ void Game::PostDrawEye(struct Renderer* renderer, float deltaTime, int eye)
 #if EMULATE_VR
 	RECT TargetRect;
 	TargetRect.left = 0;
-	TargetRect.right = 100;
+	TargetRect.right = 200;
 	TargetRect.top = 0;
-	TargetRect.bottom = 100;
+	TargetRect.bottom = 200;
 	Helpers::GetDirect3DDevice9()->StretchRect(UISurface, NULL, Helpers::GetRenderTargets()[0].renderSurface, &TargetRect, D3DTEXF_NONE);
 #endif
 }
@@ -198,9 +210,11 @@ bool Game::PreDrawHUD()
 		// ...but try to avoid breaking the game view (for now at least)
 		return GetRenderState() == ERenderState::GAME;
 	}
-
+	
 	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &UIRealSurface);
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, UISurface);
+	UIRealSurface = Helpers::GetRenderTargets()[1].renderSurface;
+	Helpers::GetRenderTargets()[1].renderSurface = UISurface;
 
 	return true;
 }
@@ -212,9 +226,6 @@ void Game::PostDrawHUD()
 	{
 		return;
 	}
-
-	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, UIRealSurface);
-	UIRealSurface->Release();
 }
 
 bool Game::PreDrawMenu()
@@ -225,9 +236,6 @@ bool Game::PreDrawMenu()
 		// ...but try to avoid breaking the game view (for now at least)
 		return GetRenderState() == ERenderState::GAME;
 	}
-
-	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &UIRealSurface);
-	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, UISurface);
 
 	return true;
 }
@@ -240,6 +248,7 @@ void Game::PostDrawMenu()
 		return;
 	}
 
+	Helpers::GetRenderTargets()[1].renderSurface = UIRealSurface;
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, UIRealSurface);
 	UIRealSurface->Release();
 }
@@ -278,6 +287,14 @@ void Game::UpdateViewModel(Vector3* pos, Vector3* facing, Vector3* up)
 	pos->x = camPos.x;
 	pos->y = camPos.y;
 	pos->z = camPos.z;
+
+	facing->x = frustum1.facingDirection.x;
+	facing->y = frustum1.facingDirection.y;
+	facing->z = frustum1.facingDirection.z;
+
+	up->x = frustum1.upDirection.x;
+	up->y = frustum1.upDirection.y;
+	up->z = frustum1.upDirection.z;
 }
 
 float Game::MetresToWorld(float m)

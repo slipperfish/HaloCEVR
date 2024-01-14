@@ -25,6 +25,7 @@ public:
 	Offset TabOutVideo =			{ "halo.exe", 0xc7b74, "38 1D ?? ?? ?? ?? 74 0E 83 FD 01 74 09 83 FD 02 0F 85" };
 	Offset TabOutVideo2 =			{ "halo.exe", 0xc801c, "75 11 38 1D ?? ?? ?? ?? 75 04 3A C3 74 05 C6 44 24 17 01" };
 	Offset TabOutVideo3 =			{ "halo.exe", 0xc829c, "38 1D ?? ?? ?? ?? 74 29 0F BF 05 ?? ?? ?? ?? 3B C3 7E 0E" };
+	Offset CutsceneFPSCap =			{ "halo.exe", 0xc9fb5, "b3 01 eb ?? 32 db 8b 2d ?? ?? ?? ?? 8d 4c" };
 
 	Offset InitDirectX =			{ "halo.exe", 0x1169c0, "83 ec 60 8b 15 ?? ?? ?? ?? 8b 0d ?? ?? ?? ?? 53 33 db"};
 	Offset DrawFrame =				{ "halo.exe", 0x10bea0, "83 ec 14 8b 15 ?? ?? ?? ?? 8b 44 24 24 8b 4c 24 28 42" };

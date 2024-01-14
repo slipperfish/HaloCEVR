@@ -18,6 +18,7 @@ public:
 	int GetViewWidth() { return 600; }
 	int GetViewHeight() { return 600; }
 	float GetAspect() { return 1.0f; }
+	Matrix4 GetHMDTransform(bool bRenderPose = false) { return Matrix4(); }
 	virtual struct IDirect3DSurface9* GetRenderSurface(int eye);
 	virtual struct IDirect3DTexture9* GetRenderTexture(int eye);
 	virtual struct IDirect3DSurface9* GetUISurface();

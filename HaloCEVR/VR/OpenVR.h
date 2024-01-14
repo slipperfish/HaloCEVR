@@ -4,7 +4,6 @@
 #include <d3d9.h>
 #include <d3d11.h>
 #include "../../ThirdParty/OpenVR/include/openvr.h"
-#include "../Maths/Matrices.h"
 
 class OpenVR : public IVR
 {
@@ -19,6 +18,7 @@ public:
 	int GetViewWidth() override;
 	int GetViewHeight() override;
 	float GetAspect() override;
+	Matrix4 GetHMDTransform(bool bRenderPose = false) override;
 	IDirect3DSurface9* GetRenderSurface(int eye) override;
 	IDirect3DTexture9* GetRenderTexture(int eye) override;
 	IDirect3DSurface9* GetUISurface() override;
@@ -29,12 +29,15 @@ protected:
 
 	vr::IVRSystem* VRSystem;
 	vr::IVRCompositor* VRCompositor;
+	vr::IVROverlay* VROverlay;
 
 	vr::VRTextureBounds_t TextureBounds[2];
 	uint32_t RecommendedWidth;
 	uint32_t RecommendedHeight;
 	float Aspect;
 	float FOV;
+
+	vr::VROverlayHandle_t UIOverlay;
 
 	vr::TrackedDevicePose_t GamePoses[vr::k_unMaxTrackedDeviceCount];
 	vr::TrackedDevicePose_t RenderPoses[vr::k_unMaxTrackedDeviceCount];

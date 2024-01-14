@@ -41,6 +41,7 @@ public:
 
 	// All direct patches go here:
 	static void P_FixTabOut();
+	static void P_RemoveCutsceneFPSCap();
 private:
 	static inline Offsets o;
 };
