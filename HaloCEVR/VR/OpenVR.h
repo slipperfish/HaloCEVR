@@ -26,6 +26,7 @@ public:
 
 protected:
 	void CreateTexAndSurface(int index, UINT Width, UINT Height, DWORD Usage, D3DFORMAT Format);
+	void PositionOverlay();
 
 	vr::IVRSystem* VRSystem;
 	vr::IVRCompositor* VRCompositor;

@@ -41,7 +41,6 @@ void OpenVR::Init()
 	}
 
 	VROverlay->CreateOverlay("UIOverlay", "UIOverlay", &UIOverlay);
-	VROverlay->SetOverlayFlag(UIOverlay, vr::VROverlayFlags_IsPremultiplied, true);
 
 	VROverlay->ShowOverlay(UIOverlay);
 
@@ -99,7 +98,18 @@ void OpenVR::OnGameFinishInit()
 	// UI Layer
 	CreateTexAndSurface(2, RecommendedWidth, RecommendedHeight, Desc2.Usage, Desc2.Format);
 
-	VROverlay->SetOverlayWidthInMeters(UIOverlay, 4.0f);
+	VROverlay->SetOverlayFlag(UIOverlay, vr::VROverlayFlags_IsPremultiplied, true);
+
+	VROverlay->SetOverlayWidthInMeters(UIOverlay, Game::instance.c_UIOverlayScale->Value());
+	Logger::log << "[OpenVR] Set UI Width = " << Game::instance.c_UIOverlayScale->Value() << std::endl;
+
+	float Curvature = Game::instance.c_UIOverlayCurvature->Value();
+	if (Curvature != 0.0f)
+	{
+		VROverlay->SetOverlayCurvature(UIOverlay, Curvature);
+		Logger::log << "[OpenVR] Set UI Curvature = " << Curvature << std::endl;
+	}
+
 	vr::HmdMatrix34_t overlayTransform = {
 		1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f, 2.0f,
@@ -169,6 +179,39 @@ void OpenVR::PreDrawFrame(Renderer* renderer, float deltaTime)
 {
 }
 
+void OpenVR::PositionOverlay()
+{
+	// Get the HMD's position and rotation
+	vr::HmdMatrix34_t mat = RenderPoses[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking;
+	vr::HmdVector3_t Position;
+	Position.v[0] = mat.m[0][3];
+	Position.v[1] = mat.m[1][3];
+	Position.v[2] = mat.m[2][3];
+
+	float Distance = Game::instance.c_UIOverlayDistance->Value();
+
+	// Create a new transform from the position
+	vr::HmdMatrix34_t Transform;
+
+	float Len = sqrt(mat.m[0][2] * mat.m[0][2] + mat.m[2][2] * mat.m[2][2]);
+
+	Distance /= Len;
+
+	Position.v[0] += mat.m[0][2] * -Distance;
+	Position.v[2] += mat.m[2][2] * -Distance;
+
+	// Rotate only around Y for yaw
+	float yaw = atan2(-mat.m[2][0], mat.m[2][2]);
+	Transform = {
+		cos(yaw), 0, sin(yaw), Position.v[0],
+		0, 1, 0, Position.v[1],
+		-sin(yaw), 0, cos(yaw), Position.v[2]
+	};
+
+	// Set the transform for the overlay
+	VROverlay->SetOverlayTransformAbsolute(UIOverlay, vr::TrackingUniverseStanding, &Transform);
+}
+
 void OpenVR::PostDrawFrame(Renderer* renderer, float deltaTime)
 {
 	if (!VRCompositor)
@@ -202,6 +245,8 @@ void OpenVR::PostDrawFrame(Renderer* renderer, float deltaTime)
 		Logger::log << "[OpenVR] Could not submit right eye texture: " << error << std::endl;
 	}
 
+	PositionOverlay();
+
 	vr::Texture_t uiTex{ (void*)VRRenderTexture[2], vr::TextureType_DirectX, vr::ColorSpace_Auto };
 	vr::EVROverlayError oError = VROverlay->SetOverlayTexture(UIOverlay, &uiTex);
 
@@ -209,8 +254,6 @@ void OpenVR::PostDrawFrame(Renderer* renderer, float deltaTime)
 	{
 		Logger::log << "[OpenVR] Could not submit ui texture: " << error << std::endl;
 	}
-
-	// TODO: UI via an overlay here
 
 	VRCompositor->PostPresentHandoff();
 }

@@ -13,6 +13,8 @@ public:
 	std::string& GetDesc() { return description_; };
 protected:
 	std::string description_;
+	int guid;
+	friend class Config;
 };
 
 class BoolProperty : public Property {
@@ -63,31 +65,42 @@ class Config {
 public:
 	BoolProperty* RegisterBool(const std::string& name, const std::string& description, bool defaultValue) {
 		BoolProperty* newProp = new BoolProperty(defaultValue, description);
+		newProp->guid = guid++;
 		properties_[name] = newProp;
 		return newProp;
 	}
 
 	IntProperty* RegisterInt(const std::string& name, const std::string& description, int defaultValue) {
 		IntProperty* newProp = new IntProperty(defaultValue, description);
+		newProp->guid = guid++;
 		properties_[name] = newProp;
 		return newProp;
 	}
 
 	FloatProperty* RegisterFloat(const std::string& name, const std::string& description, float defaultValue) {
 		FloatProperty* newProp = new FloatProperty(defaultValue, description);
+		newProp->guid = guid++;
 		properties_[name] = newProp;
 		return newProp;
 	}
 
 	StringProperty* RegisterString(const std::string& name, const std::string& description, const std::string& defaultValue) {
 		StringProperty* newProp = new StringProperty(defaultValue, description);
+		newProp->guid = guid++;
 		properties_[name] = newProp;
 		return newProp;
 	}
 
+	bool sortProperties(std::pair<std::string, Property*> a, std::pair<std::string, Property*> b)
+	{
+		return a.second->guid < b.second->guid;
+	}
+
 	void SaveToFile(const std::string& filename) const {
 		std::ofstream file(filename);
-		for (const auto& pair : properties_) {
+		std::vector<std::pair<std::string, Property*>> sortedProperties(properties_.begin(), properties_.end());
+		std::sort(sortedProperties.begin(), sortedProperties.end(), [](std::pair<std::string, Property*> a, std::pair<std::string, Property*> b) { return a.second->guid < b.second->guid; });
+		for (const auto& pair : sortedProperties) {
 			const std::string& name = pair.first;
 			Property* prop = pair.second;
 			if (BoolProperty* boolProp = dynamic_cast<BoolProperty*>(prop)) {
@@ -175,4 +188,6 @@ public:
 
 private:
 	std::unordered_map<std::string, Property*> properties_;
+
+	int guid = 0;
 };
