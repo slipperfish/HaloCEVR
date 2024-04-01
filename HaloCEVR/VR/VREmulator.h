@@ -22,6 +22,11 @@ public:
 	virtual struct IDirect3DSurface9* GetRenderSurface(int eye);
 	virtual struct IDirect3DTexture9* GetRenderTexture(int eye);
 	virtual struct IDirect3DSurface9* GetUISurface();
+	void UpdateInputs();
+	InputBindingID RegisterBoolInput(std::string set, std::string action);
+	InputBindingID RegisterVector2Input(std::string set, std::string action);
+	bool GetBoolInput(InputBindingID id);
+	Vector2 GetVector2Input(InputBindingID id);
 	// End Interface IVR
 
 protected:

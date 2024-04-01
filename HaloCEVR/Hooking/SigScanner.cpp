@@ -26,6 +26,13 @@ long long SigScanner::UpdateOffset(Offset& offset)
 		return -1;
 	}
 
+	if (offset.Signature.size() == 0)
+	{
+		offset.Address = (uintptr_t)CurrentModule + offset.Offset;
+		Logger::log << "SigScanner [WARN]: Skipping signature check for 0x" << std::hex << offset.Offset << std::dec << ", this should only be done during dev builds" << std::endl;
+		return 0;
+	}
+
 	std::stringstream SigStream(offset.Signature);
 	std::string SigByte;
 	while (SigStream >> SigByte)

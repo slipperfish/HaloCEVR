@@ -1,6 +1,7 @@
 #include <d3d11.h>
 #include <d3d9.h>
 #include <algorithm>
+#include <filesystem>
 #include "OpenVR.h"
 #include "../Logger.h"
 #include "../Game.h"
@@ -40,9 +41,27 @@ void OpenVR::Init()
 		return;
 	}
 
+	VRInput = vr::VRInput();
+
+	if (!VRInput)
+	{
+		Logger::log << "[OpenVR] VRInput failed" << std::endl;
+		return;
+	}
+
 	VROverlay->CreateOverlay("UIOverlay", "UIOverlay", &UIOverlay);
 
 	VROverlay->ShowOverlay(UIOverlay);
+
+	std::filesystem::path cwd = std::filesystem::current_path() / "VR" / "actions.json";
+	VRInput->SetActionManifestPath(cwd.string().c_str());
+
+	vr::EVRInputError ActionSetError = VRInput->GetActionSetHandle("/actions/Default", &ActionSets[0].ulActionSet);
+
+	if (ActionSetError != vr::EVRInputError::VRInputError_None)
+	{
+		Logger::log << "[OpenVR] Could not get action set: " << ActionSetError << std::endl;
+	}
 
 	VRSystem->GetRecommendedRenderTargetSize(&RecommendedWidth, &RecommendedHeight);
 
@@ -324,4 +343,68 @@ IDirect3DTexture9* OpenVR::GetRenderTexture(int eye)
 IDirect3DSurface9* OpenVR::GetUISurface()
 {
     return GameRenderSurface[2];
+}
+
+void OpenVR::UpdateInputs()
+{
+	vr::EVRInputError error = VRInput->UpdateActionState(ActionSets, sizeof(vr::VRActiveActionSet_t), 1);
+
+	if (error != vr::VRInputError_None)
+	{
+		Logger::log << "[OpenVR] Could not update inputs: " << error << std::endl;
+	}
+}
+
+InputBindingID OpenVR::RegisterBoolInput(std::string set, std::string action)
+{
+	InputBindingID ID;
+	vr::EVRInputError err = VRInput->GetActionHandle(("/actions/" + set + "/in/" + action).c_str(), &ID);
+	if (err != vr::VRInputError_None)
+	{
+		Logger::log << "[OpenVR] Could not register bool input /actions/" << set << "/in/" << action << ": " << err << std::endl;
+	}
+	else
+	{
+		Logger::log << "[OpenVR] Registered /actions/" << set << "/in/" << action << " with id " << ID << std::endl;
+	}
+	return ID;
+}
+
+InputBindingID OpenVR::RegisterVector2Input(std::string set, std::string action)
+{
+	InputBindingID ID;
+	vr::EVRInputError err = VRInput->GetActionHandle(("/actions/" + set + "/in/" + action).c_str(), &ID);
+	if (err != vr::VRInputError_None)
+	{
+		Logger::log << "[OpenVR] Could not register vector2 input /actions/" << set << "/in/" << action << ": " << err << std::endl;
+	}
+	else
+	{
+		Logger::log << "[OpenVR] Registered /actions/" << set << "/in/" << action << " with id " << ID << std::endl;
+	}
+	return ID;
+}
+
+bool OpenVR::GetBoolInput(InputBindingID id)
+{
+	static vr::InputDigitalActionData_t Digital;
+	vr::EVRInputError err = VRInput->GetDigitalActionData(id, &Digital, sizeof(vr::InputDigitalActionData_t), vr::k_ulInvalidInputValueHandle);
+	if (err != vr::VRInputError_None)
+	{
+		Logger::log << "[OpenVR] Could not get digital action: " << err << std::endl;
+	}
+
+	return Digital.bState;
+}
+
+Vector2 OpenVR::GetVector2Input(InputBindingID id)
+{
+	static vr::InputAnalogActionData_t Analog;
+	vr::EVRInputError err = VRInput->GetAnalogActionData(id, &Analog, sizeof(vr::InputAnalogActionData_t), vr::k_ulInvalidInputValueHandle);
+	if (err != vr::VRInputError_None)
+	{
+		Logger::log << "[OpenVR] Could not get analog action: " << err << std::endl;
+	}
+
+	return Vector2(Analog.x, Analog.y);
 }

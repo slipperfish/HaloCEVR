@@ -166,6 +166,7 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Helpers\Camera.cpp" />
+    <ClCompile Include="Helpers\Controls.cpp" />
     <ClCompile Include="Helpers\DX9.cpp" />
     <ClCompile Include="Helpers\Player.cpp" />
     <ClCompile Include="Helpers\Renderer.cpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="Config\Config.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Helpers\Camera.h" />
+    <ClInclude Include="Helpers\Controls.h" />
     <ClInclude Include="Helpers\DX9.h" />
     <ClInclude Include="Helpers\Player.h" />
     <ClInclude Include="Helpers\Renderer.h" />
@@ -199,7 +201,15 @@
     <ClInclude Include="VR\VREmulator.h" />
     <ClInclude Include="VR\IVR.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="VR\actions.json" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

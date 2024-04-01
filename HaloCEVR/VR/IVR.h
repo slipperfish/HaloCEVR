@@ -1,6 +1,8 @@
 #pragma once
 #include "../Maths/Matrices.h"
 
+typedef uint64_t InputBindingID;
+
 class IVR
 {
 public:
@@ -19,4 +21,10 @@ public:
 	virtual struct IDirect3DSurface9* GetRenderSurface(int eye) = 0;
 	virtual struct IDirect3DTexture9* GetRenderTexture(int eye) = 0;
 	virtual struct IDirect3DSurface9* GetUISurface() = 0;
+
+	virtual void UpdateInputs() = 0;
+	virtual InputBindingID RegisterBoolInput(std::string set, std::string action) = 0;
+	virtual InputBindingID RegisterVector2Input(std::string set, std::string action) = 0;
+	virtual bool GetBoolInput(InputBindingID id) = 0;
+	virtual Vector2 GetVector2Input(InputBindingID id) = 0;
 };

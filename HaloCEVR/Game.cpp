@@ -1,4 +1,4 @@
-#define EMULATE_VR 1
+#define EMULATE_VR 0
 #include "Game.h"
 #include "Logger.h"
 #include "Hooking/Hooks.h"
@@ -6,6 +6,7 @@
 #include "Helpers/RenderTarget.h"
 #include "Helpers/Renderer.h"
 #include "Helpers/Camera.h"
+#include "Helpers/Controls.h"
 
 #if EMULATE_VR
 #include "VR/VREmulator.h"
@@ -32,6 +33,30 @@ void Game::Init()
 #endif
 
 	vr->Init();
+
+#define RegisterBoolInput(x) x = vr->RegisterBoolInput("Default", #x);
+#define RegisterVector2Input(x) x = vr->RegisterVector2Input("Default", #x);
+
+	RegisterBoolInput(Jump);
+	RegisterBoolInput(SwitchGrenades);
+	RegisterBoolInput(Interact);
+	RegisterBoolInput(SwitchWeapons);
+	RegisterBoolInput(Melee);
+	RegisterBoolInput(Flashlight);
+	RegisterBoolInput(Grenade);
+	RegisterBoolInput(Fire);
+	RegisterBoolInput(MenuForward);
+	RegisterBoolInput(MenuBack);
+	RegisterBoolInput(Crouch);
+	RegisterBoolInput(Zoom);
+	RegisterBoolInput(Reload);
+
+	RegisterVector2Input(Move);
+	RegisterVector2Input(Look);
+
+
+#undef RegisterBoolInput
+#undef RegisterVector2Input
 
 	BackBufferWidth = vr->GetViewWidth();
 	BackBufferHeight = vr->GetViewHeight();
@@ -82,6 +107,7 @@ void Game::OnInitDirectX()
 	UISurface = vr->GetUISurface();
 }
 
+
 void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 {
 	RenderState = ERenderState::UNKNOWN;
@@ -115,7 +141,7 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 	if (bNeedsRecentre)
 	{
 		bNeedsRecentre = false;
-		Offset = (vr->GetHMDTransform(true) * Vector3(0.0f, 0.0f, 0.0f)) * MetresToWorld(1.0f);
+		Offset = (vr->GetHMDTransform(true).scale(MetresToWorld(1.0f)) * Vector3(0.0f, 0.0f, 0.0f));
 	}
 
 	vr->PreDrawFrame(renderer, deltaTime);
@@ -296,6 +322,62 @@ void Game::UpdateViewModel(Vector3* pos, Vector3* facing, Vector3* up)
 	up->y = frustum1.upDirection.y;
 	up->z = frustum1.upDirection.z;
 }
+
+#define ApplyBoolInput(x) controls.##x = vr->GetBoolInput(x) ? 127 : 0;
+
+void Game::UpdateInputs()
+{
+	// Don't bother simulating inputs if we aren't actually in vr
+#if EMULATE_VR
+	return;
+#endif
+
+	vr->UpdateInputs();
+
+	Controls& controls = Helpers::GetControls();
+
+	ApplyBoolInput(Jump);
+	ApplyBoolInput(SwitchGrenades);
+	ApplyBoolInput(Interact);
+	ApplyBoolInput(SwitchWeapons);
+	ApplyBoolInput(Melee);
+	ApplyBoolInput(Flashlight);
+	ApplyBoolInput(Grenade);
+	ApplyBoolInput(Fire);
+	ApplyBoolInput(MenuForward);
+	ApplyBoolInput(MenuBack);
+	ApplyBoolInput(Crouch);
+	ApplyBoolInput(Zoom);
+	ApplyBoolInput(Reload);
+
+	Vector2 MoveInput = vr->GetVector2Input(Move);
+
+	controls.Left = -MoveInput.x;
+	controls.Forwards = MoveInput.y;
+}
+
+
+void Game::UpdateCamera(float& yaw, float& pitch)
+{
+	Vector2 LookInput = vr->GetVector2Input(Look);
+
+	// TODO: Better smooth/snap turning (i.e. make this actually work)
+	YawOffset += LookInput.x;
+
+	Vector3 LookHMD = vr->GetHMDTransform().rotateZ(YawOffset).getLeftAxis();
+	// Get current camera angle
+	Vector3 LookGame = Helpers::GetCamera().lookDir;
+	// Apply deltas
+	float YawHMD = atan2(LookHMD.y, LookHMD.x);
+	float YawGame = atan2(LookGame.y, LookGame.x);
+	yaw = (YawHMD - YawGame);
+
+	float PitchHMD = atan2(LookHMD.z, sqrt(LookHMD.x * LookHMD.x + LookHMD.y * LookHMD.y));
+	float PitchGame = atan2(LookGame.z, sqrt(LookGame.x * LookGame.x + LookGame.y * LookGame.y));
+	pitch = (PitchHMD - PitchGame);
+}
+
+#undef ApplyBoolInput
 
 float Game::MetresToWorld(float m)
 {

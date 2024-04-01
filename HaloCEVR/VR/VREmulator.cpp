@@ -119,6 +119,30 @@ IDirect3DSurface9* VREmulator::GetUISurface()
 	return UISurface;
 }
 
+void VREmulator::UpdateInputs()
+{
+}
+
+InputBindingID VREmulator::RegisterBoolInput(std::string set, std::string action)
+{
+	return InputBindingID();
+}
+
+InputBindingID VREmulator::RegisterVector2Input(std::string set, std::string action)
+{
+	return InputBindingID();
+}
+
+bool VREmulator::GetBoolInput(InputBindingID id)
+{
+	return false;
+}
+
+Vector2 VREmulator::GetVector2Input(InputBindingID id)
+{
+	return Vector2();
+}
+
 void VREmulator::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 {
 	if (!MirrorDevice)

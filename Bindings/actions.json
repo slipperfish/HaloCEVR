@@ -1,0 +1,95 @@
+{
+    "default_bindings": [
+        {
+            "controller_type": "oculus_touch",
+            "binding_url": "oculus_touch.json"
+        },
+        {
+            "controller_type": "knuckles",
+            "binding_url": "knuckles.json"
+        }
+    ],
+    "actions": [
+        {
+            "name": "/actions/Default/in/Jump",
+            "requirement": "suggested",
+            "type": "boolean"
+        },
+        {
+            "name": "/actions/Default/in/SwitchGrenades",
+            "requirement": "suggested",
+            "type": "boolean"
+        },
+        {
+            "name": "/actions/Default/in/Interact",
+            "requirement": "suggested",
+            "type": "boolean"
+        },
+        {
+            "name": "/actions/Default/in/SwitchWeapons",
+            "requirement": "suggested",
+            "type": "boolean"
+        },
+        {
+            "name": "/actions/Default/in/Melee",
+            "requirement": "suggested",
+            "type": "boolean"
+        },
+        {
+            "name": "/actions/Default/in/Flashlight",
+            "requirement": "suggested",
+            "type": "boolean"
+        },
+        {
+            "name": "/actions/Default/in/Grenade",
+            "requirement": "suggested",
+            "type": "boolean"
+        },
+        {
+            "name": "/actions/Default/in/Fire",
+            "requirement": "suggested",
+            "type": "boolean"
+        },
+        {
+            "name": "/actions/Default/in/MenuForward",
+            "requirement": "suggested",
+            "type": "boolean"
+        },
+        {
+            "name": "/actions/Default/in/MenuBack",
+            "requirement": "suggested",
+            "type": "boolean"
+        },
+        {
+            "name": "/actions/Default/in/Crouch",
+            "requirement": "suggested",
+            "type": "boolean"
+        },
+        {
+            "name": "/actions/Default/in/Zoom",
+            "requirement": "suggested",
+            "type": "boolean"
+        },
+        {
+            "name": "/actions/Default/in/Reload",
+            "requirement": "suggested",
+            "type": "boolean"
+        },
+        {
+            "name": "/actions/Default/in/Look",
+            "requirement": "suggested",
+            "type": "vector1"
+        },
+        {
+            "name": "/actions/Default/in/Move",
+            "requirement": "suggested",
+            "type": "vector2"
+        }
+    ],
+    "action_sets": [
+        {
+            "name": "/actions/Default",
+            "usage": "leftright"
+        }
+    ]
+}

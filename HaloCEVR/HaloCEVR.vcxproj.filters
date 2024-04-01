@@ -57,6 +57,9 @@
     <ClCompile Include="Maths\Matrices.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Helpers\Controls.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Hooking\FunctionTypedefs.h">
@@ -116,5 +119,11 @@
     <ClInclude Include="Maths\Vectors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Helpers\Controls.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="VR\actions.json" />
   </ItemGroup>
 </Project>

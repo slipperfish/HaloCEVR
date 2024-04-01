@@ -37,6 +37,9 @@ public:
 
 	void UpdateViewModel(struct Vector3* pos, struct Vector3* facing, struct Vector3* up);
 
+	void UpdateInputs();
+	void UpdateCamera(float& yaw, float& pitch);
+
 	bool GetDrawMirror() const { return c_DrawMirror->Value(); }
 
 	ERenderState GetRenderState() const { return RenderState; }
@@ -62,6 +65,7 @@ protected:
 
 	bool bNeedsRecentre = true;
 	Vector3 Offset;
+	float YawOffset = 0.0f;
 
 
 	float TimeSinceFPSUpdate = 0.0f;
@@ -85,6 +89,23 @@ protected:
 
 	CameraFrustum frustum1;
 	CameraFrustum frustum2;
+
+	//======Controls======//
+	InputBindingID Jump;
+	InputBindingID SwitchGrenades;
+	InputBindingID Interact;
+	InputBindingID SwitchWeapons;
+	InputBindingID Melee;
+	InputBindingID Flashlight;
+	InputBindingID Grenade;
+	InputBindingID Fire;
+	InputBindingID MenuForward;
+	InputBindingID MenuBack;
+	InputBindingID Crouch;
+	InputBindingID Zoom;
+	InputBindingID Reload;
+	InputBindingID Move;
+	InputBindingID Look;
 
 	//======Configs======//
 public:

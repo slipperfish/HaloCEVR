@@ -14,11 +14,12 @@ void Hooks::InitHooks()
 	CREATEHOOK(DrawFrame);
 	CREATEHOOK(DrawHUD);
 	CREATEHOOK(DrawMenu);
-	CREATEHOOK(DrawScope);
+	//CREATEHOOK(DrawScope);
 	CREATEHOOK(DrawLoadingScreen);
 	CREATEHOOK(SetViewModelPosition);
-	//CREATEHOOK(UpdateCameraRotation);
 	//CREATEHOOK(SetViewportSize);
+	CREATEHOOK(HandleInputs);
+	CREATEHOOK(UpdatePitchYaw);
 
 	// These are handled with a direct patch, so manually scan them
 	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo) < 0;
@@ -36,8 +37,9 @@ void Hooks::EnableAllHooks()
 	//DrawScope.EnableHook();
 	DrawLoadingScreen.EnableHook();
 	SetViewModelPosition.EnableHook();
-	//UpdateCameraRotation.EnableHook();
 	//SetViewportSize.EnableHook();
+	HandleInputs.EnableHook();
+	UpdatePitchYaw.EnableHook();
 
 	P_RemoveCutsceneFPSCap();
 
@@ -49,11 +51,9 @@ void Hooks::EnableAllHooks()
 		// TODO: Test this (and get a proper signature etc)
 		//NOPInstructions(0x4c90ea, 6);
 	}
-
-	// Maybe removes camera shake from camera?
-	// Hard to tell, but definitely doesn't fix viewmodel going ballistic
-	//NOPInstructions(0x45788f, 6);
 }
+
+//===============================//Helpers//===================================//
 
 void Hooks::SetByte(long long Address, byte Byte)
 {
@@ -94,27 +94,6 @@ void Hooks::NOPInstructions(long long Address, int Length)
 }
 
 //===============================//Hooks//===================================//
-
-void __declspec(naked) Hooks::H_UpdateCameraRotation()
-{
-	UpdateCameraRotation.Original();
-
-	static float t = 0.0f;
-
-	t += 1.0f / 60.0f;
-	
-	Helpers::GetPlayer().camera.fov = 0.5f + abs(sin(t));
-
-	//float newFov = Helpers::GetPlayer().camera.fov;
-	//float newFovDeg = newFov * (180.0f / 3.1415926f);
-
-	//Logger::log << t << ": " << newFov << " (" << newFovDeg << ")" << std::endl;
-
-	_asm
-	{
-		ret
-	}
-}
 
 void Hooks::H_InitDirectX()
 {
@@ -320,6 +299,80 @@ void __declspec(naked) Hooks::H_SetViewportSize()
 	_asm
 	{
 		add esp, 0x4
+		ret
+	}
+}
+
+void Hooks::H_HandleInputs()
+{
+	HandleInputs.Original();
+
+	Game::instance.UpdateInputs();
+}
+
+void __declspec(naked) Hooks::H_UpdatePitchYaw()
+{
+	static short playerId;
+	static float yaw;
+	static float pitch;
+
+	// Extract parameters
+	_asm
+	{
+		mov playerId, ax
+		mov eax, [esp + 0x4]
+		mov yaw, eax
+		mov eax, [esp + 0x8]
+		mov pitch, eax
+		movsx eax, playerId
+	}
+
+	/*
+	Original stack:
+	0x0: ret address
+	0x4: yaw
+	0x8: pitch
+	
+	Post-hook stack:
+	0x0: hook ret address
+	0x4: ret address
+	0x8: yaw
+	0xc: pitch
+
+	Fixed stack:
+	0x0: hook ret address
+	0x4: yaw
+	0x8: pitch
+	0xc: ret address
+	0x10: yaw
+	0x14: pitch
+	*/
+
+	_asm
+	{
+		pushad
+	}
+
+	Game::instance.UpdateCamera(yaw, pitch);
+
+	_asm
+	{
+		popad
+	}
+
+	// Re-push parameters to fix stack for original call
+	_asm
+	{
+		push pitch
+		push yaw
+	}
+
+	UpdatePitchYaw.Original();
+
+	// Cleanup and return
+	_asm
+	{
+		add esp, 0x8
 		ret
 	}
 }

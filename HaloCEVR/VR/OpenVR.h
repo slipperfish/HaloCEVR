@@ -22,6 +22,11 @@ public:
 	IDirect3DSurface9* GetRenderSurface(int eye) override;
 	IDirect3DTexture9* GetRenderTexture(int eye) override;
 	IDirect3DSurface9* GetUISurface() override;
+	void UpdateInputs() override;
+	InputBindingID RegisterBoolInput(std::string set, std::string action) override;
+	InputBindingID RegisterVector2Input(std::string set, std::string action) override;
+	bool GetBoolInput(InputBindingID id) override;
+	Vector2 GetVector2Input(InputBindingID id) override;
 	// End Interface IVR
 
 protected:
@@ -30,6 +35,7 @@ protected:
 
 	vr::IVRSystem* VRSystem;
 	vr::IVRCompositor* VRCompositor;
+	vr::IVRInput* VRInput;
 	vr::IVROverlay* VROverlay;
 
 	vr::VRTextureBounds_t TextureBounds[2];
@@ -37,6 +43,8 @@ protected:
 	uint32_t RecommendedHeight;
 	float Aspect;
 	float FOV;
+
+	vr::VRActiveActionSet_t ActionSets[1];
 
 	vr::VROverlayHandle_t UIOverlay;
 

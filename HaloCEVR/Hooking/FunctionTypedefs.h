@@ -10,3 +10,7 @@ typedef void(__stdcall* Func_DrawScope)(void*);
 typedef void(*Func_DrawLoadingScreen)();
 
 typedef void(*Func_SetViewModelPosition)();
+
+typedef void(*Func_HandleInputs)();
+
+typedef void(*Func_UpdatePitchYaw)();

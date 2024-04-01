@@ -25,8 +25,9 @@ public:
 	static inline Hook<Func_DrawScope> DrawScope;
 	static inline Hook<Func_DrawLoadingScreen> DrawLoadingScreen;
 	static inline Hook<Func_SetViewModelPosition> SetViewModelPosition;
-	static inline Hook<Func_UpdateCameraRotation> UpdateCameraRotation;	// Unused
 	static inline Hook<Func_SetViewportSize> SetViewportSize; // Unused
+	static inline Hook<Func_HandleInputs> HandleInputs;
+	static inline Hook<Func_UpdatePitchYaw> UpdatePitchYaw;
 
 	// All Hook implementations go here:
 	static void H_InitDirectX();
@@ -36,8 +37,9 @@ public:
 	static void __stdcall H_DrawScope(void* param1);
 	static void H_DrawLoadingScreen();
 	static void H_SetViewModelPosition();
-	static void H_UpdateCameraRotation();
 	static void H_SetViewportSize();
+	static void H_HandleInputs();
+	static void H_UpdatePitchYaw();
 
 	// All direct patches go here:
 	static void P_FixTabOut();
