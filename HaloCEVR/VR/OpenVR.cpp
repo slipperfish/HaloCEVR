@@ -318,15 +318,25 @@ float OpenVR::GetAspect()
 	return Aspect;
 }
 
+void OpenVR::SetYawOffset(float NewOffset)
+{
+	YawOffset = NewOffset;
+}
+
+float OpenVR::GetYawOffset()
+{
+	return YawOffset;
+}
+
 Matrix4 OpenVR::GetHMDTransform(bool bRenderPose)
 {
 	if (bRenderPose)
 	{
-		return ConvertSteamVRMatrixToMatrix4(RenderPoses[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking);
+		return ConvertSteamVRMatrixToMatrix4(RenderPoses[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking).rotateZ(-YawOffset);
 	}
 	else
 	{
-		return ConvertSteamVRMatrixToMatrix4(GamePoses[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking);
+		return ConvertSteamVRMatrixToMatrix4(GamePoses[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking).rotateZ(-YawOffset);
 	}
 }
 
@@ -387,12 +397,20 @@ InputBindingID OpenVR::RegisterVector2Input(std::string set, std::string action)
 
 bool OpenVR::GetBoolInput(InputBindingID id)
 {
+	static bool Dummy = false;
+	return GetBoolInput(id, Dummy);
+}
+
+bool OpenVR::GetBoolInput(InputBindingID id, bool& bHasChanged)
+{
 	static vr::InputDigitalActionData_t Digital;
 	vr::EVRInputError err = VRInput->GetDigitalActionData(id, &Digital, sizeof(vr::InputDigitalActionData_t), vr::k_ulInvalidInputValueHandle);
 	if (err != vr::VRInputError_None)
 	{
 		Logger::log << "[OpenVR] Could not get digital action: " << err << std::endl;
 	}
+
+	bHasChanged = Digital.bChanged;
 
 	return Digital.bState;
 }

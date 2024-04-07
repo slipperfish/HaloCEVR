@@ -18,6 +18,8 @@ public:
 	int GetViewWidth() { return 600; }
 	int GetViewHeight() { return 600; }
 	float GetAspect() { return 1.0f; }
+	void SetYawOffset(float NewOffset) {};
+	float GetYawOffset() { return 0.0f; };
 	Matrix4 GetHMDTransform(bool bRenderPose = false) { return Matrix4(); }
 	virtual struct IDirect3DSurface9* GetRenderSurface(int eye);
 	virtual struct IDirect3DTexture9* GetRenderTexture(int eye);
@@ -26,6 +28,7 @@ public:
 	InputBindingID RegisterBoolInput(std::string set, std::string action);
 	InputBindingID RegisterVector2Input(std::string set, std::string action);
 	bool GetBoolInput(InputBindingID id);
+	bool GetBoolInput(InputBindingID id, bool& bHasChanged);
 	Vector2 GetVector2Input(InputBindingID id);
 	// End Interface IVR
 

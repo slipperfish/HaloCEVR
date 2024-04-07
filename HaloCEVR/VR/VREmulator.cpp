@@ -138,6 +138,11 @@ bool VREmulator::GetBoolInput(InputBindingID id)
 	return false;
 }
 
+bool VREmulator::GetBoolInput(InputBindingID id, bool& bHasChanged)
+{
+	return false;
+}
+
 Vector2 VREmulator::GetVector2Input(InputBindingID id)
 {
 	return Vector2();

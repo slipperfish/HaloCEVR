@@ -18,6 +18,8 @@ public:
 	int GetViewWidth() override;
 	int GetViewHeight() override;
 	float GetAspect() override;
+	void SetYawOffset(float NewOffset) override;
+	float GetYawOffset() override;
 	Matrix4 GetHMDTransform(bool bRenderPose = false) override;
 	IDirect3DSurface9* GetRenderSurface(int eye) override;
 	IDirect3DTexture9* GetRenderTexture(int eye) override;
@@ -26,6 +28,7 @@ public:
 	InputBindingID RegisterBoolInput(std::string set, std::string action) override;
 	InputBindingID RegisterVector2Input(std::string set, std::string action) override;
 	bool GetBoolInput(InputBindingID id) override;
+	bool GetBoolInput(InputBindingID id, bool& bHasChanged) override;
 	Vector2 GetVector2Input(InputBindingID id) override;
 	// End Interface IVR
 
@@ -43,6 +46,8 @@ protected:
 	uint32_t RecommendedHeight;
 	float Aspect;
 	float FOV;
+
+	float YawOffset;
 
 	vr::VRActiveActionSet_t ActionSets[1];
 

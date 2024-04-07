@@ -329,6 +329,7 @@ void Game::UpdateViewModel(Vector3* pos, Vector3* facing, Vector3* up)
 }
 
 #define ApplyBoolInput(x) controls.##x = vr->GetBoolInput(x) ? 127 : 0;
+#define ApplyImpulseBoolInput(x) controls.##x = vr->GetBoolInput(x, bHasChanged) && bHasChanged ? 127 : 0;
 
 void Game::UpdateInputs()
 {
@@ -339,12 +340,14 @@ void Game::UpdateInputs()
 
 	vr->UpdateInputs();
 
+	static bool bHasChanged = false;
+
 	Controls& controls = Helpers::GetControls();
 
 	ApplyBoolInput(Jump);
-	ApplyBoolInput(SwitchGrenades);
+	ApplyImpulseBoolInput(SwitchGrenades);
 	ApplyBoolInput(Interact);
-	ApplyBoolInput(SwitchWeapons);
+	ApplyImpulseBoolInput(SwitchWeapons);
 	ApplyBoolInput(Melee);
 	ApplyBoolInput(Flashlight);
 	ApplyBoolInput(Grenade);
@@ -352,7 +355,7 @@ void Game::UpdateInputs()
 	ApplyBoolInput(MenuForward);
 	ApplyBoolInput(MenuBack);
 	ApplyBoolInput(Crouch);
-	ApplyBoolInput(Zoom);
+	ApplyImpulseBoolInput(Zoom);
 	ApplyBoolInput(Reload);
 
 	if (vr->GetBoolInput(Recentre))
@@ -370,6 +373,8 @@ void Game::UpdateInputs()
 void Game::UpdateCamera(float& yaw, float& pitch)
 {
 	Vector2 LookInput = vr->GetVector2Input(Look);
+
+	float YawOffset = vr->GetYawOffset();
 
 	if (c_SnapTurn->Value())
 	{
@@ -403,12 +408,12 @@ void Game::UpdateCamera(float& yaw, float& pitch)
 	}
 	else
 	{
-		// TODO: Get the delta time
 		YawOffset += LookInput.x * c_SmoothTurnAmount->Value() * LastDeltaTime;
 	}
 
+	vr->SetYawOffset(YawOffset);
 
-	Vector3 LookHMD = vr->GetHMDTransform().rotateZ(YawOffset).getLeftAxis();
+	Vector3 LookHMD = vr->GetHMDTransform().getLeftAxis();
 	// Get current camera angle
 	Vector3 LookGame = Helpers::GetCamera().lookDir;
 	// Apply deltas

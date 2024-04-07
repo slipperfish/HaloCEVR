@@ -65,7 +65,6 @@ protected:
 
 	bool bNeedsRecentre = true;
 	Vector3 Offset;
-	float YawOffset = 0.0f;
 	char LastSnapState = 0;
 	float LastDeltaTime = 0.0f;
 
