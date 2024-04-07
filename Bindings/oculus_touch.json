@@ -1,20 +1,20 @@
 {
     "bindings": {
-        "/actions/Default": {
+        "/actions/default": {
             "haptics": [],
             "poses": [],
             "sources": [
                 {
                     "inputs": {
                         "north": {
-                            "output": "/actions/Default/in/Jump"
+                            "output": "/actions/default/in/Jump"
                         },
                         "south": {
-                            "output": "/actions/Default/in/Crouch"
+                            "output": "/actions/default/in/Crouch"
                         }
                     },
                     "mode": "dpad",
-                    "path": "/user/hand/right/input/thumbstick",
+                    "path": "/user/hand/right/input/joystick",
                     "parameters": {
                         "sub_mode": "touch"
                     }
@@ -22,7 +22,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/Default/in/SwitchGrenades"
+                            "output": "/actions/default/in/SwitchGrenades"
                         }
                     },
                     "mode": "button",
@@ -35,7 +35,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/Default/in/SwitchWeapons"
+                            "output": "/actions/default/in/SwitchWeapons"
                         }
                     },
                     "mode": "button",
@@ -48,7 +48,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/Default/in/Interact"
+                            "output": "/actions/default/in/Interact"
                         }
                     },
                     "mode": "button",
@@ -58,7 +58,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/Default/in/Melee"
+                            "output": "/actions/default/in/Melee"
                         }
                     },
                     "mode": "button",
@@ -68,7 +68,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/Default/in/Flashlight"
+                            "output": "/actions/default/in/Flashlight"
                         }
                     },
                     "mode": "button",
@@ -78,7 +78,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/Default/in/Reload"
+                            "output": "/actions/default/in/Reload"
                         }
                     },
                     "mode": "button",
@@ -88,7 +88,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/Default/in/Grenade"
+                            "output": "/actions/default/in/Grenade"
                         }
                     },
                     "mode": "button",
@@ -98,7 +98,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/Default/in/Fire"
+                            "output": "/actions/default/in/Fire"
                         }
                     },
                     "mode": "button",
@@ -107,22 +107,42 @@
                 },
                 {
                     "inputs": {
-                        "click": {
-                            "output": "/actions/Default/in/Look"
+                        "position": {
+                            "output": "/actions/default/in/Look"
                         }
                     },
-                    "mode": "button",
-                    "path": "/user/hand/right/input/thumbstick/x",
+                    "mode": "joystick",
+                    "path": "/user/hand/right/input/joystick",
                     "parameters": {}
                 },
                 {
                     "inputs": {
                         "position": {
-                            "output": "/actions/Default/in/Move"
+                            "output": "/actions/default/in/Move"
                         }
                     },
                     "mode": "joystick",
-                    "path": "/user/hand/left/input/thumbstick",
+                    "path": "/user/hand/left/input/joystick",
+                    "parameters": {}
+                },
+                {
+                    "inputs": {
+                        "click": {
+                            "output": "/actions/default/in/Zoom"
+                        }
+                    },
+                    "mode": "button",
+                    "path": "/user/hand/right/input/thumbrest",
+                    "parameters": {}
+                },
+                {
+                    "inputs": {
+                        "click": {
+                            "output": "/actions/default/in/Recentre"
+                        }
+                    },
+                    "mode": "button",
+                    "path": "/user/hand/left/input/thumbrest",
                     "parameters": {}
                 }
             ],

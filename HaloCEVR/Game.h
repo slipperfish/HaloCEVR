@@ -66,6 +66,8 @@ protected:
 	bool bNeedsRecentre = true;
 	Vector3 Offset;
 	float YawOffset = 0.0f;
+	char LastSnapState = 0;
+	float LastDeltaTime = 0.0f;
 
 
 	float TimeSinceFPSUpdate = 0.0f;
@@ -106,6 +108,8 @@ protected:
 	InputBindingID Reload;
 	InputBindingID Move;
 	InputBindingID Look;
+	// Temp?
+	InputBindingID Recentre;
 
 	//======Configs======//
 public:
@@ -115,5 +119,8 @@ public:
 	FloatProperty* c_UIOverlayDistance = nullptr;
 	FloatProperty* c_UIOverlayScale = nullptr;
 	FloatProperty* c_UIOverlayCurvature = nullptr;
+	BoolProperty* c_SnapTurn = nullptr;
+	FloatProperty* c_SnapTurnAmount = nullptr;
+	FloatProperty* c_SmoothTurnAmount = nullptr;
 };
 

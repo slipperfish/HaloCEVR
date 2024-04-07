@@ -1,12 +1,12 @@
 import json
 
 controllers = ["oculus_touch", "knuckles"]
-boolActions = ["Jump","SwitchGrenades","Interact","SwitchWeapons","Melee","Flashlight","Grenade","Fire","MenuForward","MenuBack","Crouch","Zoom","Reload"]
-vec1Actions = ["Look"]
-vec2Actions = ["Move"]
+boolActions = ["Jump","SwitchGrenades","Interact","SwitchWeapons","Melee","Flashlight","Grenade","Fire","MenuForward","MenuBack","Crouch","Zoom","Reload", "Recentre"]
+vec1Actions = []
+vec2Actions = ["Look", "Move"]
 
 bindings = {
-    "Jump" : { "h" : "right", "b" : "thumbstick|north"},
+    "Jump" : { "h" : "right", "b" : "joystick|north"},
     "SwitchGrenades" : {"h" : "left", "b" : "grip"},
     "SwitchWeapons" : {"h" : "right", "b" : "grip"},
     "Interact" : {"h" : "left", "b" : "y"},
@@ -15,9 +15,11 @@ bindings = {
     "Reload" : {"h" : "right", "b" : "b"},
     "Grenade" : {"h" : "left", "b" : "trigger"},
     "Fire" : {"h" : "right", "b" : "trigger"},
-    "Crouch" : {"h" : "right", "b" : "thumbstick|south"},
-    "Look" : {"h" : "right", "b" : "thumbstick/x"},
-    "Move" : {"h" : "left", "b" : "thumbstick"},
+    "Crouch" : {"h" : "right", "b" : "joystick|south"},
+    "Look" : {"h" : "right", "b" : "joystick"},
+    "Move" : {"h" : "left", "b" : "joystick"},
+    "Zoom" : {"h" : "right", "b" : "thumbrest"},
+    "Recentre" : {"h" : "left", "b" : "thumbrest"},
 }
 
 manifest = {
@@ -25,7 +27,7 @@ manifest = {
     "actions" : [],
     "action_sets" : [
         {
-            "name" : "/actions/Default",
+            "name" : "/actions/default",
             "usage" : "leftright"
         }
     ]
@@ -35,13 +37,13 @@ for c in controllers:
     manifest["default_bindings"].append({"controller_type" : c, "binding_url" : c + ".json"})
 
 for b in boolActions:
-    manifest["actions"].append({"name" : "/actions/Default/in/" + b, "requirement" : "suggested", "type" : "boolean"})
+    manifest["actions"].append({"name" : "/actions/default/in/" + b, "requirement" : "suggested", "type" : "boolean"})
 
 for v in vec1Actions:
-    manifest["actions"].append({"name" : "/actions/Default/in/" + v, "requirement" : "suggested", "type" : "vector1"})
+    manifest["actions"].append({"name" : "/actions/default/in/" + v, "requirement" : "suggested", "type" : "vector1"})
     
 for v in vec2Actions:
-    manifest["actions"].append({"name" : "/actions/Default/in/" + v, "requirement" : "suggested", "type" : "vector2"})
+    manifest["actions"].append({"name" : "/actions/default/in/" + v, "requirement" : "suggested", "type" : "vector2"})
 
 try:
     with open("actions.json", "w") as f:
@@ -55,7 +57,7 @@ else:
 for c in controllers:
     controller = {
         "bindings" : {
-            "/actions/Default" : {
+            "/actions/default" : {
                 "haptics" : [],
                 "poses" : [],
                 "sources" : [],
@@ -79,7 +81,10 @@ for c in controllers:
         
         inputtype = "click"
         
-        if inputs[0].startswith("thumbstick"):
+        if inputs[0] == "joystick":
+            if controllers == "knuckles":
+                inputs[0] = "thumbstick"
+        
             if len(inputs) > 1:
                 mode = "dpad"
                 parameters["sub_mode"] = "touch"
@@ -87,13 +92,13 @@ for c in controllers:
                 
                 needsMerge = False
                 
-                for entry in controller["bindings"]["/actions/Default"]["sources"]:
+                for entry in controller["bindings"]["/actions/default"]["sources"]:
                     if entry["mode"] == mode and entry["path"] == "/user/hand/" + b["h"] + "/input/" + inputs[0]:
                         needsMerge = True
                         break
                 
                 if needsMerge:
-                    entry["inputs"][inputtype] = {"output" : "/actions/Default/in/" + binding}
+                    entry["inputs"][inputtype] = {"output" : "/actions/default/in/" + binding}
                     continue
             else:
                 mode = "joystick"
@@ -107,11 +112,14 @@ for c in controllers:
         elif inputs[0] == "y":
             if controllers == "knuckles":
                 inputs[0] = "b"
+        elif inputs[0] == "thumbrest":
+            if controllers == "knuckles":
+                inputs[0] = "trackpad"
         
         input = {}
-        input[inputtype] = {"output" : "/actions/Default/in/" + binding}
+        input[inputtype] = {"output" : "/actions/default/in/" + binding}
         
-        controller["bindings"]["/actions/Default"]["sources"].append({"inputs" : input, "mode" : mode, "path" : "/user/hand/" + b["h"] + "/input/" + inputs[0], "parameters" : parameters})
+        controller["bindings"]["/actions/default"]["sources"].append({"inputs" : input, "mode" : mode, "path" : "/user/hand/" + b["h"] + "/input/" + inputs[0], "parameters" : parameters})
     
     try:
         with open(c+".json", "w") as f:

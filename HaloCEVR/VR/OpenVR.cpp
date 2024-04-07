@@ -53,10 +53,10 @@ void OpenVR::Init()
 
 	VROverlay->ShowOverlay(UIOverlay);
 
-	std::filesystem::path cwd = std::filesystem::current_path() / "VR" / "actions.json";
+	std::filesystem::path cwd = std::filesystem::current_path() / "VR" / "OpenVR" / "actions.json";
 	VRInput->SetActionManifestPath(cwd.string().c_str());
 
-	vr::EVRInputError ActionSetError = VRInput->GetActionSetHandle("/actions/Default", &ActionSets[0].ulActionSet);
+	vr::EVRInputError ActionSetError = VRInput->GetActionSetHandle("/actions/default", &ActionSets[0].ulActionSet);
 
 	if (ActionSetError != vr::EVRInputError::VRInputError_None)
 	{

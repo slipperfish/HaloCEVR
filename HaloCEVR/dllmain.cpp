@@ -8,12 +8,7 @@
 #pragma comment(lib, "libMinHook.x86.lib")
 #pragma comment(lib, "d3d9.lib")
 
-//#pragma comment(linker, "/export:Direct3DCreate9=d3d9_o.Direct3DCreate9")
-////#pragma comment(linker, "/export:Direct3DCreate9=?InterceptDirect3DCreate9@@YGPAUIDirect3D9@@I@Z")
-//#pragma comment(linker, "/export:Direct3DShaderValidatorCreate9=d3d9_o.Direct3DShaderValidatorCreate9")
-//#pragma comment(linker, "/export:Direct3DCreate9Ex=d3d9_o.Direct3DCreate9Ex")
-
-Logger Logger::log("inject.log");
+Logger Logger::log("VR/inject.log");
 Game Game::instance;
 
 BOOL APIENTRY DllMain( HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)

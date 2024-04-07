@@ -11,84 +11,89 @@
     ],
     "actions": [
         {
-            "name": "/actions/Default/in/Jump",
+            "name": "/actions/default/in/Jump",
             "requirement": "suggested",
             "type": "boolean"
         },
         {
-            "name": "/actions/Default/in/SwitchGrenades",
+            "name": "/actions/default/in/SwitchGrenades",
             "requirement": "suggested",
             "type": "boolean"
         },
         {
-            "name": "/actions/Default/in/Interact",
+            "name": "/actions/default/in/Interact",
             "requirement": "suggested",
             "type": "boolean"
         },
         {
-            "name": "/actions/Default/in/SwitchWeapons",
+            "name": "/actions/default/in/SwitchWeapons",
             "requirement": "suggested",
             "type": "boolean"
         },
         {
-            "name": "/actions/Default/in/Melee",
+            "name": "/actions/default/in/Melee",
             "requirement": "suggested",
             "type": "boolean"
         },
         {
-            "name": "/actions/Default/in/Flashlight",
+            "name": "/actions/default/in/Flashlight",
             "requirement": "suggested",
             "type": "boolean"
         },
         {
-            "name": "/actions/Default/in/Grenade",
+            "name": "/actions/default/in/Grenade",
             "requirement": "suggested",
             "type": "boolean"
         },
         {
-            "name": "/actions/Default/in/Fire",
+            "name": "/actions/default/in/Fire",
             "requirement": "suggested",
             "type": "boolean"
         },
         {
-            "name": "/actions/Default/in/MenuForward",
+            "name": "/actions/default/in/MenuForward",
             "requirement": "suggested",
             "type": "boolean"
         },
         {
-            "name": "/actions/Default/in/MenuBack",
+            "name": "/actions/default/in/MenuBack",
             "requirement": "suggested",
             "type": "boolean"
         },
         {
-            "name": "/actions/Default/in/Crouch",
+            "name": "/actions/default/in/Crouch",
             "requirement": "suggested",
             "type": "boolean"
         },
         {
-            "name": "/actions/Default/in/Zoom",
+            "name": "/actions/default/in/Zoom",
             "requirement": "suggested",
             "type": "boolean"
         },
         {
-            "name": "/actions/Default/in/Reload",
+            "name": "/actions/default/in/Reload",
             "requirement": "suggested",
             "type": "boolean"
         },
         {
-            "name": "/actions/Default/in/Look",
+            "name": "/actions/default/in/Recentre",
             "requirement": "suggested",
-            "type": "vector1"
+            "type": "boolean"
         },
         {
-            "name": "/actions/Default/in/Move",
+            "name": "/actions/default/in/Look",
+            "requirement": "suggested",
+            "type": "vector2"
+        },
+        {
+            "name": "/actions/default/in/Move",
             "requirement": "suggested",
             "type": "vector2"
         }
     ],
     "action_sets": [
         {
-            "name": "/actions/Default",
+            "name": "/actions/default",
             "usage": "leftright"
         }
     ]

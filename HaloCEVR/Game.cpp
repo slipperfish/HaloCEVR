@@ -34,8 +34,8 @@ void Game::Init()
 
 	vr->Init();
 
-#define RegisterBoolInput(x) x = vr->RegisterBoolInput("Default", #x);
-#define RegisterVector2Input(x) x = vr->RegisterVector2Input("Default", #x);
+#define RegisterBoolInput(x) x = vr->RegisterBoolInput("default", #x);
+#define RegisterVector2Input(x) x = vr->RegisterVector2Input("default", #x);
 
 	RegisterBoolInput(Jump);
 	RegisterBoolInput(SwitchGrenades);
@@ -53,6 +53,9 @@ void Game::Init()
 
 	RegisterVector2Input(Move);
 	RegisterVector2Input(Look);
+
+	// Temp?
+	RegisterBoolInput(Recentre);
 
 
 #undef RegisterBoolInput
@@ -110,6 +113,8 @@ void Game::OnInitDirectX()
 
 void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 {
+	LastDeltaTime = deltaTime;
+	
 	RenderState = ERenderState::UNKNOWN;
 
 	CalcFPS(deltaTime);
@@ -350,6 +355,11 @@ void Game::UpdateInputs()
 	ApplyBoolInput(Zoom);
 	ApplyBoolInput(Reload);
 
+	if (vr->GetBoolInput(Recentre))
+	{
+		bNeedsRecentre = true;
+	}
+
 	Vector2 MoveInput = vr->GetVector2Input(Move);
 
 	controls.Left = -MoveInput.x;
@@ -361,8 +371,42 @@ void Game::UpdateCamera(float& yaw, float& pitch)
 {
 	Vector2 LookInput = vr->GetVector2Input(Look);
 
-	// TODO: Better smooth/snap turning (i.e. make this actually work)
-	YawOffset += LookInput.x;
+	if (c_SnapTurn->Value())
+	{
+		if (LastSnapState == 1)
+		{
+			if (LookInput.x < 0.4f)
+			{
+				LastSnapState = 0;
+			}
+		}
+		else if (LastSnapState == -1)
+		{
+			if (LookInput.x > -0.4f)
+			{
+				LastSnapState = 0;
+			}
+		}
+		else
+		{
+			if (LookInput.x > 0.6f)
+			{
+				LastSnapState = 1;
+				YawOffset += c_SnapTurnAmount->Value();
+			}
+			else if (LookInput.x < -0.6f)
+			{
+				LastSnapState = -1;
+				YawOffset -= c_SnapTurnAmount->Value();
+			}
+		}
+	}
+	else
+	{
+		// TODO: Get the delta time
+		YawOffset += LookInput.x * c_SmoothTurnAmount->Value() * LastDeltaTime;
+	}
+
 
 	Vector3 LookHMD = vr->GetHMDTransform().rotateZ(YawOffset).getLeftAxis();
 	// Get current camera angle
@@ -428,9 +472,12 @@ void Game::SetupConfigs()
 	c_UIOverlayDistance = config.RegisterFloat("UIOverlayDistance", "Distance in metres in front of the HMD to display the UI", 15.0f);
 	c_UIOverlayScale = config.RegisterFloat("UIOverlayScale", "Width of the UI overlay in metres", 10.0f);
 	c_UIOverlayCurvature = config.RegisterFloat("UIOverlayCurvature", "Curvature of the UI Overlay, on a scale of 0 to 1", 0.1f);
+	c_SnapTurn = config.RegisterBool("SnapTurn", "The look input will instantly rotate the view by a fixed amount, rather than smoothly rotating", true);
+	c_SnapTurnAmount = config.RegisterFloat("SnapTurnAmount", "Rotation in degrees a single snap turn will rotate the view by", 45.0f);
+	c_SmoothTurnAmount = config.RegisterFloat("SmoothTurnAmount", "Rotation in degrees per second the view will turn at when not using snap turning", 90.0f);
 
-	config.LoadFromFile("config.txt");
-	config.SaveToFile("config.txt");
+	config.LoadFromFile("VR/config.txt");
+	config.SaveToFile("VR/config.txt");
 
 	Logger::log << "Loaded configs" << std::endl;
 }
