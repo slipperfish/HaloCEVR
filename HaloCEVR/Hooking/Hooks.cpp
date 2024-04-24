@@ -4,7 +4,7 @@
 #include "../Helpers/DX9.h"
 #include "../Game.h"
 
-#define CREATEHOOK(Func) Func##.CreateHook(o.##Func##, &H_##Func##)
+#define CREATEHOOK(Func) Func##.CreateHook(#Func, o.##Func##, &H_##Func##)
 
 bool bPotentiallyFoundChimera = false;
 
@@ -20,6 +20,7 @@ void Hooks::InitHooks()
 	//CREATEHOOK(SetViewportSize);
 	CREATEHOOK(HandleInputs);
 	CREATEHOOK(UpdatePitchYaw);
+	CREATEHOOK(SetViewportScale);
 
 	// These are handled with a direct patch, so manually scan them
 	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo) < 0;
@@ -40,6 +41,7 @@ void Hooks::EnableAllHooks()
 	//SetViewportSize.EnableHook();
 	HandleInputs.EnableHook();
 	UpdatePitchYaw.EnableHook();
+	SetViewportScale.EnableHook();
 
 	P_RemoveCutsceneFPSCap();
 
@@ -373,6 +375,36 @@ void __declspec(naked) Hooks::H_UpdatePitchYaw()
 	_asm
 	{
 		add esp, 0x8
+		ret
+	}
+}
+
+
+void __declspec(naked) Hooks::H_SetViewportScale()
+{
+	static Viewport* view;
+
+	_asm
+	{
+		mov view, ecx
+	}
+
+	SetViewportScale.Original();
+
+	_asm
+	{
+		pushad
+	}
+
+	Game::instance.SetViewportScale(view);
+
+	_asm
+	{
+		popad
+	}
+
+	_asm
+	{
 		ret
 	}
 }

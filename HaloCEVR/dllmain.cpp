@@ -9,6 +9,7 @@
 #pragma comment(lib, "d3d9.lib")
 
 Logger Logger::log("VR/inject.log");
+Logger::LoggerAlert Logger::err(&Logger::log);
 Game Game::instance;
 
 BOOL APIENTRY DllMain( HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
@@ -59,7 +60,7 @@ bool LoadRealDLL()
 
 	if (!dllHandle)
 	{
-		Logger::log << "Could not load the real d3d9.dll file from the system directory" << std::endl;
+		Logger::err << "Could not load the real d3d9.dll file from the system directory" << std::endl;
 		return false;
 	}
 
@@ -70,7 +71,7 @@ bool LoadRealDLL()
 	{
 		FreeLibrary(dllHandle);
 		dllHandle = nullptr;
-		Logger::log << "Could not get create functions from real d3d9.dll" << std::endl;
+		Logger::err << "Could not get create functions from real d3d9.dll" << std::endl;
 		return false;
 	}
 

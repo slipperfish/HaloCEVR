@@ -17,6 +17,8 @@ public:
 	void UpdateCameraFrustum(CameraFrustum* frustum, int eye) override;
 	int GetViewWidth() override;
 	int GetViewHeight() override;
+	float GetViewWidthStretch() override;
+	float GetViewHeightStretch() override;
 	float GetAspect() override;
 	void SetYawOffset(float NewOffset) override;
 	float GetYawOffset() override;
@@ -42,6 +44,8 @@ protected:
 	vr::IVROverlay* VROverlay;
 
 	vr::VRTextureBounds_t TextureBounds[2];
+	uint32_t RealWidth;
+	uint32_t RealHeight;
 	uint32_t RecommendedWidth;
 	uint32_t RecommendedHeight;
 	float Aspect;

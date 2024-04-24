@@ -21,7 +21,7 @@ void OpenVR::Init()
 
 	if (initError != vr::VRInitError_None)
 	{
-		Logger::log << "[OpenVR] VR_Init failed: " << vr::VR_GetVRInitErrorAsEnglishDescription(initError) << std::endl;
+		Logger::err << "[OpenVR] VR_Init failed: " << vr::VR_GetVRInitErrorAsEnglishDescription(initError) << std::endl;
 		return;
 	}
 
@@ -29,7 +29,7 @@ void OpenVR::Init()
 
 	if (!VRCompositor)
 	{
-		Logger::log << "[OpenVR] VRCompositor failed" << std::endl;
+		Logger::err << "[OpenVR] VRCompositor failed" << std::endl;
 		return;
 	}
 
@@ -37,7 +37,7 @@ void OpenVR::Init()
 
 	if (!VROverlay)
 	{
-		Logger::log << "[OpenVR] VROverlay failed" << std::endl;
+		Logger::err << "[OpenVR] VROverlay failed" << std::endl;
 		return;
 	}
 
@@ -45,7 +45,7 @@ void OpenVR::Init()
 
 	if (!VRInput)
 	{
-		Logger::log << "[OpenVR] VRInput failed" << std::endl;
+		Logger::err << "[OpenVR] VRInput failed" << std::endl;
 		return;
 	}
 
@@ -60,7 +60,7 @@ void OpenVR::Init()
 
 	if (ActionSetError != vr::EVRInputError::VRInputError_None)
 	{
-		Logger::log << "[OpenVR] Could not get action set: " << ActionSetError << std::endl;
+		Logger::err << "[OpenVR] Could not get action set: " << ActionSetError << std::endl;
 	}
 
 	VRSystem->GetRecommendedRenderTargetSize(&RecommendedWidth, &RecommendedHeight);
@@ -91,8 +91,13 @@ void OpenVR::Init()
 	Aspect = tanHalfFov[0] / tanHalfFov[1];
 	FOV = 2.0f * atan(tanHalfFov[0]);
 
+	RealWidth = RecommendedWidth;
+	RealHeight = RecommendedHeight;
+
 	RecommendedWidth = static_cast<uint32_t>(RecommendedWidth / (std::max)(TextureBounds[0].uMax - TextureBounds[0].uMin, TextureBounds[1].uMax - TextureBounds[1].uMin));
 	RecommendedHeight = static_cast<uint32_t>(RecommendedHeight / (std::max)(TextureBounds[0].vMax - TextureBounds[0].vMin, TextureBounds[1].vMax - TextureBounds[1].vMin));
+
+	Logger::log << "[OpenVR] Stretched Width/Height from " << RealWidth << "x" << RealHeight << " to " << RecommendedWidth << "x" << RecommendedHeight << std::endl;
 
 	Logger::log << "[OpenVR] VR systems created successfully" << std::endl;
 }
@@ -149,14 +154,14 @@ void OpenVR::CreateTexAndSurface(int index, UINT Width, UINT Height, DWORD Usage
 	HRESULT result = Helpers::GetDirect3DDevice9()->CreateTexture(Width, Height, 1, Usage, Format, D3DPOOL_DEFAULT, &GameRenderTexture[index], &SharedHandle);
 	if (FAILED(result))
 	{
-		Logger::log << "[OpenVR] Failed to create game " << index << " texture: " << result << std::endl;
+		Logger::err << "[OpenVR] Failed to create game " << index << " texture: " << result << std::endl;
 		return;
 	}
 
 	result = GameRenderTexture[index]->GetSurfaceLevel(0, &GameRenderSurface[index]);
 	if (FAILED(result))
 	{
-		Logger::log << "[OpenVR] Failed to retrieve game " << index << " surface: " << result << std::endl;
+		Logger::err << "[OpenVR] Failed to retrieve game " << index << " surface: " << result << std::endl;
 		return;
 	}
 
@@ -167,7 +172,7 @@ void OpenVR::CreateTexAndSurface(int index, UINT Width, UINT Height, DWORD Usage
 
 	if (FAILED(result))
 	{
-		Logger::log << "[OpenVR] Failed to open shared resource " << index << ": " << result << std::endl;
+		Logger::err << "[OpenVR] Failed to open shared resource " << index << ": " << result << std::endl;
 		return;
 	}
 
@@ -176,7 +181,7 @@ void OpenVR::CreateTexAndSurface(int index, UINT Width, UINT Height, DWORD Usage
 
 	if (FAILED(result))
 	{
-		Logger::log << "[OpenVR] Failed to query texture interface " << index << ": " << result << std::endl;
+		Logger::err << "[OpenVR] Failed to query texture interface " << index << ": " << result << std::endl;
 		return;
 	}
 
@@ -311,6 +316,16 @@ int OpenVR::GetViewWidth()
 int OpenVR::GetViewHeight()
 {
     return RecommendedHeight;
+}
+
+float OpenVR::GetViewWidthStretch()
+{
+	return RecommendedWidth / static_cast<float>(RealWidth);
+}
+
+float OpenVR::GetViewHeightStretch()
+{
+	return RecommendedHeight / static_cast<float>(RealHeight);
 }
 
 float OpenVR::GetAspect()

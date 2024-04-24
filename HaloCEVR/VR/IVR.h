@@ -16,6 +16,8 @@ public:
 
 	virtual int GetViewWidth() = 0;
 	virtual int GetViewHeight() = 0;
+	virtual float GetViewWidthStretch() = 0;
+	virtual float GetViewHeightStretch() = 0;
 	virtual float GetAspect() = 0;
 	virtual void SetYawOffset(float NewOffset) = 0;
 	virtual float GetYawOffset() = 0;

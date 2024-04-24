@@ -40,6 +40,8 @@ public:
 	void UpdateInputs();
 	void UpdateCamera(float& yaw, float& pitch);
 
+	void SetViewportScale(struct Viewport* viewport);
+
 	bool GetDrawMirror() const { return c_DrawMirror->Value(); }
 
 	ERenderState GetRenderState() const { return RenderState; }

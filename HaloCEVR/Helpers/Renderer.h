@@ -2,6 +2,15 @@
 #include <cstdint>
 #include "../Maths/Vectors.h"
 
+struct Viewport
+{
+	float left;
+	float right;
+	float top;
+	float bottom;
+};
+static_assert(sizeof(Viewport) == 0x10);
+
 struct sRect
 {
 	short top;
@@ -20,8 +29,8 @@ struct CameraFrustum
 	bool drawPlayer;
 	std::uint8_t unk0[3];
 	float fov;
-	sRect oViewport;
-	sRect Viewport;
+	sRect WindowViewport;
+	sRect InnerViewport;
 	// Not sure if these are the znear/far values, but they have values in the correct range
 	float zNear;
 	float zFar;

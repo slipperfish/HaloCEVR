@@ -17,6 +17,8 @@ public:
 
 	int GetViewWidth() { return 600; }
 	int GetViewHeight() { return 600; }
+	float GetViewWidthStretch() { return 1.0f; }
+	float GetViewHeightStretch() { return 1.0f; }
 	float GetAspect() { return 1.0f; }
 	void SetYawOffset(float NewOffset) {};
 	float GetYawOffset() { return 0.0f; };

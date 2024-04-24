@@ -14,3 +14,5 @@ typedef void(*Func_SetViewModelPosition)();
 typedef void(*Func_HandleInputs)();
 
 typedef void(*Func_UpdatePitchYaw)();
+
+typedef void(*Func_SetViewportScale)();

@@ -71,7 +71,7 @@ void Game::Shutdown()
 {
 	Logger::log << "HaloCEVR shutting down..." << std::endl;
 
-	MH_STATUS HookStatus = MH_RemoveHook(MH_ALL_HOOKS);
+	MH_STATUS HookStatus = MH_DisableHook(MH_ALL_HOOKS);
 
 	if (HookStatus != MH_OK)
 	{
@@ -177,18 +177,6 @@ void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
 
 	vr->UpdateCameraFrustum(&renderer->frustum, eye);
 	vr->UpdateCameraFrustum(&renderer->frustum2, eye);
-
-	for (CameraFrustum* f : { &renderer->frustum, &renderer->frustum2 })
-	{
-		f->Viewport.left = 0;
-		f->Viewport.top = 0;
-		f->Viewport.right = vr->GetViewWidth();
-		f->Viewport.bottom = vr->GetViewHeight();
-		f->oViewport.left = 0;
-		f->oViewport.top = 0;
-		f->oViewport.right = vr->GetViewWidth();
-		f->oViewport.bottom = vr->GetViewHeight();
-	}
 
 	RenderTarget* primaryRenderTarget = Helpers::GetRenderTargets();
 
@@ -372,6 +360,11 @@ void Game::UpdateInputs()
 
 void Game::UpdateCamera(float& yaw, float& pitch)
 {
+	// Don't bother simulating inputs if we aren't actually in vr
+#if EMULATE_VR
+	return;
+#endif
+
 	Vector2 LookInput = vr->GetVector2Input(Look);
 
 	float YawOffset = vr->GetYawOffset();
@@ -424,6 +417,17 @@ void Game::UpdateCamera(float& yaw, float& pitch)
 	float PitchHMD = atan2(LookHMD.z, sqrt(LookHMD.x * LookHMD.x + LookHMD.y * LookHMD.y));
 	float PitchGame = atan2(LookGame.z, sqrt(LookGame.x * LookGame.x + LookGame.y * LookGame.y));
 	pitch = (PitchHMD - PitchGame);
+}
+
+void Game::SetViewportScale(Viewport* viewport)
+{
+	float Width = vr->GetViewWidthStretch();
+	float Height = vr->GetViewHeightStretch();
+
+	viewport->left = -Width;
+	viewport->right = Width;
+	viewport->bottom = Height;
+	viewport->top = -Height;
 }
 
 #undef ApplyBoolInput

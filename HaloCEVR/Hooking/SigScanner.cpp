@@ -8,11 +8,11 @@ long long SigScanner::UpdateOffset(Offset& offset)
 {
 	std::vector<int> Signature;
 
-	HMODULE CurrentModule = GetModuleHandleA(offset.Module.c_str());
+	HMODULE CurrentModule = GetModuleHandleA(ModuleName.c_str());
 
 	if (!CurrentModule)
 	{
-		Logger::log << "SigScanner [FAIL]:" << offset.Signature << " can't be located as the module << " << offset.Module << " could not be found!" << std::endl;
+		Logger::err << "SigScanner [FAIL]:" << offset.DebugName << " can't be located as the module << " << ModuleName << " could not be found!" << std::endl;
 		return -1;
 	}
 
@@ -22,14 +22,14 @@ long long SigScanner::UpdateOffset(Offset& offset)
 
 	if (!Res)
 	{
-		Logger::log << "SigScanner [FAIL]:" << offset.Signature << " can't be validated as GetModuleInformation failed for " << offset.Module << std::endl;
+		Logger::err << "SigScanner [FAIL]:" << offset.DebugName << " can't be validated as GetModuleInformation failed for " << ModuleName << std::endl;
 		return -1;
 	}
 
 	if (offset.Signature.size() == 0)
 	{
 		offset.Address = (uintptr_t)CurrentModule + offset.Offset;
-		Logger::log << "SigScanner [WARN]: Skipping signature check for 0x" << std::hex << offset.Offset << std::dec << ", this should only be done during dev builds" << std::endl;
+		Logger::log << "SigScanner [WARN]: Skipping signature check for " << offset.DebugName << " and using offset 0x" << std::hex << offset.Offset << std::dec << ", this should only be done during dev builds!" << std::endl;
 		return 0;
 	}
 
@@ -64,11 +64,11 @@ long long SigScanner::UpdateOffset(Offset& offset)
 	if (!bNeedsUpdating)
 	{
 		offset.Address = (uintptr_t)CurrentModule + offset.Offset;
-		Logger::log << "SigScanner [PASS]: " << offset.Signature << std::endl;
+		Logger::log << "SigScanner [PASS]: " << offset.DebugName << "(" + offset.Signature + ") - signature found at 0x" << std::hex << offset.Offset << std::dec << std::endl;
 		return 0;
 	}
 
-	Logger::log << "SigScanner [WARN]: " << offset.Signature << " is outdated, scanning from 0x" << 0 << " to 0x" << std::hex << ModuleInfo.SizeOfImage << std::dec << std::endl;
+	Logger::log << "SigScanner [WARN]: " << offset.DebugName << " is outdated, scanning from 0x" << 0 << " to 0x" << std::hex << ModuleInfo.SizeOfImage << std::dec << std::endl;
 
 	// Scan the dll for the signature
 	for (DWORD i = 0; i < ModuleInfo.SizeOfImage; i++)
@@ -86,12 +86,12 @@ long long SigScanner::UpdateOffset(Offset& offset)
 		{
 			offset.Offset = i - offset.SignatureOffset;
 			offset.Address = (uintptr_t)CurrentModule + offset.Offset;
-			Logger::log << "SigScanner [PASS]: " << offset.Signature << " found! New offset is 0x" << std::hex << offset.Offset << std::dec << std::endl;
+			Logger::log << "SigScanner [PASS]: " << offset.DebugName << "(" + offset.Signature + ") found! New offset is 0x" << std::hex << offset.Offset << std::dec << std::endl;
 			return offset.Offset;
 		}
 	}
 
-	Logger::log << "SigScanner [FAIL]: " << offset.Signature << " could not be found! No offset available" << std::endl;
+	Logger::err << "SigScanner [FAIL]: " << offset.DebugName << "(" + offset.Signature + ") could not be found! No offset available" << std::endl;
 	offset.Offset = -1;
 	return -1;
 }
