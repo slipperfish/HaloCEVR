@@ -245,6 +245,10 @@ void Game::PostDrawHUD()
 	{
 		return;
 	}
+
+	Helpers::GetRenderTargets()[1].renderSurface = UIRealSurface;
+	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, UIRealSurface);
+	UIRealSurface->Release();
 }
 
 bool Game::PreDrawMenu()
@@ -255,6 +259,11 @@ bool Game::PreDrawMenu()
 		// ...but try to avoid breaking the game view (for now at least)
 		return GetRenderState() == ERenderState::GAME;
 	}
+
+	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &UIRealSurface);
+	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, UISurface);
+	UIRealSurface = Helpers::GetRenderTargets()[1].renderSurface;
+	Helpers::GetRenderTargets()[1].renderSurface = UISurface;
 
 	return true;
 }
