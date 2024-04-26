@@ -66,7 +66,6 @@ protected:
 	void RestoreRenderTargets();
 
 	bool bNeedsRecentre = true;
-	Vector3 Offset;
 	char LastSnapState = 0;
 	float LastDeltaTime = 0.0f;
 

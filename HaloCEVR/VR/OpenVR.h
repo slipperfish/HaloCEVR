@@ -20,6 +20,8 @@ public:
 	float GetViewWidthStretch() override;
 	float GetViewHeightStretch() override;
 	float GetAspect() override;
+	void SetLocationOffset(Vector3 NewOffset) override;
+	Vector3 GetLocationOffset() override;
 	void SetYawOffset(float NewOffset) override;
 	float GetYawOffset() override;
 	Matrix4 GetHMDTransform(bool bRenderPose = false) override;
@@ -51,6 +53,7 @@ protected:
 	float Aspect;
 	float FOV;
 
+	Vector3 PositionOffset;
 	float YawOffset;
 
 	vr::VRActiveActionSet_t ActionSets[1];

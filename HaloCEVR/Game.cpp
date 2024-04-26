@@ -146,7 +146,7 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 	if (bNeedsRecentre)
 	{
 		bNeedsRecentre = false;
-		Offset = (vr->GetHMDTransform(true).scale(MetresToWorld(1.0f)) * Vector3(0.0f, 0.0f, 0.0f));
+		vr->SetLocationOffset(vr->GetHMDTransform(true) * Vector3(0.0f, 0.0f, 0.0f));
 	}
 
 	vr->PreDrawFrame(renderer, deltaTime);
@@ -158,12 +158,6 @@ void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
 
 	renderer->frustum = frustum1;
 	renderer->frustum2 = frustum2;
-
-	// Apply offsets
-	{
-		renderer->frustum.position -= Offset;
-		renderer->frustum2.position -= Offset;
-	}
 
 	// For performance reasons, we should prevent the game from calling SceneStart/SceneEnd for each eye
 	if (eye == 0)

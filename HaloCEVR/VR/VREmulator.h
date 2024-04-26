@@ -20,8 +20,10 @@ public:
 	float GetViewWidthStretch() { return 1.0f; }
 	float GetViewHeightStretch() { return 1.0f; }
 	float GetAspect() { return 1.0f; }
-	void SetYawOffset(float NewOffset) {};
-	float GetYawOffset() { return 0.0f; };
+	void SetLocationOffset(Vector3 NewOffset) {}
+	Vector3 GetLocationOffset() { return Vector3(0.0f, 0.0f, 0.0f); }
+	void SetYawOffset(float NewOffset) {}
+	float GetYawOffset() { return 0.0f; }
 	Matrix4 GetHMDTransform(bool bRenderPose = false) { return Matrix4(); }
 	virtual struct IDirect3DSurface9* GetRenderSurface(int eye);
 	virtual struct IDirect3DTexture9* GetRenderTexture(int eye);

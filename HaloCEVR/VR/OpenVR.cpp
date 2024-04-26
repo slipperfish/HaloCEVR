@@ -333,6 +333,16 @@ float OpenVR::GetAspect()
 	return Aspect;
 }
 
+void OpenVR::SetLocationOffset(Vector3 NewOffset)
+{
+	PositionOffset = NewOffset;
+}
+
+Vector3 OpenVR::GetLocationOffset()
+{
+	return PositionOffset;
+}
+
 void OpenVR::SetYawOffset(float NewOffset)
 {
 	YawOffset = NewOffset;
@@ -347,11 +357,11 @@ Matrix4 OpenVR::GetHMDTransform(bool bRenderPose)
 {
 	if (bRenderPose)
 	{
-		return ConvertSteamVRMatrixToMatrix4(RenderPoses[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking).rotateZ(-YawOffset);
+		return ConvertSteamVRMatrixToMatrix4(RenderPoses[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking).translate(-PositionOffset).rotateZ(-YawOffset);
 	}
 	else
 	{
-		return ConvertSteamVRMatrixToMatrix4(GamePoses[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking).rotateZ(-YawOffset);
+		return ConvertSteamVRMatrixToMatrix4(GamePoses[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking).translate(-PositionOffset).rotateZ(-YawOffset);
 	}
 }
 
