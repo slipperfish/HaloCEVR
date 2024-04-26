@@ -50,7 +50,7 @@ void OpenVR::Init()
 	}
 
 	VROverlay->CreateOverlay("UIOverlay", "UIOverlay", &UIOverlay);
-
+	VROverlay->SetOverlayFlag(UIOverlay, vr::VROverlayFlags_MakeOverlaysInteractiveIfVisible, true);
 	VROverlay->ShowOverlay(UIOverlay);
 
 	std::filesystem::path cwd = std::filesystem::current_path() / "VR" / "OpenVR" / "actions.json";
@@ -197,6 +197,31 @@ void OpenVR::UpdatePoses()
 	}
 
 	VRCompositor->WaitGetPoses(RenderPoses, vr::k_unMaxTrackedDeviceCount, GamePoses, vr::k_unMaxTrackedDeviceCount);
+
+	if (!VROverlay || !bMouseVisible)
+	{
+		return;
+	}
+
+	vr::VREvent_t vrEvent;
+	while (VROverlay->PollNextOverlayEvent(UIOverlay, &vrEvent, sizeof(vrEvent)))
+	{
+		switch (vrEvent.eventType)
+		{
+		case vr::VREvent_MouseMove:
+			MousePos.x = vrEvent.data.mouse.x;
+			MousePos.y = 1.0f - vrEvent.data.mouse.y;
+			break;
+		case vr::VREvent_MouseButtonDown:
+			bMouseDown = true;
+			break;
+		case vr::VREvent_MouseButtonUp:
+			bMouseDown = false;
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 void OpenVR::PreDrawFrame(Renderer* renderer, float deltaTime)
@@ -380,6 +405,28 @@ IDirect3DSurface9* OpenVR::GetUISurface()
     return GameRenderSurface[2];
 }
 
+void OpenVR::SetMouseVisibility(bool bIsVisible)
+{
+	if (!VROverlay)
+	{
+		return;
+	}
+
+	if (bMouseVisible == bIsVisible)
+	{
+		return;
+	}
+
+	bMouseVisible = bIsVisible;
+
+	if (!bMouseVisible)
+	{
+		bMouseDown = false;
+	}
+
+	VROverlay->SetOverlayInputMethod(UIOverlay, bIsVisible ? vr::VROverlayInputMethod_Mouse : vr::VROverlayInputMethod_None);
+}
+
 void OpenVR::UpdateInputs()
 {
 	vr::EVRInputError error = VRInput->UpdateActionState(ActionSets, sizeof(vr::VRActiveActionSet_t), 1);
@@ -450,4 +497,14 @@ Vector2 OpenVR::GetVector2Input(InputBindingID id)
 	}
 
 	return Vector2(Analog.x, Analog.y);
+}
+
+Vector2 OpenVR::GetMousePos()
+{
+	return MousePos;
+}
+
+bool OpenVR::GetMouseDown()
+{
+	return bMouseDown;
 }

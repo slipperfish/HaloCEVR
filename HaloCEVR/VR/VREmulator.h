@@ -28,12 +28,15 @@ public:
 	virtual struct IDirect3DSurface9* GetRenderSurface(int eye);
 	virtual struct IDirect3DTexture9* GetRenderTexture(int eye);
 	virtual struct IDirect3DSurface9* GetUISurface();
+	void SetMouseVisibility(bool bIsVisible) {}
 	void UpdateInputs();
 	InputBindingID RegisterBoolInput(std::string set, std::string action);
 	InputBindingID RegisterVector2Input(std::string set, std::string action);
 	bool GetBoolInput(InputBindingID id);
 	bool GetBoolInput(InputBindingID id, bool& bHasChanged);
 	Vector2 GetVector2Input(InputBindingID id);
+	Vector2 GetMousePos() { return Vector2(0.0f, 0.0f); }
+	bool GetMouseDown() { return false; }
 	// End Interface IVR
 
 protected:

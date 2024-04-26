@@ -31,6 +31,8 @@ public:
 	DEFINE_HOOK(HandleInputs);
 	DEFINE_HOOK(UpdatePitchYaw);
 	DEFINE_HOOK(SetViewportScale);
+	DEFINE_HOOK(SetMousePosition);
+	DEFINE_HOOK(UpdateMouseInfo);
 
 	// All direct patches go here:
 	static void P_FixTabOut();

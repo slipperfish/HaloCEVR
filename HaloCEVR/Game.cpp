@@ -7,6 +7,7 @@
 #include "Helpers/Renderer.h"
 #include "Helpers/Camera.h"
 #include "Helpers/Controls.h"
+#include "Helpers/Menus.h"
 
 #if EMULATE_VR
 #include "VR/VREmulator.h"
@@ -119,6 +120,7 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 
 	CalcFPS(deltaTime);
 	
+	vr->SetMouseVisibility(Helpers::IsMouseVisible());
 	vr->UpdatePoses();
 
 	StoreRenderTargets();
@@ -420,6 +422,32 @@ void Game::UpdateCamera(float& yaw, float& pitch)
 	float PitchHMD = atan2(LookHMD.z, sqrt(LookHMD.x * LookHMD.x + LookHMD.y * LookHMD.y));
 	float PitchGame = atan2(LookGame.z, sqrt(LookGame.x * LookGame.x + LookGame.y * LookGame.y));
 	pitch = (PitchHMD - PitchGame);
+}
+
+void Game::SetMousePosition(int& x, int& y)
+{
+	Vector2 MousePos = vr->GetMousePos();
+	x = static_cast<int>(MousePos.x * 640);
+	y = static_cast<int>(MousePos.y * 480);
+}
+
+void Game::UpdateMouseInfo(MouseInfo* MouseInfo)
+{
+	if (vr->GetMouseDown())
+	{
+		if (MouseDownState < 255)
+		{
+			MouseDownState++;
+		}
+	}
+	else
+	{
+		MouseDownState = 0;
+	}
+
+	MouseInfo->buttonState[0] = MouseDownState;
+
+	Logger::log << (int)MouseInfo->buttonState[0] << std::endl;
 }
 
 void Game::SetViewportScale(Viewport* viewport)

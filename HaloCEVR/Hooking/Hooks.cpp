@@ -3,6 +3,7 @@
 #include "../Helpers/Renderer.h"
 #include "../Helpers/DX9.h"
 #include "../Game.h"
+#include "../Helpers/Menus.h"
 
 #define CREATEHOOK(Func) Func##.CreateHook(#Func, o.##Func##, &H_##Func##)
 
@@ -21,6 +22,8 @@ void Hooks::InitHooks()
 	CREATEHOOK(HandleInputs);
 	CREATEHOOK(UpdatePitchYaw);
 	CREATEHOOK(SetViewportScale);
+	CREATEHOOK(SetMousePosition);
+	CREATEHOOK(UpdateMouseInfo);
 
 	// These are handled with a direct patch, so manually scan them
 	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo) < 0;
@@ -42,6 +45,8 @@ void Hooks::EnableAllHooks()
 	HandleInputs.EnableHook();
 	UpdatePitchYaw.EnableHook();
 	SetViewportScale.EnableHook();
+	SetMousePosition.EnableHook();
+	UpdateMouseInfo.EnableHook();
 
 	P_RemoveCutsceneFPSCap();
 
@@ -405,6 +410,81 @@ void __declspec(naked) Hooks::H_SetViewportScale()
 
 	_asm
 	{
+		ret
+	}
+}
+
+void __declspec(naked) Hooks::H_SetMousePosition()
+{
+	static int x;
+	static int y;
+
+	_asm
+	{
+		mov x, eax
+		mov y, ecx
+	}
+
+	_asm
+	{
+		pushad
+	}
+
+	Game::instance.SetMousePosition(x, y);
+
+	_asm
+	{
+		popad
+	}
+
+	_asm
+	{
+		mov eax, x
+		mov ecx, y
+	}
+
+	SetMousePosition.Original();
+
+	_asm
+	{
+		ret
+	}
+}
+
+void __declspec(naked) Hooks::H_UpdateMouseInfo()
+{
+	static MouseInfo* mouseInfo;
+
+	_asm
+	{
+		push eax
+		mov eax, [esp + 0x8]
+		mov mouseInfo, eax
+		pop eax
+	}
+
+	_asm
+	{
+		push mouseInfo
+	}
+
+	UpdateMouseInfo.Original();
+
+	_asm
+	{
+		pushad
+	}
+
+	Game::instance.UpdateMouseInfo(mouseInfo);
+
+	_asm
+	{
+		popad
+	}
+
+	_asm
+	{
+		add esp, 0x4
 		ret
 	}
 }

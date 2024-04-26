@@ -28,12 +28,15 @@ public:
 	IDirect3DSurface9* GetRenderSurface(int eye) override;
 	IDirect3DTexture9* GetRenderTexture(int eye) override;
 	IDirect3DSurface9* GetUISurface() override;
+	void SetMouseVisibility(bool bIsVisible) override;
 	void UpdateInputs() override;
 	InputBindingID RegisterBoolInput(std::string set, std::string action) override;
 	InputBindingID RegisterVector2Input(std::string set, std::string action) override;
 	bool GetBoolInput(InputBindingID id) override;
 	bool GetBoolInput(InputBindingID id, bool& bHasChanged) override;
 	Vector2 GetVector2Input(InputBindingID id) override;
+	Vector2 GetMousePos() override;
+	bool GetMouseDown() override;
 	// End Interface IVR
 
 protected:
@@ -55,6 +58,10 @@ protected:
 
 	Vector3 PositionOffset;
 	float YawOffset;
+
+	bool bMouseVisible;
+	Vector2 MousePos;
+	bool bMouseDown;
 
 	vr::VRActiveActionSet_t ActionSets[1];
 

@@ -39,6 +39,8 @@ public:
 
 	void UpdateInputs();
 	void UpdateCamera(float& yaw, float& pitch);
+	void SetMousePosition(int& x, int& y);
+	void UpdateMouseInfo(struct MouseInfo* MouseInfo);
 
 	void SetViewportScale(struct Viewport* viewport);
 
@@ -69,6 +71,7 @@ protected:
 	char LastSnapState = 0;
 	float LastDeltaTime = 0.0f;
 
+	unsigned char MouseDownState = 0;
 
 	float TimeSinceFPSUpdate = 0.0f;
 	int FramesSinceFPSUpdate = 0;

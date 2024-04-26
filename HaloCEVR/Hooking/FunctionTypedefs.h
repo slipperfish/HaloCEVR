@@ -8,11 +8,9 @@ typedef void(__stdcall* Func_DrawHUD)();
 typedef void(*Func_DrawMenu)();
 typedef void(__stdcall* Func_DrawScope)(void*);
 typedef void(*Func_DrawLoadingScreen)();
-
 typedef void(*Func_SetViewModelPosition)();
-
 typedef void(*Func_HandleInputs)();
-
 typedef void(*Func_UpdatePitchYaw)();
-
 typedef void(*Func_SetViewportScale)();
+typedef void(*Func_SetMousePosition)();
+typedef void(*Func_UpdateMouseInfo)();
