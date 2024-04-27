@@ -106,6 +106,8 @@ void Game::OnInitDirectX()
 		return;
 	}
 
+	SetForegroundWindow(GetActiveWindow());
+
 	vr->OnGameFinishInit();
 
 	UISurface = vr->GetUISurface();
@@ -148,7 +150,7 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 	if (bNeedsRecentre)
 	{
 		bNeedsRecentre = false;
-		vr->SetLocationOffset(vr->GetHMDTransform(true) * Vector3(0.0f, 0.0f, 0.0f));
+		vr->Recentre();
 	}
 
 	vr->PreDrawFrame(renderer, deltaTime);
@@ -446,8 +448,6 @@ void Game::UpdateMouseInfo(MouseInfo* MouseInfo)
 	}
 
 	MouseInfo->buttonState[0] = MouseDownState;
-
-	Logger::log << (int)MouseInfo->buttonState[0] << std::endl;
 }
 
 void Game::SetViewportScale(Viewport* viewport)

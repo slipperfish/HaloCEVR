@@ -20,6 +20,7 @@ public:
 	float GetViewWidthStretch() { return 1.0f; }
 	float GetViewHeightStretch() { return 1.0f; }
 	float GetAspect() { return 1.0f; }
+	void Recentre() {};
 	void SetLocationOffset(Vector3 NewOffset) {}
 	Vector3 GetLocationOffset() { return Vector3(0.0f, 0.0f, 0.0f); }
 	void SetYawOffset(float NewOffset) {}

@@ -20,6 +20,7 @@ public:
 	float GetViewWidthStretch() override;
 	float GetViewHeightStretch() override;
 	float GetAspect() override;
+	void Recentre() override;
 	void SetLocationOffset(Vector3 NewOffset) override;
 	Vector3 GetLocationOffset() override;
 	void SetYawOffset(float NewOffset) override;

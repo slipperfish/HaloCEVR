@@ -358,6 +358,11 @@ float OpenVR::GetAspect()
 	return Aspect;
 }
 
+void OpenVR::Recentre()
+{
+	SetLocationOffset(ConvertSteamVRMatrixToMatrix4(RenderPoses[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking) * Vector3(0.0f, 0.0f, 0.0f));
+}
+
 void OpenVR::SetLocationOffset(Vector3 NewOffset)
 {
 	PositionOffset = NewOffset;

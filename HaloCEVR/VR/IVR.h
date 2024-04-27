@@ -19,6 +19,7 @@ public:
 	virtual float GetViewWidthStretch() = 0;
 	virtual float GetViewHeightStretch() = 0;
 	virtual float GetAspect() = 0;
+	virtual void Recentre() = 0;
 	virtual void SetLocationOffset(Vector3 NewOffset) = 0;
 	virtual Vector3 GetLocationOffset() = 0;
 	virtual void SetYawOffset(float NewOffset) = 0;
