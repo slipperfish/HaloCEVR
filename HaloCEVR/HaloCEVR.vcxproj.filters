@@ -63,6 +63,15 @@
     <ClCompile Include="Helpers\Menus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Helpers\Objects.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Helpers\Assets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Helpers\Maths.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Hooking\FunctionTypedefs.h">
@@ -126,6 +135,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Helpers\Menus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Helpers\Objects.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Helpers\Maths.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Helpers\Assets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

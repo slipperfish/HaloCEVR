@@ -4,6 +4,7 @@
 #include "SigScanner.h"
 #include "FunctionTypeDefs.h"
 #include "../Helpers/Renderer.h"
+#include "../Helpers/Objects.h"
 
 #define DEFINE_HOOK_FULL(Name, RetCall, ...) static inline Hook<Func_##Name> Name; static RetCall H_##Name(__VA_ARGS__)
 #define DEFINE_HOOK(Name, ...) DEFINE_HOOK_FULL(Name, void, __VA_ARGS__)
@@ -18,6 +19,8 @@ public:
 	static void SetByte(long long Address, byte Byte);
 	static void SetBytes(long long Address, int Length, byte* Bytes);
 	static void NOPInstructions(long long Address, int Length);
+	static bool Freeze();
+	static void Unfreeze();
 
 	// All Hooks go here:
 	DEFINE_HOOK(InitDirectX);
@@ -33,10 +36,12 @@ public:
 	DEFINE_HOOK(SetViewportScale);
 	DEFINE_HOOK(SetMousePosition);
 	DEFINE_HOOK(UpdateMouseInfo);
+	DEFINE_HOOK_FULL(FireWeapon, void __cdecl, HaloID param1, short param2, bool param3);
 
 	// All direct patches go here:
 	static void P_FixTabOut();
 	static void P_RemoveCutsceneFPSCap();
+	static void P_DontStealMouse();
 private:
 	static inline Offsets o;
 };

@@ -165,10 +165,13 @@
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Helpers\Assets.cpp" />
     <ClCompile Include="Helpers\Camera.cpp" />
     <ClCompile Include="Helpers\Controls.cpp" />
     <ClCompile Include="Helpers\DX9.cpp" />
+    <ClCompile Include="Helpers\Maths.cpp" />
     <ClCompile Include="Helpers\Menus.cpp" />
+    <ClCompile Include="Helpers\Objects.cpp" />
     <ClCompile Include="Helpers\Player.cpp" />
     <ClCompile Include="Helpers\Renderer.cpp" />
     <ClCompile Include="Helpers\RenderTarget.cpp" />
@@ -183,10 +186,13 @@
   <ItemGroup>
     <ClInclude Include="Config\Config.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="Helpers\Assets.h" />
     <ClInclude Include="Helpers\Camera.h" />
     <ClInclude Include="Helpers\Controls.h" />
     <ClInclude Include="Helpers\DX9.h" />
+    <ClInclude Include="Helpers\Maths.h" />
     <ClInclude Include="Helpers\Menus.h" />
+    <ClInclude Include="Helpers\Objects.h" />
     <ClInclude Include="Helpers\Player.h" />
     <ClInclude Include="Helpers\Renderer.h" />
     <ClInclude Include="Helpers\RenderTarget.h" />

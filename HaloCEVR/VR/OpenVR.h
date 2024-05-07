@@ -26,6 +26,7 @@ public:
 	void SetYawOffset(float NewOffset) override;
 	float GetYawOffset() override;
 	Matrix4 GetHMDTransform(bool bRenderPose = false) override;
+	Matrix4 GetControllerTransform(ControllerRole Role, bool bRenderPose = false) override;
 	IDirect3DSurface9* GetRenderSurface(int eye) override;
 	IDirect3DTexture9* GetRenderTexture(int eye) override;
 	IDirect3DSurface9* GetUISurface() override;

@@ -8,6 +8,9 @@
 #include "Helpers/Camera.h"
 #include "Helpers/Controls.h"
 #include "Helpers/Menus.h"
+#include "Helpers/Objects.h"
+#include "Helpers/Maths.h"
+#include "Helpers/Assets.h"
 
 #if EMULATE_VR
 #include "VR/VREmulator.h"
@@ -113,14 +116,13 @@ void Game::OnInitDirectX()
 	UISurface = vr->GetUISurface();
 }
 
-
 void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 {
 	LastDeltaTime = deltaTime;
 	
 	RenderState = ERenderState::UNKNOWN;
 
-	CalcFPS(deltaTime);
+	//CalcFPS(deltaTime);
 	
 	vr->SetMouseVisibility(Helpers::IsMouseVisible());
 	vr->UpdatePoses();
@@ -151,6 +153,14 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 	{
 		bNeedsRecentre = false;
 		vr->Recentre();
+	}
+
+
+	UnitDynamicObject* WeaponFiredPlayer = static_cast<UnitDynamicObject*>(Helpers::GetLocalPlayer());
+
+	if (WeaponFiredPlayer)
+	{
+		//Logger::log << "Pos: " << WeaponFiredPlayer->Position << " Centre: " << WeaponFiredPlayer->Centre << std::endl;
 	}
 
 	vr->PreDrawFrame(renderer, deltaTime);
@@ -306,21 +316,301 @@ void Game::PostDrawLoading(int param1, struct Renderer* renderer)
 	Helpers::GetRenderTargets()[1].renderSurface = UIRealSurface;
 }
 
-void Game::UpdateViewModel(Vector3* pos, Vector3* facing, Vector3* up)
+/*
+* Reference Implementation of UpdateViewModel:
+	Asset& ViewModel = Helpers::GetAssetArray()[id.Index];
+	AssetData* Data = ViewModel.Data;
+	Bone* BoneArray = Data->BoneArray;
+
+	Transform Root;
+	Helpers::MakeTransformFromXZ(up, facing, &Root);
+	Root.Translation = *pos;
+
+	int i = 0;
+
+	if (Data->NumBones > 0)
+	{
+		int lastIndex = 1;
+		int16_t Processed[64]{};
+
+		Processed[0] = 0;
+
+		do
+		{
+			const int16_t boneIdx = Processed[i];
+			i++;
+			const Bone& CurrentBone = BoneArray[boneIdx];
+			const Transform* ParentTransform = boneIdx == 0 ? &Root : &OutBoneTransforms[CurrentBone.Parent];
+			const TransformQuat* CurrentQuat = &BoneTransforms[boneIdx];
+			Transform TempTransform;
+			Helpers::MakeTransformFromQuat(&CurrentQuat->Rotation, &TempTransform);
+			TempTransform.Scale = CurrentQuat->Scale;
+			TempTransform.Translation = CurrentQuat->Translation;
+			Helpers::CombineTransforms(ParentTransform, &TempTransform, &OutBoneTransforms[boneIdx]);
+
+			if (CurrentBone.LeftLeaf != -1)
+			{
+				Processed[lastIndex] = CurrentBone.LeftLeaf;
+				lastIndex++;
+			}
+			if (CurrentBone.RightLeaf != -1)
+			{
+				Processed[lastIndex] = CurrentBone.RightLeaf;
+				lastIndex++;
+			}
+
+		} while (i != lastIndex);
+	}
+*/
+
+
+#pragma optimize("", off)
+
+
+Vector3 LocalOffset(-0.0455f, 0.0096f, 0.0056f);
+Vector3 LocalRotation;
+bool bDoRotation = true;
+
+void Game::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, Vector3* up, TransformQuat* BoneTransforms, Transform* OutBoneTransforms)
 {
-	// For now just move it to be in a consistent position
+	// For now just move it to be in a consistent position, we'll set the actual positions later in the function
 	Vector3& camPos = Helpers::GetCamera().position;
+
 	pos->x = camPos.x;
 	pos->y = camPos.y;
 	pos->z = camPos.z;
 
-	facing->x = frustum1.facingDirection.x;
-	facing->y = frustum1.facingDirection.y;
-	facing->z = frustum1.facingDirection.z;
+	facing->x = 1.0f;
+	facing->y = 0.0f;
+	facing->z = 0.0f;
 
-	up->x = frustum1.upDirection.x;
-	up->y = frustum1.upDirection.y;
-	up->z = frustum1.upDirection.z;
+	up->x = 0.0f;
+	up->y = 0.0f;
+	up->z = 1.0f;
+
+	// Reimplementation of original function:
+	Asset& ViewModel = Helpers::GetAssetArray()[id.Index];
+	AssetData* Data = ViewModel.Data;
+	Bone* BoneArray = Data->BoneArray;
+
+	Transform Root;
+	Helpers::MakeTransformFromXZ(up, facing, &Root);
+	Root.Translation = *pos;
+
+
+	//VR_START
+	Transform RealTransforms[64]{};
+	//VR_END
+
+	if (Data->NumBones > 0)
+	{
+		int lastIndex = 1;
+		int16_t Processed[64]{};
+
+		Processed[0] = 0;
+
+		int i = 0;
+		do
+		{
+			const int16_t BoneIndex = Processed[i];
+			i++;
+			const Bone& CurrentBone = BoneArray[BoneIndex];
+			Transform* ParentTransform = BoneIndex == 0 ? &Root : &OutBoneTransforms[CurrentBone.Parent];
+			const TransformQuat* CurrentQuat = &BoneTransforms[BoneIndex];
+			Transform TempTransform;
+			// VR_START
+			Transform ModifiedTransform;
+			// For all bones but the root sub in the ACTUAL transform for the calculations (free from scaling/transform issues)
+			if (BoneIndex > 0)
+			{
+				ModifiedTransform = *ParentTransform;
+				*ParentTransform = RealTransforms[CurrentBone.Parent];
+			}
+			// VR_END
+			Helpers::MakeTransformFromQuat(&CurrentQuat->Rotation, &TempTransform);
+			TempTransform.Scale = CurrentQuat->Scale;
+			TempTransform.Translation = CurrentQuat->Translation;
+			Helpers::CombineTransforms(ParentTransform, &TempTransform, &OutBoneTransforms[BoneIndex]);
+
+			//VR_START
+			if (BoneIndex > 0)
+			{
+				// Restore the modified transform
+				*ParentTransform = ModifiedTransform;
+			}
+			// Cache the calculated transform for this bone
+			RealTransforms[BoneIndex] = OutBoneTransforms[BoneIndex];
+			if (CurrentBone.Parent == 0)
+			{
+				// Hide upper arms/root
+				OutBoneTransforms[BoneIndex].Scale = 0.0f;
+			}
+			else if (BoneArray[CurrentBone.Parent].Parent == 0)
+			{
+				VM_CreateEndCap(BoneIndex, CurrentBone, RealTransforms, OutBoneTransforms);
+			}
+			// TODO: CACHE THIS!
+			else if (strstr(CurrentBone.BoneName, "r wrist"))
+			{
+				Matrix4 NewTransform = vr->GetControllerTransform(ControllerRole::Right, true); 
+				// Apply scale only to translation portion
+				Vector3 Translation = NewTransform * Vector3(0.0f, 0.0f, 0.0f);
+				NewTransform.translate(-Translation);
+				Translation *= MetresToWorld(1.0f);
+				Translation += *pos;
+				NewTransform.translate(Translation);
+
+				VM_MoveBoneWithParents(BoneIndex, CurrentBone, NewTransform, BoneArray, RealTransforms, OutBoneTransforms);
+			}
+			else if (strstr(CurrentBone.BoneName, "l wrist"))
+			{
+				Matrix4 NewTransform = vr->GetControllerTransform(ControllerRole::Left, true);
+				// Apply scale only to translation portion
+				Vector3 Translation = NewTransform * Vector3(0.0f, 0.0f, 0.0f);
+				NewTransform.translate(-Translation);
+				Translation *= MetresToWorld(1.0f);
+				Translation += *pos;
+				NewTransform.translate(Translation);
+				VM_MoveBoneWithParents(BoneIndex, CurrentBone, NewTransform, BoneArray, RealTransforms, OutBoneTransforms);
+			}
+			//VR_END
+
+			if (CurrentBone.LeftLeaf != -1)
+			{
+				Processed[lastIndex] = CurrentBone.LeftLeaf;
+				lastIndex++;
+			}
+			if (CurrentBone.RightLeaf != -1)
+			{
+				Processed[lastIndex] = CurrentBone.RightLeaf;
+				lastIndex++;
+			}
+
+		} while (i != lastIndex);
+	}
+}
+
+
+void Game::VM_CreateEndCap(int BoneIndex, const Bone& CurrentBone, Transform* RealTransforms, Transform* OutBoneTransforms)
+{
+	// Move the upper arms (now scaled to 0) to act as end caps for the forearms
+	int idx = CurrentBone.Parent;
+	RealTransforms[idx] = OutBoneTransforms[idx];
+	OutBoneTransforms[idx].Translation = OutBoneTransforms[BoneIndex].Translation;
+	for (int j = 0; j < 9; j++)
+	{
+		OutBoneTransforms[idx].Rotation[j] = OutBoneTransforms[BoneIndex].Rotation[j];
+	}
+	OutBoneTransforms[idx].Scale = 0.0f;
+}
+
+void Game::VM_MoveBoneWithParents(int BoneIndex, const Bone& CurrentBone, const Matrix4& NewTransform, Bone* BoneArray, Transform* RealTransforms, Transform* OutBoneTransforms)
+{
+	// Move hands to match controllers
+	Vector3 NewTranslation = NewTransform * Vector3(0.0f, 0.0f, 0.0f);
+	Matrix4 NewRotation4 = NewTransform;
+	NewRotation4.translate(-NewTranslation);
+	NewRotation4.rotateZ(LocalRotation.z);
+	NewRotation4.rotateY(LocalRotation.y);
+	NewRotation4.rotateX(LocalRotation.x);
+
+	//Add Local offset
+	NewTranslation += NewRotation4 * LocalOffset;
+
+	Vector3 OldTranslation = OutBoneTransforms[BoneIndex].Translation;
+	Vector3 DeltaTranslation = NewTranslation - OldTranslation;
+	Matrix3 OldRotation;
+	OldRotation.set(OutBoneTransforms[BoneIndex].Rotation);
+	OutBoneTransforms[BoneIndex].Translation = NewTranslation;
+	for (int x = 0; x < 3; x++)
+	{
+		for (int y = 0; y < 3; y++)
+		{
+			OutBoneTransforms[BoneIndex].Rotation[x + y * 3] = NewRotation4.get()[x + y * 4];
+		}
+	}
+	RealTransforms[BoneIndex] = OutBoneTransforms[BoneIndex]; // Re-cache value to use updated position
+
+	Matrix3 NewRotation;
+	NewRotation.set(OutBoneTransforms[BoneIndex].Rotation);
+
+	Matrix3 DeltaRotation = NewRotation * OldRotation.invert();
+
+	// Go up the tree to the (hopefully) already processed bones and move them with this bone
+	Bone* ParentBone = &BoneArray[CurrentBone.Parent];
+	int CurrentIdx = CurrentBone.Parent;
+	while (CurrentIdx != 0)
+	{
+		Matrix3 ParentRot;
+		ParentRot.set(OutBoneTransforms[CurrentIdx].Rotation);
+		ParentRot = DeltaRotation * ParentRot;
+
+		Vector3 LocalDeltaTranslation = OutBoneTransforms[CurrentIdx].Translation - OldTranslation;
+
+		for (int x = 0; x < 3; x++)
+		{
+			for (int y = 0; y < 3; y++)
+			{
+				OutBoneTransforms[CurrentIdx].Rotation[x + y * 3] = ParentRot.get()[x + y * 3];
+			}
+		}
+		OutBoneTransforms[CurrentIdx].Translation += DeltaTranslation - LocalDeltaTranslation + DeltaRotation * LocalDeltaTranslation;
+		RealTransforms[BoneIndex] = OutBoneTransforms[BoneIndex]; // Re-cache value to use updated transform
+		CurrentIdx = ParentBone->Parent;
+		ParentBone = &BoneArray[CurrentIdx];
+	}
+}
+#pragma optimize("", on)
+
+void Game::PreFireWeapon(HaloID& WeaponID, short param2, bool param3)
+{	
+	BaseDynamicObject* Object = Helpers::GetDynamicObject(WeaponID);
+
+	WeaponFiredPlayer = nullptr;
+
+	// Check if the weapon is being used by the player
+	HaloID PlayerID;
+	if (Object && Helpers::GetLocalPlayerID(PlayerID) && PlayerID == Object->Parent)
+	{
+		Logger::log << "FireWeapon(" << WeaponID << ", " << param2 << ", " << param3 << ")" << std::endl;
+
+		// Teleport the player to the controller position so the bullet comes from there instead
+		WeaponFiredPlayer = static_cast<UnitDynamicObject*>(Helpers::GetDynamicObject(PlayerID));
+		if (WeaponFiredPlayer)
+		{
+			// TODO: Handedness
+			Matrix4 ControllerPos = vr->GetControllerTransform(ControllerRole::Right, false).scale(Game::MetresToWorld(1.0f));
+
+			PlayerPosition = WeaponFiredPlayer->Position;
+			// What are the other aims for??
+			PlayerAim = WeaponFiredPlayer->Aim;
+
+			Vector3 LocalControllerPos = ControllerPos * Vector3(0.0f, 0.0f, 0.0f);
+
+			WeaponFiredPlayer->Position = PlayerPosition + LocalControllerPos;
+			WeaponFiredPlayer->Aim = ControllerPos.getLeftAxis();
+
+			Logger::log << "Overwrote bullet trajectory: " << PlayerPosition << " @ " << PlayerAim << " -> " << WeaponFiredPlayer->Position << " @ " << WeaponFiredPlayer->Aim << std::endl;
+		}
+	}
+	else
+	{
+		Logger::log << "NON PLAYER FireWeapon(" << WeaponID << ", " << param2 << ", " << param3 << ")" << std::endl;
+		if (Object)
+		{
+			Logger::log << PlayerID << "!=" << Object->Parent << std::endl;
+		}
+	}
+}
+
+void Game::PostFireWeapon(HaloID& WeaponID, short param2, bool param3)
+{
+	// Restore state after firing the weapon
+	if (WeaponFiredPlayer)
+	{
+		WeaponFiredPlayer->Position = PlayerPosition;
+		WeaponFiredPlayer->Aim = PlayerAim;
+	}
 }
 
 #define ApplyBoolInput(x) controls.##x = vr->GetBoolInput(x) ? 127 : 0;
@@ -328,6 +618,79 @@ void Game::UpdateViewModel(Vector3* pos, Vector3* facing, Vector3* up)
 
 void Game::UpdateInputs()
 {
+	if (GetAsyncKeyState(VK_TAB) & 0x1)
+	{
+		bDoRotation ^= true;
+		Logger::log << "Do Rotation: " << bDoRotation << std::endl;
+	}
+
+	if (bDoRotation)
+	{
+		if (GetAsyncKeyState(VK_LEFT))
+		{
+			LocalRotation.x -= 0.1f;
+			Logger::log << "R: " << LocalRotation << std::endl;
+		}
+		if (GetAsyncKeyState(VK_RIGHT))
+		{
+			LocalRotation.x += 0.1f;
+			Logger::log << "R: " << LocalRotation << std::endl;
+		}
+		if (GetAsyncKeyState(VK_DOWN))
+		{
+			LocalRotation.y -= 0.1f;
+			Logger::log << "R: " << LocalRotation << std::endl;
+		}
+		if (GetAsyncKeyState(VK_UP))
+		{
+			LocalRotation.y += 0.1f;
+			Logger::log << "R: " << LocalRotation << std::endl;
+		}
+		if (GetAsyncKeyState(VK_RCONTROL))
+		{
+			LocalRotation.z -= 0.1f;
+			Logger::log << "R: " << LocalRotation << std::endl;
+		}
+		if (GetAsyncKeyState(VK_RSHIFT))
+		{
+			LocalRotation.z += 0.1f;
+			Logger::log << "R: " << LocalRotation << std::endl;
+		}
+	}
+	else
+	{
+		if (GetAsyncKeyState(VK_LEFT))
+		{
+			LocalOffset.x -= 0.0001f;
+			Logger::log << LocalOffset << std::endl;
+		}
+		if (GetAsyncKeyState(VK_RIGHT))
+		{
+			LocalOffset.x += 0.0001f;
+			Logger::log << LocalOffset << std::endl;
+		}
+		if (GetAsyncKeyState(VK_DOWN))
+		{
+			LocalOffset.y -= 0.0001f;
+			Logger::log << LocalOffset << std::endl;
+		}
+		if (GetAsyncKeyState(VK_UP))
+		{
+			LocalOffset.y += 0.0001f;
+			Logger::log << LocalOffset << std::endl;
+		}
+		if (GetAsyncKeyState(VK_RCONTROL))
+		{
+			LocalOffset.z -= 0.0001f;
+			Logger::log << LocalOffset << std::endl;
+		}
+		if (GetAsyncKeyState(VK_RSHIFT))
+		{
+			LocalOffset.z += 0.0001f;
+			Logger::log << LocalOffset << std::endl;
+		}
+	}
+
 	// Don't bother simulating inputs if we aren't actually in vr
 #if EMULATE_VR
 	return;
@@ -428,6 +791,11 @@ void Game::UpdateCamera(float& yaw, float& pitch)
 
 void Game::SetMousePosition(int& x, int& y)
 {
+	// Don't bother simulating inputs if we aren't actually in vr
+#if EMULATE_VR
+	return;
+#endif
+
 	Vector2 MousePos = vr->GetMousePos();
 	x = static_cast<int>(MousePos.x * 640);
 	y = static_cast<int>(MousePos.y * 480);
@@ -435,6 +803,11 @@ void Game::SetMousePosition(int& x, int& y)
 
 void Game::UpdateMouseInfo(MouseInfo* MouseInfo)
 {
+	// Don't bother simulating inputs if we aren't actually in vr
+#if EMULATE_VR
+	return;
+#endif
+
 	if (vr->GetMouseDown())
 	{
 		if (MouseDownState < 255)

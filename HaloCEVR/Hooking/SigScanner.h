@@ -26,6 +26,7 @@ public:
 	OFFSET(TabOutVideo2,          0x0c801c, "75 11 38 1D ?? ?? ?? ?? 75 04 3A C3 74 05 C6 44 24 17 01");
 	OFFSET(TabOutVideo3,          0x0c829c, "38 1D ?? ?? ?? ?? 74 29 0F BF 05 ?? ?? ?? ?? 3B C3 7E 0E");
 	OFFSET(CutsceneFPSCap,        0x0c9fb5, "b3 01 eb ?? 32 db 8b 2d ?? ?? ?? ?? 8d 4c");
+	OFFSET(CreateMouseDevice,     0x0919c0, "6a 17 ff 15 ?? ?? ?? ?? 85 c0 74 ?? 66 c7 05 ?? ?? ?? ?? 02 00");
 
 	OFFSET(InitDirectX,           0x1169c0, "83 ec 60 8b 15 ?? ?? ?? ?? 8b 0d ?? ?? ?? ?? 53 33 db");
 	OFFSET(DrawFrame,             0x10bea0, "83 ec 14 8b 15 ?? ?? ?? ?? 8b 44 24 24 8b 4c 24 28 42");
@@ -40,6 +41,7 @@ public:
 	OFFSET(UpdatePitchYaw,        0x072160, "81 ec a4 00 00 00 8b 15 ?? ?? ?? ?? 53 0f bf c8");
 	OFFSET(SetMousePosition,      0x097250, "56 8b 35 ?? ?? ?? ?? 33 d2 3b f0 75 ?? 39 0d");
 	OFFSET(UpdateMouseInfo,       0x091bc0, "8b 01 53 55 8b 6c 24 0c 89 45 00 8b 51 04 f7 da 56");
+	OFFSET(FireWeapon,            0x0c3280, "");
 	
 	OFFSET(SetViewportSize,       0x0c8da0, "83 ec 10 53 55 56 57 8b f8 33 c0 83 ff 01 0f 9e c0");
 	OFFSET(SetViewportScale,      0x10ca90, "51 0f bf 50 2e 56 0f bf 70 30 57 0f bf 78 2c 2b f7");

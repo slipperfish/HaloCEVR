@@ -4,6 +4,9 @@
 #include "../Helpers/DX9.h"
 #include "../Game.h"
 #include "../Helpers/Menus.h"
+#include "../Helpers/Maths.h"
+
+#include <tlhelp32.h>
 
 #define CREATEHOOK(Func) Func##.CreateHook(#Func, o.##Func##, &H_##Func##)
 
@@ -24,12 +27,14 @@ void Hooks::InitHooks()
 	CREATEHOOK(SetViewportScale);
 	CREATEHOOK(SetMousePosition);
 	CREATEHOOK(UpdateMouseInfo);
+	CREATEHOOK(FireWeapon);
 
 	// These are handled with a direct patch, so manually scan them
 	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo) < 0;
 	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo2) < 0;
 	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo3) < 0;
 	SigScanner::UpdateOffset(o.CutsceneFPSCap);
+	SigScanner::UpdateOffset(o.CreateMouseDevice);
 }
 
 void Hooks::EnableAllHooks()
@@ -47,8 +52,12 @@ void Hooks::EnableAllHooks()
 	SetViewportScale.EnableHook();
 	SetMousePosition.EnableHook();
 	UpdateMouseInfo.EnableHook();
+	FireWeapon.EnableHook();
+
+	Freeze();
 
 	P_RemoveCutsceneFPSCap();
+	P_DontStealMouse();
 
 	// If we think the user has chimera installed, don't try to patch their patches
 	if (!bPotentiallyFoundChimera)
@@ -58,6 +67,8 @@ void Hooks::EnableAllHooks()
 		// TODO: Test this (and get a proper signature etc)
 		//NOPInstructions(0x4c90ea, 6);
 	}
+
+	Unfreeze();
 }
 
 //===============================//Helpers//===================================//
@@ -98,6 +109,136 @@ void Hooks::NOPInstructions(long long Address, int Length)
 		DWORD NewProt;
 		VirtualProtect(Addr, Length, OldProt, &NewProt);
 	}
+}
+
+// Below is borrowed from minhook to freeze threads while applying patches
+#define THREAD_ACCESS \
+    (THREAD_SUSPEND_RESUME | THREAD_GET_CONTEXT | THREAD_QUERY_INFORMATION | THREAD_SET_CONTEXT)
+#define INITIAL_THREAD_CAPACITY 128
+
+HANDLE g_hHeap = NULL;
+
+typedef struct _FROZEN_THREADS
+{
+	LPDWORD pItems;         // Data heap
+	UINT    capacity;       // Size of allocated data heap, items
+	UINT    size;           // Actual number of data items
+} FROZEN_THREADS, * PFROZEN_THREADS;
+
+static BOOL EnumerateThreads(PFROZEN_THREADS pThreads)
+{
+	LPDWORD p;
+	BOOL succeeded = FALSE;
+
+	HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+	if (hSnapshot != INVALID_HANDLE_VALUE)
+	{
+		THREADENTRY32 te;
+		te.dwSize = sizeof(THREADENTRY32);
+		if (Thread32First(hSnapshot, &te))
+		{
+			succeeded = TRUE;
+			do
+			{
+				if (te.dwSize >= (FIELD_OFFSET(THREADENTRY32, th32OwnerProcessID) + sizeof(DWORD))
+					&& te.th32OwnerProcessID == GetCurrentProcessId()
+					&& te.th32ThreadID != GetCurrentThreadId())
+				{
+					if (pThreads->pItems == NULL)
+					{
+						pThreads->capacity = INITIAL_THREAD_CAPACITY;
+						pThreads->pItems
+							= (LPDWORD)HeapAlloc(g_hHeap, 0, pThreads->capacity * sizeof(DWORD));
+						if (pThreads->pItems == NULL)
+						{
+							succeeded = FALSE;
+							break;
+						}
+					}
+					else if (pThreads->size >= pThreads->capacity)
+					{
+						pThreads->capacity *= 2;
+						p = (LPDWORD)HeapReAlloc(
+							g_hHeap, 0, pThreads->pItems, pThreads->capacity * sizeof(DWORD));
+						if (p == NULL)
+						{
+							succeeded = FALSE;
+							break;
+						}
+
+						pThreads->pItems = p;
+					}
+					pThreads->pItems[pThreads->size++] = te.th32ThreadID;
+				}
+
+				te.dwSize = sizeof(THREADENTRY32);
+			} while (Thread32Next(hSnapshot, &te));
+
+			if (succeeded && GetLastError() != ERROR_NO_MORE_FILES)
+				succeeded = FALSE;
+
+			if (!succeeded && pThreads->pItems != NULL)
+			{
+				HeapFree(g_hHeap, 0, pThreads->pItems);
+				pThreads->pItems = NULL;
+			}
+		}
+		CloseHandle(hSnapshot);
+	}
+
+	return succeeded;
+}
+
+//-------------------------------------------------------------------------
+FROZEN_THREADS Threads;
+
+bool Hooks::Freeze()
+{
+	Threads.pItems = NULL;
+	Threads.capacity = 0;
+	Threads.size = 0;
+	g_hHeap = HeapCreate(0, 0, 0);
+	if (!EnumerateThreads(&Threads))
+	{
+		return false;
+	}
+
+	if (Threads.pItems != NULL)
+	{
+		UINT i;
+		for (i = 0; i < Threads.size; ++i)
+		{
+			HANDLE hThread = OpenThread(THREAD_ACCESS, FALSE, Threads.pItems[i]);
+			if (hThread != NULL)
+			{
+				SuspendThread(hThread);
+				CloseHandle(hThread);
+			}
+		}
+	}
+
+	return true;
+}
+
+//-------------------------------------------------------------------------
+void Hooks::Unfreeze()
+{
+	if (Threads.pItems != NULL)
+	{
+		UINT i;
+		for (i = 0; i < Threads.size; ++i)
+		{
+			HANDLE hThread = OpenThread(THREAD_ACCESS, FALSE, Threads.pItems[i]);
+			if (hThread != NULL)
+			{
+				ResumeThread(hThread);
+				CloseHandle(hThread);
+			}
+		}
+
+		HeapFree(g_hHeap, 0, Threads.pItems);
+	}
+	HeapDestroy(g_hHeap);
 }
 
 //===============================//Hooks//===================================//
@@ -231,28 +372,34 @@ void __declspec(naked) Hooks::H_SetViewModelPosition()
 	static Vector3* pos;
 	static Vector3* facing;
 	static Vector3* up;
+	static HaloID id;
+	static TransformQuat* quatTrans;
+	static Transform* trans;
+
+	// TODO: Before submitting, remove the repushing + fix up the esp + 0xXX movs
 
 	_asm
 	{
-		mov pos, ecx
-		mov ecx, [esp + 0x10]
+		mov id, eax // Get ID from EAX param
+		mov pos, ecx // Get Position from ECX param
+		mov ecx, [esp + 0x10] // Get UpVector from 0x10 param
 		mov up, ecx
-		push ecx
-		mov ecx, [esp + 0x10]
+		push ecx // Re-push UpVector
+		mov ecx, [esp + 0x10] // Get FacingVector from 0xc param
 		mov facing, ecx
-		push ecx
-		mov ecx, [esp + 0x10]
-		push ecx
-		mov ecx, [esp + 0x10]
-		push ecx
-		mov ecx, pos
+		push ecx // Re-push FacingVector
+		mov ecx, [esp + 0x10] // Get QuatTransforms from 0x8 param
+		mov quatTrans, ecx
+		push ecx // Re-push QuatTransforms
+		mov ecx, [esp + 0x10] // Get Transforms from 0x4 param
+		mov trans, ecx
+		push ecx // Re-push Transforms
+		mov ecx, pos // Restore Position in ECX register
 	}
 
-	_asm { pushad }
-	Game::instance.UpdateViewModel(pos, facing, up);
-	_asm { popad }
-
-	SetViewModelPosition.Original();
+	// The original function was simple enough + required enough patches for VR
+	// that it is easier to just fully reimplement it in the mod
+	Game::instance.UpdateViewModel(id, pos, facing, up, quatTrans, trans);
 
 	_asm
 	{
@@ -489,6 +636,20 @@ void __declspec(naked) Hooks::H_UpdateMouseInfo()
 	}
 }
 
+#pragma optimize("", off)
+
+void Hooks::H_FireWeapon(HaloID param1, short param2, bool param3)
+{
+	Game::instance.PreFireWeapon(param1, param2, param3);
+
+	FireWeapon.Original(param1, param2, param3);
+
+	Game::instance.PostFireWeapon(param1, param2, param3);
+
+}
+
+#pragma optimize("", on)
+
 //================================//Patches//================================//
 
 void Hooks::P_FixTabOut()
@@ -511,4 +672,12 @@ void Hooks::P_RemoveCutsceneFPSCap()
 	// Instead of setting the flag for capping the fps to 1 when we are in a cutscene, just clear it
 	byte bytes[2]{ 0x32, 0xdb };
 	SetBytes(o.CutsceneFPSCap.Address, 2, bytes);
+}
+
+void Hooks::P_DontStealMouse()
+{
+	// Halo claims exclusive rights over the mouse which causes all sorts of chaos when trying to pause the game with a debugger
+	// Changing it to non-exclusive is fine for our purposes (VR/testing),
+	// but does cause the mouse to stop being locked to the window in game
+	SetByte(o.CreateMouseDevice.Address + 0x5B, 6);
 }

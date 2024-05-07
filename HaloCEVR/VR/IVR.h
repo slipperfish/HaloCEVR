@@ -3,6 +3,12 @@
 
 typedef uint64_t InputBindingID;
 
+enum class ControllerRole
+{
+	Left,
+	Right
+};
+
 class IVR
 {
 public:
@@ -25,6 +31,7 @@ public:
 	virtual void SetYawOffset(float NewOffset) = 0;
 	virtual float GetYawOffset() = 0;
 	virtual Matrix4 GetHMDTransform(bool bRenderPose = false) = 0;
+	virtual Matrix4 GetControllerTransform(ControllerRole Role, bool bRenderPose = false) = 0;
 	virtual struct IDirect3DSurface9* GetRenderSurface(int eye) = 0;
 	virtual struct IDirect3DTexture9* GetRenderTexture(int eye) = 0;
 	virtual struct IDirect3DSurface9* GetUISurface() = 0;

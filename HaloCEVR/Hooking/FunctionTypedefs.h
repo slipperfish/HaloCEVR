@@ -1,4 +1,5 @@
 #pragma once
+#include "../Helpers/Objects.h"
 
 typedef void(*Func_UpdateCameraRotation)();
 typedef void(*Func_InitDirectX)();
@@ -14,3 +15,4 @@ typedef void(*Func_UpdatePitchYaw)();
 typedef void(*Func_SetViewportScale)();
 typedef void(*Func_SetMousePosition)();
 typedef void(*Func_UpdateMouseInfo)();
+typedef void(__cdecl* Func_FireWeapon)(HaloID, short, bool);

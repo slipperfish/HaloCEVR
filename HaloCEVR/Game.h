@@ -6,6 +6,7 @@
 #include "VR/IVR.h"
 #include "Helpers/Renderer.h"
 #include "Helpers/RenderTarget.h"
+#include "Helpers/Objects.h"
 #include "Maths/Vectors.h"
 
 enum class ERenderState { UNKNOWN, LEFT_EYE, RIGHT_EYE, GAME};
@@ -35,7 +36,9 @@ public:
 	bool PreDrawLoading(int param1, struct Renderer* renderer);
 	void PostDrawLoading(int param1, struct Renderer* renderer);
 
-	void UpdateViewModel(struct Vector3* pos, struct Vector3* facing, struct Vector3* up);
+	void UpdateViewModel(HaloID& id, struct Vector3* pos, struct Vector3* facing, struct Vector3* up, struct TransformQuat* BoneTransforms, struct Transform* OutBoneTransforms);
+	void PreFireWeapon(HaloID& WeaponID, short param2, bool param3);
+	void PostFireWeapon(HaloID& WeaponID, short param2, bool param3);
 
 	void UpdateInputs();
 	void UpdateCamera(float& yaw, float& pitch);
@@ -56,6 +59,9 @@ public:
 
 protected:
 
+	inline void VM_CreateEndCap(int BoneIndex, const struct Bone& CurrentBone, struct Transform* RealTransforms, struct Transform* OutBoneTransforms);
+	inline void VM_MoveBoneWithParents(int BoneIndex, const struct Bone& CurrentBone, const Matrix4& NewTransform, struct Bone* BoneArray, struct Transform* RealTransforms, struct Transform* OutBoneTransforms);
+
 	void CreateConsole();
 
 	void PatchGame();
@@ -72,6 +78,10 @@ protected:
 	float LastDeltaTime = 0.0f;
 
 	unsigned char MouseDownState = 0;
+
+	UnitDynamicObject* WeaponFiredPlayer = nullptr;
+	Vector3 PlayerPosition;
+	Vector3 PlayerAim;
 
 	float TimeSinceFPSUpdate = 0.0f;
 	int FramesSinceFPSUpdate = 0;

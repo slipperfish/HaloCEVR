@@ -395,6 +395,25 @@ Matrix4 OpenVR::GetHMDTransform(bool bRenderPose)
 	}
 }
 
+Matrix4 OpenVR::GetControllerTransform(ControllerRole Role, bool bRenderPose)
+{
+	if (!VRSystem)
+	{
+		return Matrix4();
+	}
+
+	vr::TrackedDeviceIndex_t ControllerIndex = VRSystem->GetTrackedDeviceIndexForControllerRole(Role == ControllerRole::Left ? vr::TrackedControllerRole_LeftHand : vr::TrackedControllerRole_RightHand);
+
+	if (bRenderPose)
+	{
+		return ConvertSteamVRMatrixToMatrix4(RenderPoses[ControllerIndex].mDeviceToAbsoluteTracking).translate(-PositionOffset).rotateZ(-YawOffset);
+	}
+	else
+	{
+		return ConvertSteamVRMatrixToMatrix4(GamePoses[ControllerIndex].mDeviceToAbsoluteTracking).translate(-PositionOffset).rotateZ(-YawOffset);
+	}
+}
+
 IDirect3DSurface9* OpenVR::GetRenderSurface(int eye)
 {
     return GameRenderSurface[eye];
