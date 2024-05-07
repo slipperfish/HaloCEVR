@@ -368,7 +368,7 @@ void Game::PostDrawLoading(int param1, struct Renderer* renderer)
 
 
 Vector3 LocalOffset(-0.0455f, 0.0096f, 0.0056f);
-Vector3 LocalRotation;
+Vector3 LocalRotation(-11.0f, 0.0f, 0.0f);
 bool bDoRotation = true;
 
 void Game::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, Vector3* up, TransformQuat* BoneTransforms, Transform* OutBoneTransforms)
@@ -440,14 +440,10 @@ void Game::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, Vector3* u
 			}
 			// Cache the calculated transform for this bone
 			RealTransforms[BoneIndex] = OutBoneTransforms[BoneIndex];
-			if (CurrentBone.Parent == 0)
+			if (CurrentBone.Parent == 0 || BoneArray[CurrentBone.Parent].Parent == 0)
 			{
-				// Hide upper arms/root
+				// Hide arms/root
 				OutBoneTransforms[BoneIndex].Scale = 0.0f;
-			}
-			else if (BoneArray[CurrentBone.Parent].Parent == 0)
-			{
-				VM_CreateEndCap(BoneIndex, CurrentBone, RealTransforms, OutBoneTransforms);
 			}
 			// TODO: CACHE THIS!
 			else if (strstr(CurrentBone.BoneName, "r wrist"))
@@ -460,7 +456,8 @@ void Game::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, Vector3* u
 				Translation += *pos;
 				NewTransform.translate(Translation);
 
-				VM_MoveBoneWithParents(BoneIndex, CurrentBone, NewTransform, BoneArray, RealTransforms, OutBoneTransforms);
+				VM_MoveBoneToTransform(BoneIndex, CurrentBone, NewTransform, BoneArray, RealTransforms, OutBoneTransforms);
+				VM_CreateEndCap(BoneIndex, CurrentBone, RealTransforms, OutBoneTransforms);
 			}
 			else if (strstr(CurrentBone.BoneName, "l wrist"))
 			{
@@ -471,7 +468,9 @@ void Game::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, Vector3* u
 				Translation *= MetresToWorld(1.0f);
 				Translation += *pos;
 				NewTransform.translate(Translation);
-				VM_MoveBoneWithParents(BoneIndex, CurrentBone, NewTransform, BoneArray, RealTransforms, OutBoneTransforms);
+
+				VM_MoveBoneToTransform(BoneIndex, CurrentBone, NewTransform, BoneArray, RealTransforms, OutBoneTransforms);
+				VM_CreateEndCap(BoneIndex, CurrentBone, RealTransforms, OutBoneTransforms);
 			}
 			//VR_END
 
@@ -493,9 +492,8 @@ void Game::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, Vector3* u
 
 void Game::VM_CreateEndCap(int BoneIndex, const Bone& CurrentBone, Transform* RealTransforms, Transform* OutBoneTransforms)
 {
-	// Move the upper arms (now scaled to 0) to act as end caps for the forearms
+	// Parent bone to the position of the current bone with 0 scale to act as an end cap
 	int idx = CurrentBone.Parent;
-	RealTransforms[idx] = OutBoneTransforms[idx];
 	OutBoneTransforms[idx].Translation = OutBoneTransforms[BoneIndex].Translation;
 	for (int j = 0; j < 9; j++)
 	{
@@ -504,7 +502,7 @@ void Game::VM_CreateEndCap(int BoneIndex, const Bone& CurrentBone, Transform* Re
 	OutBoneTransforms[idx].Scale = 0.0f;
 }
 
-void Game::VM_MoveBoneWithParents(int BoneIndex, const Bone& CurrentBone, const Matrix4& NewTransform, Bone* BoneArray, Transform* RealTransforms, Transform* OutBoneTransforms)
+void Game::VM_MoveBoneToTransform(int BoneIndex, const Bone& CurrentBone, const Matrix4& NewTransform, Bone* BoneArray, Transform* RealTransforms, Transform* OutBoneTransforms)
 {
 	// Move hands to match controllers
 	Vector3 NewTranslation = NewTransform * Vector3(0.0f, 0.0f, 0.0f);
@@ -517,10 +515,6 @@ void Game::VM_MoveBoneWithParents(int BoneIndex, const Bone& CurrentBone, const 
 	//Add Local offset
 	NewTranslation += NewRotation4 * LocalOffset;
 
-	Vector3 OldTranslation = OutBoneTransforms[BoneIndex].Translation;
-	Vector3 DeltaTranslation = NewTranslation - OldTranslation;
-	Matrix3 OldRotation;
-	OldRotation.set(OutBoneTransforms[BoneIndex].Rotation);
 	OutBoneTransforms[BoneIndex].Translation = NewTranslation;
 	for (int x = 0; x < 3; x++)
 	{
@@ -530,35 +524,6 @@ void Game::VM_MoveBoneWithParents(int BoneIndex, const Bone& CurrentBone, const 
 		}
 	}
 	RealTransforms[BoneIndex] = OutBoneTransforms[BoneIndex]; // Re-cache value to use updated position
-
-	Matrix3 NewRotation;
-	NewRotation.set(OutBoneTransforms[BoneIndex].Rotation);
-
-	Matrix3 DeltaRotation = NewRotation * OldRotation.invert();
-
-	// Go up the tree to the (hopefully) already processed bones and move them with this bone
-	Bone* ParentBone = &BoneArray[CurrentBone.Parent];
-	int CurrentIdx = CurrentBone.Parent;
-	while (CurrentIdx != 0)
-	{
-		Matrix3 ParentRot;
-		ParentRot.set(OutBoneTransforms[CurrentIdx].Rotation);
-		ParentRot = DeltaRotation * ParentRot;
-
-		Vector3 LocalDeltaTranslation = OutBoneTransforms[CurrentIdx].Translation - OldTranslation;
-
-		for (int x = 0; x < 3; x++)
-		{
-			for (int y = 0; y < 3; y++)
-			{
-				OutBoneTransforms[CurrentIdx].Rotation[x + y * 3] = ParentRot.get()[x + y * 3];
-			}
-		}
-		OutBoneTransforms[CurrentIdx].Translation += DeltaTranslation - LocalDeltaTranslation + DeltaRotation * LocalDeltaTranslation;
-		RealTransforms[BoneIndex] = OutBoneTransforms[BoneIndex]; // Re-cache value to use updated transform
-		CurrentIdx = ParentBone->Parent;
-		ParentBone = &BoneArray[CurrentIdx];
-	}
 }
 #pragma optimize("", on)
 

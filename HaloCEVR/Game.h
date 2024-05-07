@@ -60,7 +60,7 @@ public:
 protected:
 
 	inline void VM_CreateEndCap(int BoneIndex, const struct Bone& CurrentBone, struct Transform* RealTransforms, struct Transform* OutBoneTransforms);
-	inline void VM_MoveBoneWithParents(int BoneIndex, const struct Bone& CurrentBone, const Matrix4& NewTransform, struct Bone* BoneArray, struct Transform* RealTransforms, struct Transform* OutBoneTransforms);
+	inline void VM_MoveBoneToTransform(int BoneIndex, const struct Bone& CurrentBone, const Matrix4& NewTransform, struct Bone* BoneArray, struct Transform* RealTransforms, struct Transform* OutBoneTransforms);
 
 	void CreateConsole();
 
