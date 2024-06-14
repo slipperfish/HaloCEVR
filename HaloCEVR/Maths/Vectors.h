@@ -77,6 +77,7 @@ struct Vector3
     // utils functions
     void        set(float x, float y, float z);
     float       length() const;                         //
+    float       lengthSqr() const;                         //
     float       distance(const Vector3& vec) const;     // distance between two vectors
     float       angle(const Vector3& vec) const;        // angle between two vectors
     Vector3&    normalize();                            //
@@ -363,6 +364,10 @@ inline void Vector3::set(float x, float y, float z) {
 
 inline float Vector3::length() const {
     return sqrtf(x*x + y*y + z*z);
+}
+
+inline float Vector3::lengthSqr() const {
+	return x * x + y * y + z * z;
 }
 
 inline float Vector3::distance(const Vector3& vec) const {

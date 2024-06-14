@@ -119,11 +119,11 @@ void Game::OnInitDirectX()
 void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 {
 	LastDeltaTime = deltaTime;
-	
+
 	RenderState = ERenderState::UNKNOWN;
 
 	//CalcFPS(deltaTime);
-	
+
 	vr->SetMouseVisibility(Helpers::IsMouseVisible());
 	vr->UpdatePoses();
 
@@ -237,7 +237,7 @@ bool Game::PreDrawHUD()
 		// ...but try to avoid breaking the game view (for now at least)
 		return GetRenderState() == ERenderState::GAME;
 	}
-	
+
 	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &UIRealSurface);
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, UISurface);
 	UIRealSurface = Helpers::GetRenderTargets()[1].renderSurface;
@@ -371,6 +371,9 @@ Vector3 LocalOffset(-0.0455f, 0.0096f, 0.0056f);
 Vector3 LocalRotation(-11.0f, 0.0f, 0.0f);
 bool bDoRotation = true;
 
+Vector3 LastFireLocation(0.0f, 0.0f, 0.0f);
+Vector3 LastFireAim(0.0f, 0.0f, 0.0f);
+
 void Game::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, Vector3* up, TransformQuat* BoneTransforms, Transform* OutBoneTransforms)
 {
 	// For now just move it to be in a consistent position, we'll set the actual positions later in the function
@@ -379,6 +382,12 @@ void Game::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, Vector3* u
 	pos->x = camPos.x;
 	pos->y = camPos.y;
 	pos->z = camPos.z;
+
+#if EMULATE_VR
+	pos->x = -28.1572f;
+	pos->y = 21.4454f;
+	pos->z = 0.617999f;
+#endif
 
 	facing->x = 1.0f;
 	facing->y = 0.0f;
@@ -389,16 +398,29 @@ void Game::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, Vector3* u
 	up->z = 1.0f;
 
 	// Reimplementation of original function:
-	Asset& ViewModel = Helpers::GetAssetArray()[id.Index];
-	AssetData* Data = ViewModel.Data;
+	Asset_ModelAnimations* ViewModel = Helpers::GetTypedAsset<Asset_ModelAnimations>(id);
+	if (!ViewModel)
+	{
+		Logger::log << "[UpdateViewModel] Can't get view model asset" << std::endl;
+		return;
+	}
+
+	AssetData_ModelAnimations* Data = ViewModel->Data;
 	Bone* BoneArray = Data->BoneArray;
 
 	Transform Root;
 	Helpers::MakeTransformFromXZ(up, facing, &Root);
 	Root.Translation = *pos;
 
-
 	//VR_START
+	const bool bShouldUpdateCache = CachedViewModel.CurrentAsset != id;
+	if (bShouldUpdateCache)
+	{
+		VM_UpdateCache(id, Data);
+	}
+
+	Matrix4 HandTransform;
+
 	Transform RealTransforms[64]{};
 	//VR_END
 
@@ -445,21 +467,53 @@ void Game::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, Vector3* u
 				// Hide arms/root
 				OutBoneTransforms[BoneIndex].Scale = 0.0f;
 			}
-			// TODO: CACHE THIS!
-			else if (strstr(CurrentBone.BoneName, "r wrist"))
+			else if (BoneIndex == CachedViewModel.RightWristIndex)
 			{
-				Matrix4 NewTransform = vr->GetControllerTransform(ControllerRole::Right, true); 
+				Matrix4 NewTransform = vr->GetControllerTransform(ControllerRole::Right, true);
 				// Apply scale only to translation portion
 				Vector3 Translation = NewTransform * Vector3(0.0f, 0.0f, 0.0f);
 				NewTransform.translate(-Translation);
 				Translation *= MetresToWorld(1.0f);
 				Translation += *pos;
+
 				NewTransform.translate(Translation);
 
+				HandTransform = NewTransform;
+
+				// TODO: Check this works for other guns
+				// Not sure if I should keep this? Rotates the hand to make the gun face forwards when controller does
+				/*
+				if (CurrentBone.RightLeaf != -1)
+				{
+					Bone& GunBone = BoneArray[CurrentBone.RightLeaf];
+					if (CurrentBone.RightLeaf == CachedViewModel.GunIndex)
+					{
+						const TransformQuat* GunQuat = &BoneTransforms[CurrentBone.RightLeaf];
+						Helpers::MakeTransformFromQuat(&GunQuat->Rotation, &TempTransform);
+
+						Matrix4 Rotation;
+						for (int x = 0; x < 3; x++)
+						{
+							for (int y = 0; y < 3; y++)
+							{
+								Rotation[x + y * 4] = TempTransform.Rotation[x + y * 3];
+							}
+						}
+
+						NewTransform = NewTransform * Rotation.invert();
+					}
+					else
+					{
+						Logger::log << "ERROR: Right leaf of " << CurrentBone.BoneName << " is " << GunBone.BoneName << std::endl;
+					}
+
+				}
+				*/
+
 				VM_MoveBoneToTransform(BoneIndex, CurrentBone, NewTransform, BoneArray, RealTransforms, OutBoneTransforms);
-				VM_CreateEndCap(BoneIndex, CurrentBone, RealTransforms, OutBoneTransforms);
+				VM_CreateEndCap(BoneIndex, CurrentBone, OutBoneTransforms);
 			}
-			else if (strstr(CurrentBone.BoneName, "l wrist"))
+			else if (BoneIndex == CachedViewModel.LeftWristIndex)
 			{
 				Matrix4 NewTransform = vr->GetControllerTransform(ControllerRole::Left, true);
 				// Apply scale only to translation portion
@@ -470,8 +524,44 @@ void Game::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, Vector3* u
 				NewTransform.translate(Translation);
 
 				VM_MoveBoneToTransform(BoneIndex, CurrentBone, NewTransform, BoneArray, RealTransforms, OutBoneTransforms);
-				VM_CreateEndCap(BoneIndex, CurrentBone, RealTransforms, OutBoneTransforms);
+				VM_CreateEndCap(BoneIndex, CurrentBone, OutBoneTransforms);
 			}
+			else if (BoneIndex == CachedViewModel.GunIndex)
+			{
+				Vector3& GunPos = OutBoneTransforms[BoneIndex].Translation;
+				Matrix3 GunRot = OutBoneTransforms[BoneIndex].Rotation;
+
+				Vector3 HandPos = HandTransform * Vector3(0.0f, 0.0f, 0.0f);
+				Matrix4 HandRotation = HandTransform.translate(-HandPos);
+				Matrix3 HandRotation3;
+
+				for (int i = 0; i < 3; i++)
+				{
+					HandRotation3.setColumn(i, &HandRotation.get()[i * 4]);
+				}
+
+				Matrix3 InverseHand = HandRotation3;
+				InverseHand.invert();
+
+				CachedViewModel.FireOffset = (GunPos - HandPos) + (GunRot * CachedViewModel.CookedFireOffset);
+				CachedViewModel.FireOffset = InverseHand * CachedViewModel.FireOffset;
+
+				CachedViewModel.FireRotation = CachedViewModel.CookedFireRotation * GunRot * InverseHand;
+
+
+				LastFireLocation = HandPos + HandRotation3 * CachedViewModel.FireOffset;
+				LastFireAim = LastFireLocation + (HandRotation3 * CachedViewModel.FireRotation) * Vector3(1.0f, 0.0f, 0.0f);
+			}
+			/*
+			else if (strstr(CurrentBone.BoneName, "l thumb tip"))
+			{
+				OutBoneTransforms[BoneIndex].Translation = LastFireAim;
+			}
+			else if (strstr(CurrentBone.BoneName, "l thumb mid"))
+			{
+				OutBoneTransforms[BoneIndex].Translation = LastFireLocation;
+			}
+			//*/
 			//VR_END
 
 			if (CurrentBone.LeftLeaf != -1)
@@ -490,7 +580,7 @@ void Game::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, Vector3* u
 }
 
 
-void Game::VM_CreateEndCap(int BoneIndex, const Bone& CurrentBone, Transform* RealTransforms, Transform* OutBoneTransforms)
+void Game::VM_CreateEndCap(int BoneIndex, const Bone& CurrentBone, Transform* OutBoneTransforms)
 {
 	// Parent bone to the position of the current bone with 0 scale to act as an end cap
 	int idx = CurrentBone.Parent;
@@ -525,10 +615,122 @@ void Game::VM_MoveBoneToTransform(int BoneIndex, const Bone& CurrentBone, const 
 	}
 	RealTransforms[BoneIndex] = OutBoneTransforms[BoneIndex]; // Re-cache value to use updated position
 }
+
+inline void Game::VM_UpdateCache(HaloID& id, AssetData_ModelAnimations* Data)
+{
+	Logger::log << "[VM_UpdateCache] Swapped weapons, recaching " << id << std::endl;
+	CachedViewModel.CurrentAsset = id;
+	CachedViewModel.LeftWristIndex = -1;
+	CachedViewModel.RightWristIndex = -1;
+	CachedViewModel.GunIndex = -1;
+
+	Bone* BoneArray = Data->BoneArray;
+
+	for (int i = 0; i < Data->NumBones; i++)
+	{
+		Bone& CurrentBone = BoneArray[i];
+
+		if (strstr(CurrentBone.BoneName, "l wrist"))
+		{
+			Logger::log << "[VM_UpdateCache] Found Left Wrist @ " << i << std::endl;
+			CachedViewModel.LeftWristIndex = i;
+		}
+		else if (strstr(CurrentBone.BoneName, "r wrist"))
+		{
+			Logger::log << "[VM_UpdateCache] Found Right Wrist @ " << i << std::endl;
+			CachedViewModel.RightWristIndex = i;
+		}
+		else if (strstr(CurrentBone.BoneName, "gun"))
+		{
+			Logger::log << "[VM_UpdateCache] Found Gun @ " << i << std::endl;
+			CachedViewModel.GunIndex = i;
+		}
+	}
+
+	CachedViewModel.FireOffset = Vector3();
+
+	// Weapon model can be found from this chain:
+	// Player->WeaponID (DynamicObject)->WeaponID (Weapon Asset)->WeaponData->ViewModelID (GBX Asset)
+	// The local offset of the fire VFX (i.e. end of the barrel) is found in the "primary trigger" socket
+
+	BaseDynamicObject* Player = Helpers::GetLocalPlayer();
+	if (!Player)
+	{
+		Logger::log << "[VM_UpdateCache] Can't find local player" << std::endl;
+		return;
+	}
+
+	BaseDynamicObject* WeaponObj = Helpers::GetDynamicObject(Player->Weapon);
+	if (!WeaponObj)
+	{
+		Logger::log << "[VM_UpdateCache] Can't find weapon from WeaponID " << Player->Weapon << std::endl;
+		Logger::log << "[VM_UpdateCache] Player Tag = " << Player->TagID << std::endl;
+		return;
+	}
+
+	Asset_Weapon* Weapon = Helpers::GetTypedAsset<Asset_Weapon>(WeaponObj->TagID);
+	if (!Weapon)
+	{
+		Logger::log << "[VM_UpdateCache] Can't find weapon asset from TagID " << WeaponObj->TagID << std::endl;
+		return;
+	}
+
+	if (!Weapon->WeaponData)
+	{
+		Logger::log << "[VM_UpdateCache] Can't find weapon data in weapon asset " << WeaponObj->TagID << std::endl;
+		Logger::log << "[VM_UpdateCache] Weapon Type = " << Weapon->GroupID << std::endl;
+		Logger::log << "[VM_UpdateCache] Weapon Path = " << Weapon->WeaponAsset << std::endl;
+		return;
+	}
+
+
+	Asset_GBXModel* Model = Helpers::GetTypedAsset<Asset_GBXModel>(Weapon->WeaponData->ViewModelID);
+	if (!Model)
+	{
+		Logger::log << "[VM_UpdateCache] Can't find GBX model from ViewModelID = " << Weapon->WeaponData->ViewModelID << std::endl;
+		return;
+	}
+
+	Logger::log << "[VM_UpdateCache] GBXModelTag = " << std::setw(4) << Model->GroupID << std::endl;
+	Logger::log << "[VM_UpdateCache] GBXModelPath = " << Model->ModelPath << std::endl;
+
+	if (!Model->ModelData)
+	{
+		return;
+	}
+
+	Logger::log << "[VM_UpdateCache] NumSockets = " << Model->ModelData->NumSockets << std::endl;
+
+	for (int i = 0; i < Model->ModelData->NumSockets; i++)
+	{
+		GBXSocket& Socket = Model->ModelData->Sockets[i];
+		Logger::log << "[VM_UpdateCache] Socket = " << Socket.SocketName << std::endl;
+
+		if (strstr(Socket.SocketName, "primary trigger"))
+		{
+			Logger::log << "[VM_UpdateCache] Found Effects location, Num Transforms = " << Socket.NumTransforms << std::endl;
+
+			if (Socket.NumTransforms == 0)
+			{
+				Logger::log << "[VM_UpdateCache] " << Socket.SocketName << " has no transforms" << std::endl;
+				break;
+			}
+
+			CachedViewModel.CookedFireOffset = Socket.Transforms[0].Position;
+			Transform Rotation;
+			Helpers::MakeTransformFromQuat(&Socket.Transforms[0].QRotation, &Rotation);
+			CachedViewModel.CookedFireRotation = Rotation.Rotation;
+
+			Logger::log << "[VM_UpdateCache] Position = " << Socket.Transforms[0].Position << std::endl;
+			Logger::log << "[VM_UpdateCache] Quaternion = " << Socket.Transforms[0].QRotation << std::endl;
+			break;
+		}
+	}
+}
 #pragma optimize("", on)
 
 void Game::PreFireWeapon(HaloID& WeaponID, short param2, bool param3)
-{	
+{
 	BaseDynamicObject* Object = Helpers::GetDynamicObject(WeaponID);
 
 	WeaponFiredPlayer = nullptr;
@@ -537,33 +739,53 @@ void Game::PreFireWeapon(HaloID& WeaponID, short param2, bool param3)
 	HaloID PlayerID;
 	if (Object && Helpers::GetLocalPlayerID(PlayerID) && PlayerID == Object->Parent)
 	{
-		Logger::log << "FireWeapon(" << WeaponID << ", " << param2 << ", " << param3 << ")" << std::endl;
-
 		// Teleport the player to the controller position so the bullet comes from there instead
 		WeaponFiredPlayer = static_cast<UnitDynamicObject*>(Helpers::GetDynamicObject(PlayerID));
 		if (WeaponFiredPlayer)
 		{
 			// TODO: Handedness
-			Matrix4 ControllerPos = vr->GetControllerTransform(ControllerRole::Right, false).scale(Game::MetresToWorld(1.0f));
+			Matrix4 ControllerPos = vr->GetControllerTransform(ControllerRole::Right, false);
 
+			// Apply scale only to translation portion
+			Vector3 Translation = ControllerPos * Vector3(0.0f, 0.0f, 0.0f);
+			ControllerPos.translate(-Translation);
+			Translation *= MetresToWorld(1.0f);
+			Translation += WeaponFiredPlayer->Position;
+
+#if EMULATE_VR
+			// Emulate standing at (-28.1572, 21.4454, 0.0f) holding the gun 0.618 units up
+			Translation += Vector3(-28.1572f, 21.4454f, 0.618f) - WeaponFiredPlayer->Position;
+#endif
+			ControllerPos.translate(Translation);
+
+			Vector3 HandPos = ControllerPos * Vector3(0.0f, 0.0f, 0.0f);
+			Matrix4 HandRotation = ControllerPos.translate(-HandPos);
+
+			Matrix3 HandRotation3;
+
+			for (int i = 0; i < 3; i++)
+			{
+				HandRotation3.setColumn(i, &HandRotation.get()[i * 4]);
+			}
+
+			// Cache the real values so we can restore them after running the original fire function
 			PlayerPosition = WeaponFiredPlayer->Position;
 			// What are the other aims for??
 			PlayerAim = WeaponFiredPlayer->Aim;
 
-			Vector3 LocalControllerPos = ControllerPos * Vector3(0.0f, 0.0f, 0.0f);
+			// angle's off (or more likely offset) + changes when crouching
+			// maybe get camera position and use delta between camera and player position somehow
 
-			WeaponFiredPlayer->Position = PlayerPosition + LocalControllerPos;
-			WeaponFiredPlayer->Aim = ControllerPos.getLeftAxis();
+			Vector3 InternalFireOffset = Helpers::GetCamera().position - WeaponFiredPlayer->Position;
 
-			Logger::log << "Overwrote bullet trajectory: " << PlayerPosition << " @ " << PlayerAim << " -> " << WeaponFiredPlayer->Position << " @ " << WeaponFiredPlayer->Aim << std::endl;
-		}
-	}
-	else
-	{
-		Logger::log << "NON PLAYER FireWeapon(" << WeaponID << ", " << param2 << ", " << param3 << ")" << std::endl;
-		if (Object)
-		{
-			Logger::log << PlayerID << "!=" << Object->Parent << std::endl;
+			WeaponFiredPlayer->Position = HandPos + HandRotation * CachedViewModel.FireOffset;// -InternalFireOffset;
+			WeaponFiredPlayer->Aim = (HandRotation3 * CachedViewModel.FireRotation) * Vector3(1.0f, 0.0f, 0.0f);
+
+			LastFireLocation = WeaponFiredPlayer->Position;// +InternalFireOffset;
+			LastFireAim = LastFireLocation + WeaponFiredPlayer->Aim * 1.0f;
+			Logger::log << "FireOffset: " << CachedViewModel.FireOffset << std::endl;
+			Logger::log << "Player Position: " << PlayerPosition << std::endl;
+			Logger::log << "Last fire location: " << LastFireLocation << std::endl;
 		}
 	}
 }
@@ -680,6 +902,12 @@ void Game::UpdateInputs()
 	ApplyBoolInput(Crouch);
 	ApplyImpulseBoolInput(Zoom);
 	ApplyBoolInput(Reload);
+
+	unsigned char MotionControlFlashlight = UpdateFlashlight();
+	if (MotionControlFlashlight > 0)
+	{
+		controls.Flashlight = MotionControlFlashlight;
+	}
 
 	if (vr->GetBoolInput(Recentre))
 	{
@@ -853,11 +1081,43 @@ void Game::SetupConfigs()
 	c_SnapTurn = config.RegisterBool("SnapTurn", "The look input will instantly rotate the view by a fixed amount, rather than smoothly rotating", true);
 	c_SnapTurnAmount = config.RegisterFloat("SnapTurnAmount", "Rotation in degrees a single snap turn will rotate the view by", 45.0f);
 	c_SmoothTurnAmount = config.RegisterFloat("SmoothTurnAmount", "Rotation in degrees per second the view will turn at when not using snap turning", 90.0f);
+	c_LeftHandFlashlightDistance = config.RegisterFloat("LeftHandFlashlight", "Bringing the left hand within this distance of the head will toggle the flashlight (<0 to disable)", 0.2f);
+	c_RightHandFlashlightDistance = config.RegisterFloat("RightHandFlashlight", "Bringing the right hand within this distance of the head will toggle the flashlight (<0 to disable)", -1.0f);
 
 	config.LoadFromFile("VR/config.txt");
 	config.SaveToFile("VR/config.txt");
 
 	Logger::log << "Loaded configs" << std::endl;
+}
+
+unsigned char Game::UpdateFlashlight()
+{
+	Vector3 HeadPos = vr->GetHMDTransform() * Vector3(0.0f, 0.0f, 0.0f);
+
+	float LeftDistance = c_LeftHandFlashlightDistance->Value();
+	float RightDistance = c_RightHandFlashlightDistance->Value();
+
+	if (LeftDistance > 0.0f)
+	{
+		Vector3 HandPos = vr->GetControllerTransform(ControllerRole::Left) * Vector3(0.0f, 0.0f, 0.0f);
+
+		if ((HeadPos - HandPos).lengthSqr() < LeftDistance * LeftDistance)
+		{
+			return 127;
+		}
+	}
+
+	if (RightDistance > 0.0f)
+	{
+		Vector3 HandPos = vr->GetControllerTransform(ControllerRole::Right) * Vector3(0.0f, 0.0f, 0.0f);
+
+		if ((HeadPos - HandPos).lengthSqr() < RightDistance * RightDistance)
+		{
+			return 127;
+		}
+	}
+
+	return 0;
 }
 
 void Game::CalcFPS(float deltaTime)

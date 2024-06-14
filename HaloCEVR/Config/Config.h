@@ -6,7 +6,7 @@
 
 class Property {
 public:
-	Property(const std::string& description) : description_(description) {}
+	Property(const std::string& description) : description_(description), guid(-1) {}
 
 	virtual ~Property() = default;
 

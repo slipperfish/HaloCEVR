@@ -57,7 +57,7 @@ void Hooks::EnableAllHooks()
 	Freeze();
 
 	P_RemoveCutsceneFPSCap();
-	P_DontStealMouse();
+	//P_DontStealMouse();
 
 	// If we think the user has chimera installed, don't try to patch their patches
 	if (!bPotentiallyFoundChimera)

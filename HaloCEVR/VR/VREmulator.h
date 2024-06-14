@@ -26,7 +26,7 @@ public:
 	void SetYawOffset(float NewOffset) {}
 	float GetYawOffset() { return 0.0f; }
 	Matrix4 GetHMDTransform(bool bRenderPose = false) { return Matrix4(); }
-	Matrix4 GetControllerTransform(ControllerRole Role, bool bRenderPose = false) { return Matrix4(); }
+	Matrix4 GetControllerTransform(ControllerRole Role, bool bRenderPose = false);
 	virtual struct IDirect3DSurface9* GetRenderSurface(int eye);
 	virtual struct IDirect3DTexture9* GetRenderTexture(int eye);
 	virtual struct IDirect3DSurface9* GetUISurface();
@@ -51,7 +51,7 @@ protected:
 	HWND hWnd;
 	struct IDirect3DDevice9* MirrorDevice = nullptr;
 
-	struct IDirect3DSurface9* UISurface;
+	struct IDirect3DSurface9* UISurface = nullptr;
 	struct IDirect3DSurface9* EyeSurface_Game[2][2];
 	struct IDirect3DSurface9* EyeSurface_VR[2][2];
 

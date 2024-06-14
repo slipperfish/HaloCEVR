@@ -30,11 +30,11 @@ void Helpers::MakeTransformFromQuat(const Vector4* Quaternion, Transform* OutTra
 	float twoOverLength;
 
 	float len = Quaternion->w * Quaternion->w + Quaternion->z * Quaternion->z + Quaternion->y * Quaternion->y + Quaternion->x * Quaternion->x;
-	if (len == 0.0) {
-		twoOverLength = 0.0;
+	if (len == 0.0f) {
+		twoOverLength = 0.0f;
 	}
 	else {
-		twoOverLength = 2.0 / len;
+		twoOverLength = 2.0f / len;
 	}
 	float twoX = twoOverLength * Quaternion->x;
 	float twoY = twoOverLength * Quaternion->y;
@@ -48,19 +48,19 @@ void Helpers::MakeTransformFromQuat(const Vector4* Quaternion, Transform* OutTra
 	fVar7 = twoY * Quaternion->y;
 	fVar8 = twoZ * Quaternion->y;
 	fVar1 = twoZ * Quaternion->z;
-	OutTransform->Scale = 1.0;
-	(OutTransform->Translation).x = 0.0;
-	(OutTransform->Translation).y = 0.0;
-	(OutTransform->Translation).z = 0.0;
-	OutTransform->Rotation[0] = 1.0 - (fVar7 + fVar1);
+	OutTransform->Scale = 1.0f;
+	(OutTransform->Translation).x = 0.0f;
+	(OutTransform->Translation).y = 0.0f;
+	(OutTransform->Translation).z = 0.0f;
+	OutTransform->Rotation[0] = 1.0f - (fVar7 + fVar1);
 	OutTransform->Rotation[1] = fVar5 - fVar4;
 	OutTransform->Rotation[2] = fVar6 + fVar3;
 	OutTransform->Rotation[3] = fVar5 + fVar4;
-	OutTransform->Rotation[4] = 1.0 - (fVar1 + len);
+	OutTransform->Rotation[4] = 1.0f - (fVar1 + len);
 	OutTransform->Rotation[5] = fVar8 - fVar2;
 	OutTransform->Rotation[6] = fVar6 - fVar3;
 	OutTransform->Rotation[7] = fVar8 + fVar2;
-	OutTransform->Rotation[8] = 1.0 - (fVar7 + len);
+	OutTransform->Rotation[8] = 1.0f - (fVar7 + len);
 }
 
 void Helpers::CombineTransforms(const Transform* TransformA, const Transform* TransformB, Transform* OutTransform)

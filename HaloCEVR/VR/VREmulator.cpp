@@ -104,6 +104,18 @@ void VREmulator::UpdateCameraFrustum(CameraFrustum* frustum, int eye)
 	frustum->position += rightVec * DIST * (float)(2 * eye - 1);
 }
 
+Matrix4 VREmulator::GetControllerTransform(ControllerRole Role, bool bRenderPose)
+{
+	if (Role == ControllerRole::Left)
+	{
+		return Matrix4().translate(0.0f, 0.25f, -0.5f);
+	}
+	else
+	{
+		return Matrix4().translate(0.0f, -0.25f, -0.5f);
+	}
+}
+
 IDirect3DSurface9* VREmulator::GetRenderSurface(int eye)
 {
 	return EyeSurface_Game[eye][0];

@@ -59,14 +59,17 @@ public:
 
 protected:
 
-	inline void VM_CreateEndCap(int BoneIndex, const struct Bone& CurrentBone, struct Transform* RealTransforms, struct Transform* OutBoneTransforms);
+	inline void VM_CreateEndCap(int BoneIndex, const struct Bone& CurrentBone, struct Transform* OutBoneTransforms);
 	inline void VM_MoveBoneToTransform(int BoneIndex, const struct Bone& CurrentBone, const Matrix4& NewTransform, struct Bone* BoneArray, struct Transform* RealTransforms, struct Transform* OutBoneTransforms);
+	inline void VM_UpdateCache(HaloID& id, struct AssetData_ModelAnimations* Data);
 
 	void CreateConsole();
 
 	void PatchGame();
 
 	void SetupConfigs();
+
+	unsigned char UpdateFlashlight();
 
 	void CalcFPS(float deltaTime);
 
@@ -79,6 +82,19 @@ protected:
 
 	unsigned char MouseDownState = 0;
 
+	struct ViewModelCache
+	{
+		HaloID CurrentAsset{ 0, 0 };
+		int LeftWristIndex = 0;
+		int RightWristIndex = 0;
+		int GunIndex = 0;
+		Vector3 CookedFireOffset;
+		Matrix3 CookedFireRotation;
+		Vector3 FireOffset;
+		Matrix3 FireRotation;
+	};
+
+	ViewModelCache CachedViewModel;
 	UnitDynamicObject* WeaponFiredPlayer = nullptr;
 	Vector3 PlayerPosition;
 	Vector3 PlayerAim;
@@ -135,5 +151,7 @@ public:
 	BoolProperty* c_SnapTurn = nullptr;
 	FloatProperty* c_SnapTurnAmount = nullptr;
 	FloatProperty* c_SmoothTurnAmount = nullptr;
+	FloatProperty* c_LeftHandFlashlightDistance = nullptr;
+	FloatProperty* c_RightHandFlashlightDistance = nullptr;
 };
 

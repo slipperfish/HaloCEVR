@@ -20,6 +20,11 @@ inline bool operator==(HaloID& a, HaloID& b)
 	return a.ID == b.ID && a.Index == b.Index;
 }
 
+inline bool operator!=(HaloID& a, HaloID& b)
+{
+	return a.ID != b.ID || a.Index != b.Index;
+}
+
 enum class ObjectProperties : uint16_t
 {
 	NoCollision = 1 << 0,

@@ -9,11 +9,13 @@ bindings = {
     "Jump" : { "h" : "right", "b" : "joystick|north"},
     "SwitchGrenades" : {"h" : "left", "b" : "grip"},
     "SwitchWeapons" : {"h" : "right", "b" : "grip"},
-    "Interact" : {"h" : "left", "b" : "y"},
+    #"Interact" : {"h" : "left", "b" : "y"}, #Moved to right hand
     "Melee" : {"h" : "left", "b" : "x"},
-    "Flashlight" : {"h" : "right", "b" : "a"},
-    "Reload" : {"h" : "right", "b" : "b"},
-    "Grenade" : {"h" : "left", "b" : "trigger"},
+    #"Flashlight" : {"h" : "right", "b" : "a"}, #Handled by gesture
+    #"Reload" : {"h" : "right", "b" : "b"}, #Handled by interact
+    "Grenade" : {"h" : "right", "b" : "a"},
+    "Interact" : {"h" : "right", "b" : "b"},
+    #"Grenade" : {"h" : "left", "b" : "trigger"}, #Moved to right hand
     "Fire" : {"h" : "right", "b" : "trigger"},
     "Crouch" : {"h" : "right", "b" : "joystick|south"},
     "Look" : {"h" : "right", "b" : "joystick"},
