@@ -182,6 +182,7 @@
     <ClCompile Include="Maths\Matrices.cpp" />
     <ClCompile Include="VR\OpenVR.cpp" />
     <ClCompile Include="VR\VREmulator.cpp" />
+    <ClCompile Include="WeaponHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config\Config.h" />
@@ -208,6 +209,7 @@
     <ClInclude Include="Maths\Vectors.h" />
     <ClInclude Include="VR\VREmulator.h" />
     <ClInclude Include="VR\IVR.h" />
+    <ClInclude Include="WeaponHandler.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="VR\actions.json" />

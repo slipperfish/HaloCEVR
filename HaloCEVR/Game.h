@@ -8,6 +8,7 @@
 #include "Helpers/RenderTarget.h"
 #include "Helpers/Objects.h"
 #include "Maths/Vectors.h"
+#include "WeaponHandler.h"
 
 enum class ERenderState { UNKNOWN, LEFT_EYE, RIGHT_EYE, GAME};
 
@@ -54,14 +55,12 @@ public:
 	static float MetresToWorld(float m);
 	static float WorldToMetres(float w);
 
+	inline IVR* GetVR() const { return vr; }
+
 	UINT BackBufferWidth = 600;
 	UINT BackBufferHeight = 600;
 
 protected:
-
-	inline void VM_CreateEndCap(int BoneIndex, const struct Bone& CurrentBone, struct Transform* OutBoneTransforms);
-	inline void VM_MoveBoneToTransform(int BoneIndex, const struct Bone& CurrentBone, const Matrix4& NewTransform, struct Bone* BoneArray, struct Transform* RealTransforms, struct Transform* OutBoneTransforms);
-	inline void VM_UpdateCache(HaloID& id, struct AssetData_ModelAnimations* Data);
 
 	void CreateConsole();
 
@@ -76,28 +75,13 @@ protected:
 	void StoreRenderTargets();
 	void RestoreRenderTargets();
 
+	WeaponHandler weaponHandler;
+
 	bool bNeedsRecentre = true;
 	char LastSnapState = 0;
 	float LastDeltaTime = 0.0f;
 
 	unsigned char MouseDownState = 0;
-
-	struct ViewModelCache
-	{
-		HaloID CurrentAsset{ 0, 0 };
-		int LeftWristIndex = 0;
-		int RightWristIndex = 0;
-		int GunIndex = 0;
-		Vector3 CookedFireOffset;
-		Matrix3 CookedFireRotation;
-		Vector3 FireOffset;
-		Matrix3 FireRotation;
-	};
-
-	ViewModelCache CachedViewModel;
-	UnitDynamicObject* WeaponFiredPlayer = nullptr;
-	Vector3 PlayerPosition;
-	Vector3 PlayerAim;
 
 	float TimeSinceFPSUpdate = 0.0f;
 	int FramesSinceFPSUpdate = 0;

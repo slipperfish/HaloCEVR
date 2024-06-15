@@ -4,6 +4,7 @@
 #include <string>
 #include <mutex>
 #include <sstream>
+#include <Windows.h>
 
 class Logger {
 	std::ofstream logFile;
