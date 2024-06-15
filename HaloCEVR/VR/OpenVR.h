@@ -21,9 +21,9 @@ public:
 	float GetViewHeightStretch() override;
 	float GetAspect() override;
 	void Recentre() override;
-	void SetLocationOffset(Vector3 NewOffset) override;
+	void SetLocationOffset(Vector3 newOffset) override;
 	Vector3 GetLocationOffset() override;
-	void SetYawOffset(float NewOffset) override;
+	void SetYawOffset(float newOffset) override;
 	float GetYawOffset() override;
 	Matrix4 GetHMDTransform(bool bRenderPose = false) override;
 	Matrix4 GetControllerTransform(ControllerRole Role, bool bRenderPose = false) override;
@@ -45,39 +45,39 @@ protected:
 	void CreateTexAndSurface(int index, UINT Width, UINT Height, DWORD Usage, D3DFORMAT Format);
 	void PositionOverlay();
 
-	vr::IVRSystem* VRSystem;
-	vr::IVRCompositor* VRCompositor;
-	vr::IVRInput* VRInput;
-	vr::IVROverlay* VROverlay;
+	vr::IVRSystem* vrSystem;
+	vr::IVRCompositor* vrCompositor;
+	vr::IVRInput* vrInput;
+	vr::IVROverlay* vrOverlay;
 
-	vr::VRTextureBounds_t TextureBounds[2];
-	uint32_t RealWidth;
-	uint32_t RealHeight;
-	uint32_t RecommendedWidth;
-	uint32_t RecommendedHeight;
-	float Aspect;
-	float FOV;
+	vr::VRTextureBounds_t textureBounds[2];
+	uint32_t realWidth;
+	uint32_t realHeight;
+	uint32_t recommendedWidth;
+	uint32_t recommendedHeight;
+	float aspect;
+	float fov;
 
-	Vector3 PositionOffset;
-	float YawOffset;
+	Vector3 positionOffset;
+	float yawOffset;
 
 	bool bMouseVisible;
-	Vector2 MousePos;
+	Vector2 mousePos;
 	bool bMouseDown;
 
-	vr::VRActiveActionSet_t ActionSets[1];
+	vr::VRActiveActionSet_t actionSets[1];
 
-	vr::VROverlayHandle_t UIOverlay;
+	vr::VROverlayHandle_t uiOverlay;
 
-	vr::TrackedDevicePose_t GamePoses[vr::k_unMaxTrackedDeviceCount];
-	vr::TrackedDevicePose_t RenderPoses[vr::k_unMaxTrackedDeviceCount];
+	vr::TrackedDevicePose_t gamePoses[vr::k_unMaxTrackedDeviceCount];
+	vr::TrackedDevicePose_t renderPoses[vr::k_unMaxTrackedDeviceCount];
 
-	IDirect3DSurface9* GameRenderSurface[3];
-	IDirect3DTexture9* GameRenderTexture[3];
+	IDirect3DSurface9* gameRenderSurface[3];
+	IDirect3DTexture9* gameRenderTexture[3];
 
-	ID3D11Device* D3DDevice;
+	ID3D11Device* d3dDevice;
 
-	ID3D11Texture2D* VRRenderTexture[3];
+	ID3D11Texture2D* vrRenderTexture[3];
 
 
 	Matrix4 ConvertSteamVRMatrixToMatrix4(const vr::HmdMatrix34_t& matPose)
@@ -94,10 +94,10 @@ protected:
 
 	Matrix4 GetHMDMatrixPoseEye(vr::Hmd_Eye nEye)
 	{
-		if (!VRSystem)
+		if (!vrSystem)
 			return Matrix4();
 
-		vr::HmdMatrix34_t matEyeRight = VRSystem->GetEyeToHeadTransform(nEye);
+		vr::HmdMatrix34_t matEyeRight = vrSystem->GetEyeToHeadTransform(nEye);
 
 		Matrix4 matrixObj = ConvertSteamVRMatrixToMatrix4(matEyeRight);
 

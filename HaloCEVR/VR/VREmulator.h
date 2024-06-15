@@ -21,9 +21,9 @@ public:
 	float GetViewHeightStretch() { return 1.0f; }
 	float GetAspect() { return 1.0f; }
 	void Recentre() {};
-	void SetLocationOffset(Vector3 NewOffset) {}
+	void SetLocationOffset(Vector3 newOffset) {}
 	Vector3 GetLocationOffset() { return Vector3(0.0f, 0.0f, 0.0f); }
-	void SetYawOffset(float NewOffset) {}
+	void SetYawOffset(float newOffset) {}
 	float GetYawOffset() { return 0.0f; }
 	Matrix4 GetHMDTransform(bool bRenderPose = false) { return Matrix4(); }
 	Matrix4 GetControllerTransform(ControllerRole Role, bool bRenderPose = false);
@@ -44,18 +44,18 @@ public:
 protected:
 	void CreateSharedTarget();
 
-	void CreateTexAndSurface(int index, UINT Width, UINT Height, DWORD Usage, D3DFORMAT Format);
+	void CreateTexAndSurface(int index, UINT width, UINT height, DWORD usage, D3DFORMAT format);
 
 	void DrawEye(struct Renderer* renderer, float deltaTime, int eye);
 
 	HWND hWnd;
-	struct IDirect3DDevice9* MirrorDevice = nullptr;
+	struct IDirect3DDevice9* mirrorDevice = nullptr;
 
-	struct IDirect3DSurface9* UISurface = nullptr;
-	struct IDirect3DSurface9* EyeSurface_Game[2][2];
-	struct IDirect3DSurface9* EyeSurface_VR[2][2];
+	struct IDirect3DSurface9* uiSurface = nullptr;
+	struct IDirect3DSurface9* eyeSurface_Game[2][2];
+	struct IDirect3DSurface9* eyeSurface_VR[2][2];
 
-	struct IDirect3DTexture9* EyeTexture_Game[2][2];
-	struct IDirect3DTexture9* EyeTexture_VR[2][2];
+	struct IDirect3DTexture9* eyeTexture_Game[2][2];
+	struct IDirect3DTexture9* eyeTexture_VR[2][2];
 };
 

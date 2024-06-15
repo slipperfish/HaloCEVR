@@ -26,12 +26,12 @@ public:
 	virtual float GetViewHeightStretch() = 0;
 	virtual float GetAspect() = 0;
 	virtual void Recentre() = 0;
-	virtual void SetLocationOffset(Vector3 NewOffset) = 0;
+	virtual void SetLocationOffset(Vector3 newOffset) = 0;
 	virtual Vector3 GetLocationOffset() = 0;
-	virtual void SetYawOffset(float NewOffset) = 0;
+	virtual void SetYawOffset(float newOffset) = 0;
 	virtual float GetYawOffset() = 0;
 	virtual Matrix4 GetHMDTransform(bool bRenderPose = false) = 0;
-	virtual Matrix4 GetControllerTransform(ControllerRole Role, bool bRenderPose = false) = 0;
+	virtual Matrix4 GetControllerTransform(ControllerRole role, bool bRenderPose = false) = 0;
 	virtual struct IDirect3DSurface9* GetRenderSurface(int eye) = 0;
 	virtual struct IDirect3DTexture9* GetRenderTexture(int eye) = 0;
 	virtual struct IDirect3DSurface9* GetUISurface() = 0;

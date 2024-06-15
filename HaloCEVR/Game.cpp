@@ -40,8 +40,8 @@ void Game::Init()
 
 	inputHandler.RegisterInputs();
 
-	BackBufferWidth = vr->GetViewWidth();
-	BackBufferHeight = vr->GetViewHeight();
+	backBufferWidth = vr->GetViewWidth();
+	backBufferHeight = vr->GetViewHeight();
 
 	Logger::log << "HaloCEVR initialised" << std::endl;
 }
@@ -50,25 +50,25 @@ void Game::Shutdown()
 {
 	Logger::log << "HaloCEVR shutting down..." << std::endl;
 
-	MH_STATUS HookStatus = MH_DisableHook(MH_ALL_HOOKS);
+	MH_STATUS hookStatus = MH_DisableHook(MH_ALL_HOOKS);
 
-	if (HookStatus != MH_OK)
+	if (hookStatus != MH_OK)
 	{
-		Logger::log << "Could not remove hooks: " << MH_StatusToString(HookStatus) << std::endl;
+		Logger::log << "Could not remove hooks: " << MH_StatusToString(hookStatus) << std::endl;
 	}
 
-	HookStatus = MH_Uninitialize();
+	hookStatus = MH_Uninitialize();
 
-	if (HookStatus != MH_OK)
+	if (hookStatus != MH_OK)
 	{
-		Logger::log << "Could not uninitialise MinHook: " << MH_StatusToString(HookStatus) << std::endl;
+		Logger::log << "Could not uninitialise MinHook: " << MH_StatusToString(hookStatus) << std::endl;
 	}
 
 	if (c_ShowConsole && c_ShowConsole->Value())
 	{
-		if (ConsoleOut)
+		if (consoleOut)
 		{
-			fclose(ConsoleOut);
+			fclose(consoleOut);
 		}
 		FreeConsole();
 	}
@@ -88,14 +88,14 @@ void Game::OnInitDirectX()
 
 	vr->OnGameFinishInit();
 
-	UISurface = vr->GetUISurface();
+	uiSurface = vr->GetUISurface();
 }
 
 void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 {
 	lastDeltaTime = deltaTime;
 
-	RenderState = ERenderState::UNKNOWN;
+	renderState = ERenderState::UNKNOWN;
 
 	//CalcFPS(deltaTime);
 
@@ -104,19 +104,19 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 
 	StoreRenderTargets();
 
-	sRect* Window = Helpers::GetWindowRect();
-	Window->top = 0;
-	Window->left = 0;
-	Window->right = vr->GetViewWidth();
-	Window->bottom = vr->GetViewHeight();
+	sRect* window = Helpers::GetWindowRect();
+	window->top = 0;
+	window->left = 0;
+	window->right = vr->GetViewWidth();
+	window->bottom = vr->GetViewHeight();
 
 	// Clear UI surface
-	IDirect3DSurface9* CurrentSurface = nullptr;
-	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &CurrentSurface);
-	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, UISurface);
+	IDirect3DSurface9* currentSurface = nullptr;
+	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &currentSurface);
+	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, uiSurface);
 	Helpers::GetDirect3DDevice9()->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(0, 0, 0, 0), 1.0f, 0);
-	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, CurrentSurface);
-	CurrentSurface->Release();
+	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, currentSurface);
+	currentSurface->Release();
 
 	frustum1 = renderer->frustum;
 	frustum2 = renderer->frustum2;
@@ -132,7 +132,7 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 
 void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
 {
-	RenderState = eye == 0 ? ERenderState::LEFT_EYE : ERenderState::RIGHT_EYE;
+	renderState = eye == 0 ? ERenderState::LEFT_EYE : ERenderState::RIGHT_EYE;
 
 	renderer->frustum = frustum1;
 	renderer->frustum2 = frustum2;
@@ -164,18 +164,14 @@ void Game::PostDrawEye(struct Renderer* renderer, float deltaTime, int eye)
 	// UI is usually drawn via an overlay, emulate it in flat (intentionally squashed)
 
 #if EMULATE_VR
-	RECT TargetRect;
-	TargetRect.left = 0;
-	TargetRect.right = 200;
-	TargetRect.top = 0;
-	TargetRect.bottom = 200;
-	Helpers::GetDirect3DDevice9()->StretchRect(UISurface, NULL, Helpers::GetRenderTargets()[0].renderSurface, &TargetRect, D3DTEXF_NONE);
+	RECT targetRect{ 0, 0, 200, 200 };
+	Helpers::GetDirect3DDevice9()->StretchRect(uiSurface, NULL, Helpers::GetRenderTargets()[0].renderSurface, &targetRect, D3DTEXF_NONE);
 #endif
 }
 
 void Game::PreDrawMirror(struct Renderer* renderer, float deltaTime)
 {
-	RenderState = ERenderState::GAME;
+	renderState = ERenderState::GAME;
 
 	renderer->frustum = frustum1;
 	renderer->frustum2 = frustum2;
@@ -202,10 +198,10 @@ bool Game::PreDrawHUD()
 		return GetRenderState() == ERenderState::GAME;
 	}
 
-	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &UIRealSurface);
-	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, UISurface);
-	UIRealSurface = Helpers::GetRenderTargets()[1].renderSurface;
-	Helpers::GetRenderTargets()[1].renderSurface = UISurface;
+	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &uiRealSurface);
+	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, uiSurface);
+	uiRealSurface = Helpers::GetRenderTargets()[1].renderSurface;
+	Helpers::GetRenderTargets()[1].renderSurface = uiSurface;
 
 	return true;
 }
@@ -218,9 +214,9 @@ void Game::PostDrawHUD()
 		return;
 	}
 
-	Helpers::GetRenderTargets()[1].renderSurface = UIRealSurface;
-	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, UIRealSurface);
-	UIRealSurface->Release();
+	Helpers::GetRenderTargets()[1].renderSurface = uiRealSurface;
+	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, uiRealSurface);
+	uiRealSurface->Release();
 }
 
 bool Game::PreDrawMenu()
@@ -232,10 +228,10 @@ bool Game::PreDrawMenu()
 		return GetRenderState() == ERenderState::GAME;
 	}
 
-	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &UIRealSurface);
-	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, UISurface);
-	UIRealSurface = Helpers::GetRenderTargets()[1].renderSurface;
-	Helpers::GetRenderTargets()[1].renderSurface = UISurface;
+	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &uiRealSurface);
+	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, uiSurface);
+	uiRealSurface = Helpers::GetRenderTargets()[1].renderSurface;
+	Helpers::GetRenderTargets()[1].renderSurface = uiSurface;
 
 	return true;
 }
@@ -248,9 +244,9 @@ void Game::PostDrawMenu()
 		return;
 	}
 
-	Helpers::GetRenderTargets()[1].renderSurface = UIRealSurface;
-	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, UIRealSurface);
-	UIRealSurface->Release();
+	Helpers::GetRenderTargets()[1].renderSurface = uiRealSurface;
+	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, uiRealSurface);
+	uiRealSurface->Release();
 }
 
 
@@ -263,8 +259,8 @@ bool Game::PreDrawLoading(int param1, struct Renderer* renderer)
 		return GetRenderState() == ERenderState::GAME;
 	}
 
-	UIRealSurface = Helpers::GetRenderTargets()[1].renderSurface;
-	Helpers::GetRenderTargets()[1].renderSurface = UISurface;
+	uiRealSurface = Helpers::GetRenderTargets()[1].renderSurface;
+	Helpers::GetRenderTargets()[1].renderSurface = uiSurface;
 
 	return true;
 }
@@ -277,7 +273,7 @@ void Game::PostDrawLoading(int param1, struct Renderer* renderer)
 		return;
 	}
 
-	Helpers::GetRenderTargets()[1].renderSurface = UIRealSurface;
+	Helpers::GetRenderTargets()[1].renderSurface = uiRealSurface;
 }
 
 void Game::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, Vector3* up, TransformQuat* BoneTransforms, Transform* OutBoneTransforms)
@@ -335,13 +331,13 @@ void Game::UpdateMouseInfo(MouseInfo* mouseInfo)
 
 void Game::SetViewportScale(Viewport* viewport)
 {
-	float Width = vr->GetViewWidthStretch();
-	float Height = vr->GetViewHeightStretch();
+	float width = vr->GetViewWidthStretch();
+	float height = vr->GetViewHeightStretch();
 
-	viewport->left = -Width;
-	viewport->right = Width;
-	viewport->bottom = Height;
-	viewport->top = -Height;
+	viewport->left = -width;
+	viewport->right = width;
+	viewport->bottom = height;
+	viewport->top = -height;
 }
 
 float Game::MetresToWorld(float m)
@@ -362,17 +358,17 @@ void Game::CreateConsole()
 	}
 
 	AllocConsole();
-	freopen_s(&ConsoleOut, "CONOUT$", "w", stdout);
+	freopen_s(&consoleOut, "CONOUT$", "w", stdout);
 	std::cout.clear();
 }
 
 void Game::PatchGame()
 {
-	MH_STATUS HookStatus;
+	MH_STATUS hookStatus;
 
-	if ((HookStatus = MH_Initialize()) != MH_OK)
+	if ((hookStatus = MH_Initialize()) != MH_OK)
 	{
-		Logger::log << "Could not initialise MinHook: " << MH_StatusToString(HookStatus) << std::endl;
+		Logger::log << "Could not initialise MinHook: " << MH_StatusToString(hookStatus) << std::endl;
 	}
 	else
 	{
@@ -398,29 +394,33 @@ void Game::SetupConfigs()
 	c_SmoothTurnAmount = config.RegisterFloat("SmoothTurnAmount", "Rotation in degrees per second the view will turn at when not using snap turning", 90.0f);
 	c_LeftHandFlashlightDistance = config.RegisterFloat("LeftHandFlashlight", "Bringing the left hand within this distance of the head will toggle the flashlight (<0 to disable)", 0.2f);
 	c_RightHandFlashlightDistance = config.RegisterFloat("RightHandFlashlight", "Bringing the right hand within this distance of the head will toggle the flashlight (<0 to disable)", -1.0f);
-
+	c_ControllerOffsetX = config.RegisterFloat("ControllerOffset.X", "Offset from the controller's position used when calculating the in game hand position", -0.045f);
+	c_ControllerOffsetY = config.RegisterFloat("ControllerOffset.Y", "Offset from the controller's position used when calculating the in game hand position", 0.01f);
+	c_ControllerOffsetZ = config.RegisterFloat("ControllerOffset.Z", "Offset from the controller's position used when calculating the in game hand position", 0.0f);
+	c_ControllerRotationX = config.RegisterFloat("ControllerRotation.X", "Rotation added to the controller when calculating the in game hand rotation", -10.0f);
+	c_ControllerRotationY = config.RegisterFloat("ControllerRotation.Y", "Rotation added to the controller when calculating the in game hand rotation", 0.0f);
+	c_ControllerRotationZ = config.RegisterFloat("ControllerRotation.Z", "Rotation added to the controller when calculating the in game hand rotation", 0.0f);
+	
 	config.LoadFromFile("VR/config.txt");
 	config.SaveToFile("VR/config.txt");
 
-	// TODO: Register configs for these
-
-	weaponHandler.localOffset = Vector3(-0.0455f, 0.0096f, 0.0056f);
-	weaponHandler.localRotation = Vector3(-11.0f, 0.0f, 0.0f);
+	weaponHandler.localOffset = Vector3(c_ControllerOffsetX->Value(), c_ControllerOffsetY->Value(), c_ControllerOffsetZ->Value());
+	weaponHandler.localRotation = Vector3(c_ControllerRotationX->Value(), c_ControllerRotationY->Value(), c_ControllerRotationZ->Value());
 
 	Logger::log << "Loaded configs" << std::endl;
 }
 
 void Game::CalcFPS(float deltaTime)
 {
-	FramesSinceFPSUpdate++;
-	TimeSinceFPSUpdate += deltaTime;
+	fpsTracker.framesSinceFPSUpdate++;
+	fpsTracker.timeSinceFPSUpdate += deltaTime;
 
-	if (TimeSinceFPSUpdate > 1.0f)
+	if (fpsTracker.timeSinceFPSUpdate > 1.0f)
 	{
-		TimeSinceFPSUpdate = 0.0f;
-		FPS = FramesSinceFPSUpdate;
-		FramesSinceFPSUpdate = 0;
-		Logger::log << FPS << std::endl;
+		fpsTracker.timeSinceFPSUpdate = 0.0f;
+		fpsTracker.fps = fpsTracker.framesSinceFPSUpdate;
+		fpsTracker.framesSinceFPSUpdate = 0;
+		Logger::log << fpsTracker.fps << std::endl;
 	}
 }
 

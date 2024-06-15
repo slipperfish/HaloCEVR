@@ -86,8 +86,8 @@ HRESULT __stdcall IDirect3DDevice9ExWrapper::Reset(D3DPRESENT_PARAMETERS* pPrese
 {
 	if (pPresentationParameters->BackBufferWidth != 1200 || pPresentationParameters->BackBufferHeight != 600)
 	{
-		pPresentationParameters->BackBufferWidth = Game::instance.BackBufferWidth;
-		pPresentationParameters->BackBufferHeight = Game::instance.BackBufferHeight;
+		pPresentationParameters->BackBufferWidth = Game::instance.backBufferWidth;
+		pPresentationParameters->BackBufferHeight = Game::instance.backBufferHeight;
 	}
 	return Real->Reset(pPresentationParameters);
 }

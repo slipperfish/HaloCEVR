@@ -12,9 +12,9 @@ HRESULT IDirect3D9ExWrapper::CreateDevice(UINT Adapter, D3DDEVTYPE DeviceType, H
 	
 	if (pPresentationParameters->BackBufferWidth != 1200 || pPresentationParameters->BackBufferHeight != 600)
 	{
-		pPresentationParameters->BackBufferWidth = Game::instance.BackBufferWidth;
-		pPresentationParameters->BackBufferHeight = Game::instance.BackBufferHeight;
-		Logger::log << "New dimensions: " << Game::instance.BackBufferWidth << "x" << Game::instance.BackBufferHeight << std::endl;
+		pPresentationParameters->BackBufferWidth = Game::instance.backBufferWidth;
+		pPresentationParameters->BackBufferHeight = Game::instance.backBufferHeight;
+		Logger::log << "New dimensions: " << Game::instance.backBufferWidth << "x" << Game::instance.backBufferHeight << std::endl;
 	}
 
 	IDirect3DDevice9Ex* RealDevice = nullptr;

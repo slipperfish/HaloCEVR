@@ -54,14 +54,14 @@ void VREmulator::OnGameFinishInit()
 		return;
 	}
 
-	IDirect3DSurface9* GameSurface = nullptr;
+	IDirect3DSurface9* gameSurface = nullptr;
 
-	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &GameSurface);
+	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &gameSurface);
 
-	D3DSURFACE_DESC Desc;
+	D3DSURFACE_DESC desc;
 
-	GameSurface->GetDesc(&Desc);
-	GameSurface->Release();
+	gameSurface->GetDesc(&desc);
+	gameSurface->Release();
 
 	D3DPRESENT_PARAMETERS present;
 	ZeroMemory(&present, sizeof(present));
@@ -70,13 +70,13 @@ void VREmulator::OnGameFinishInit()
 	present.hDeviceWindow = hWnd;
 	present.BackBufferWidth = 1200;
 	present.BackBufferHeight = 600;
-	present.BackBufferFormat = Desc.Format;
-	present.MultiSampleQuality = Desc.MultiSampleQuality;
-	present.MultiSampleType = Desc.MultiSampleType;
+	present.BackBufferFormat = desc.Format;
+	present.MultiSampleQuality = desc.MultiSampleQuality;
+	present.MultiSampleType = desc.MultiSampleType;
 
 	HRESULT result = S_OK;
 
-	result = Helpers::GetDirect3D9()->CreateDevice(0, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &present, &MirrorDevice);
+	result = Helpers::GetDirect3D9()->CreateDevice(0, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &present, &mirrorDevice);
 
 	if (FAILED(result))
 	{
@@ -97,6 +97,7 @@ void VREmulator::UpdatePoses()
 
 void VREmulator::UpdateCameraFrustum(CameraFrustum* frustum, int eye)
 {
+	// Emulate a 64mm IPD
 	const float DIST = Game::MetresToWorld(64.0f / 1000.0f);
 
 	Vector3 rightVec = frustum->facingDirection.cross(frustum->upDirection);
@@ -104,9 +105,9 @@ void VREmulator::UpdateCameraFrustum(CameraFrustum* frustum, int eye)
 	frustum->position += rightVec * DIST * (float)(2 * eye - 1);
 }
 
-Matrix4 VREmulator::GetControllerTransform(ControllerRole Role, bool bRenderPose)
+Matrix4 VREmulator::GetControllerTransform(ControllerRole role, bool bRenderPose)
 {
-	if (Role == ControllerRole::Left)
+	if (role == ControllerRole::Left)
 	{
 		return Matrix4().translate(0.0f, 0.25f, -0.5f);
 	}
@@ -118,17 +119,17 @@ Matrix4 VREmulator::GetControllerTransform(ControllerRole Role, bool bRenderPose
 
 IDirect3DSurface9* VREmulator::GetRenderSurface(int eye)
 {
-	return EyeSurface_Game[eye][0];
+	return eyeSurface_Game[eye][0];
 }
 
 IDirect3DTexture9* VREmulator::GetRenderTexture(int eye)
 {
-	return EyeTexture_Game[eye][0];
+	return eyeTexture_Game[eye][0];
 }
 
 IDirect3DSurface9* VREmulator::GetUISurface()
 {
-	return UISurface;
+	return uiSurface;
 }
 
 void VREmulator::UpdateInputs()
@@ -162,7 +163,7 @@ Vector2 VREmulator::GetVector2Input(InputBindingID id)
 
 void VREmulator::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 {
-	if (!MirrorDevice)
+	if (!mirrorDevice)
 	{
 		Logger::log << "No Mirror Device, can't draw" << std::endl;
 		return;
@@ -170,7 +171,7 @@ void VREmulator::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 
 	HRESULT result;
 
-	result = MirrorDevice->BeginScene();
+	result = mirrorDevice->BeginScene();
 	if (FAILED(result))
 	{
 		Logger::log << "Failed to call mirror begin scene: " << result << std::endl;
@@ -179,8 +180,8 @@ void VREmulator::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 
 void VREmulator::DrawEye(struct Renderer* renderer, float deltaTime, int eye)
 {
-	IDirect3DSurface9* MirrorSurface = nullptr;
-	HRESULT result = MirrorDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &MirrorSurface);
+	IDirect3DSurface9* mirrorSurface = nullptr;
+	HRESULT result = mirrorDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &mirrorSurface);
 
 	if (FAILED(result))
 	{
@@ -189,25 +190,25 @@ void VREmulator::DrawEye(struct Renderer* renderer, float deltaTime, int eye)
 
 	D3DSURFACE_DESC mirrorDesc;
 
-	MirrorSurface->GetDesc(&mirrorDesc);
+	mirrorSurface->GetDesc(&mirrorDesc);
 
-	UINT HalfWidth = mirrorDesc.Width / 2;
+	UINT halfWidth = mirrorDesc.Width / 2;
 
 	RECT rcDest;
-	rcDest.left = eye * HalfWidth;
+	rcDest.left = eye * halfWidth;
 	rcDest.top = 0;
-	rcDest.right = HalfWidth + eye * HalfWidth;
+	rcDest.right = halfWidth + eye * halfWidth;
 	rcDest.bottom = mirrorDesc.Height;
 
 	// Flip eyes for cross eyed
-	result = MirrorDevice->StretchRect(EyeSurface_VR[1 - eye][0], nullptr, MirrorSurface, &rcDest, D3DTEXF_NONE);
+	result = mirrorDevice->StretchRect(eyeSurface_VR[1 - eye][0], nullptr, mirrorSurface, &rcDest, D3DTEXF_NONE);
 	
 	if (FAILED(result))
 	{
 		Logger::log << "Failed to copy from shared texture (" << eye << "): " << result << std::endl;
 	}
 
-	MirrorSurface->Release();
+	mirrorSurface->Release();
 }
 
 void VREmulator::PostDrawFrame(struct Renderer* renderer, float deltaTime)
@@ -224,13 +225,13 @@ void VREmulator::PostDrawFrame(struct Renderer* renderer, float deltaTime)
 	DrawEye(renderer, deltaTime, 0);
 	DrawEye(renderer, deltaTime, 1);
 
-	HRESULT result = MirrorDevice->EndScene();
+	HRESULT result = mirrorDevice->EndScene();
 	if (FAILED(result))
 	{
 		Logger::log << "Failed to end scene: " << result << std::endl;
 	}
 
-	result = MirrorDevice->Present(nullptr, nullptr, nullptr, nullptr);
+	result = mirrorDevice->Present(nullptr, nullptr, nullptr, nullptr);
 	if (FAILED(result))
 	{
 		Logger::log << "Failed to present mirror view: " << result << std::endl;
@@ -239,22 +240,21 @@ void VREmulator::PostDrawFrame(struct Renderer* renderer, float deltaTime)
 
 void VREmulator::CreateSharedTarget()
 {
+	D3DSURFACE_DESC desc;
 
-	D3DSURFACE_DESC Desc;
-
-	Helpers::GetRenderTargets()[0].renderSurface->GetDesc(&Desc);
+	Helpers::GetRenderTargets()[0].renderSurface->GetDesc(&desc);
 		
-	D3DSURFACE_DESC Desc2;
+	D3DSURFACE_DESC desc2;
 
-	Helpers::GetRenderTargets()[1].renderSurface->GetDesc(&Desc2);
+	Helpers::GetRenderTargets()[1].renderSurface->GetDesc(&desc2);
 
-	const UINT WIDTH = GetViewWidth();
-	const UINT HEIGHT = GetViewHeight();
+	const UINT width = GetViewWidth();
+	const UINT height = GetViewHeight();
 
-	CreateTexAndSurface(0, WIDTH, HEIGHT, Desc.Usage, Desc.Format);
-	CreateTexAndSurface(1, WIDTH, HEIGHT, Desc2.Usage, Desc2.Format);
+	CreateTexAndSurface(0, width, height, desc.Usage, desc.Format);
+	CreateTexAndSurface(1, width, height, desc2.Usage, desc2.Format);
 
-	HRESULT res = Helpers::GetDirect3DDevice9()->CreateRenderTarget(WIDTH, HEIGHT, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_NONE, 0, TRUE, &UISurface, NULL);
+	HRESULT res = Helpers::GetDirect3DDevice9()->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_NONE, 0, TRUE, &uiSurface, NULL);
 
 	if (FAILED(res))
 	{
@@ -263,29 +263,29 @@ void VREmulator::CreateSharedTarget()
 }
 
 
-void VREmulator::CreateTexAndSurface(int index, UINT Width, UINT Height, DWORD Usage, D3DFORMAT Format)
+void VREmulator::CreateTexAndSurface(int index, UINT width, UINT height, DWORD usage, D3DFORMAT format)
 {
 	for (int i = 0; i < 2; i++)
 	{
-		HANDLE SharedHandle = nullptr;
+		HANDLE sharedHandle = nullptr;
 
 		// Create texture on game
 
-		HRESULT result = Helpers::GetDirect3DDevice9()->CreateTexture(Width, Height, 1, Usage, Format, D3DPOOL_DEFAULT, &EyeTexture_Game[i][index], &SharedHandle);
+		HRESULT result = Helpers::GetDirect3DDevice9()->CreateTexture(width, height, 1, usage, format, D3DPOOL_DEFAULT, &eyeTexture_Game[i][index], &sharedHandle);
 		if (FAILED(result))
 		{
 			Logger::log << "Failed to create game " << index << " texture: " << result << std::endl;
 		}
 
 		// Created shared texture on vr
-		result = MirrorDevice->CreateTexture(Width, Height, 1, Usage, Format, D3DPOOL_DEFAULT, &EyeTexture_VR[i][index], &SharedHandle);
+		result = mirrorDevice->CreateTexture(width, height, 1, usage, format, D3DPOOL_DEFAULT, &eyeTexture_VR[i][index], &sharedHandle);
 		if (FAILED(result))
 		{
 			Logger::log << "Failed to create vr " << index << " texture: " << result << std::endl;
 		}
 
 		// Extract game surface
-		result = EyeTexture_Game[i][index]->GetSurfaceLevel(0, &EyeSurface_Game[i][index]);
+		result = eyeTexture_Game[i][index]->GetSurfaceLevel(0, &eyeSurface_Game[i][index]);
 
 		if (FAILED(result))
 		{
@@ -293,7 +293,7 @@ void VREmulator::CreateTexAndSurface(int index, UINT Width, UINT Height, DWORD U
 		}
 
 		// Extract vr surface
-		result = EyeTexture_VR[i][index]->GetSurfaceLevel(0, &EyeSurface_VR[i][index]);
+		result = eyeTexture_VR[i][index]->GetSurfaceLevel(0, &eyeSurface_VR[i][index]);
 
 		if (FAILED(result))
 		{

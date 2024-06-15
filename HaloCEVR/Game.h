@@ -51,15 +51,15 @@ public:
 
 	bool GetDrawMirror() const { return c_DrawMirror->Value(); }
 
-	ERenderState GetRenderState() const { return RenderState; }
+	ERenderState GetRenderState() const { return renderState; }
 
 	static float MetresToWorld(float m);
 	static float WorldToMetres(float w);
 
 	inline IVR* GetVR() const { return vr; }
 
-	UINT BackBufferWidth = 600;
-	UINT BackBufferHeight = 600;
+	UINT backBufferWidth = 600;
+	UINT backBufferHeight = 600;
 
 	// HACK: Some places it is hard to get the delta time (e.g. updating the camera)
 	// Using the last known delta time should be good enough
@@ -82,12 +82,15 @@ protected:
 	WeaponHandler weaponHandler;
 	InputHandler inputHandler;
 
-	float TimeSinceFPSUpdate = 0.0f;
-	int FramesSinceFPSUpdate = 0;
+	struct FPSTracker
+	{
+		float timeSinceFPSUpdate = 0.0f;
+		int framesSinceFPSUpdate = 0;
 
-	int FPS = 0;
+		int fps = 0;
+	} fpsTracker;
 
-	FILE* ConsoleOut = nullptr;
+	FILE* consoleOut = nullptr;
 
 	Config config;
 
@@ -95,11 +98,11 @@ protected:
 
 	RenderTarget gameRenderTargets[8];
 
-	struct IDirect3DSurface9* UISurface;
-	struct IDirect3DSurface9* UIRealSurface;
+	struct IDirect3DSurface9* uiSurface;
+	struct IDirect3DSurface9* uiRealSurface;
 	struct IDirect3DSurface9* UIRealSurface2;
 
-	ERenderState RenderState = ERenderState::UNKNOWN;
+	ERenderState renderState = ERenderState::UNKNOWN;
 
 	CameraFrustum frustum1;
 	CameraFrustum frustum2;
@@ -118,5 +121,11 @@ public:
 	FloatProperty* c_SmoothTurnAmount = nullptr;
 	FloatProperty* c_LeftHandFlashlightDistance = nullptr;
 	FloatProperty* c_RightHandFlashlightDistance = nullptr;
+	FloatProperty* c_ControllerOffsetX = nullptr;
+	FloatProperty* c_ControllerOffsetY = nullptr;
+	FloatProperty* c_ControllerOffsetZ = nullptr;
+	FloatProperty* c_ControllerRotationX = nullptr;
+	FloatProperty* c_ControllerRotationY = nullptr;
+	FloatProperty* c_ControllerRotationZ = nullptr;
 };
 

@@ -21,7 +21,6 @@ void Hooks::InitHooks()
 	//CREATEHOOK(DrawScope);
 	CREATEHOOK(DrawLoadingScreen);
 	CREATEHOOK(SetViewModelPosition);
-	//CREATEHOOK(SetViewportSize);
 	CREATEHOOK(HandleInputs);
 	CREATEHOOK(UpdatePitchYaw);
 	CREATEHOOK(SetViewportScale);
@@ -46,7 +45,6 @@ void Hooks::EnableAllHooks()
 	//DrawScope.EnableHook();
 	DrawLoadingScreen.EnableHook();
 	SetViewModelPosition.EnableHook();
-	//SetViewportSize.EnableHook();
 	HandleInputs.EnableHook();
 	UpdatePitchYaw.EnableHook();
 	SetViewportScale.EnableHook();
@@ -63,9 +61,6 @@ void Hooks::EnableAllHooks()
 	if (!bPotentiallyFoundChimera)
 	{
 		P_FixTabOut();
-
-		// TODO: Test this (and get a proper signature etc)
-		//NOPInstructions(0x4c90ea, 6);
 	}
 
 	Unfreeze();
@@ -384,16 +379,12 @@ void __declspec(naked) Hooks::H_SetViewModelPosition()
 		mov pos, ecx // Get Position from ECX param
 		mov ecx, [esp + 0x10] // Get UpVector from 0x10 param
 		mov up, ecx
-		push ecx // Re-push UpVector
-		mov ecx, [esp + 0x10] // Get FacingVector from 0xc param
+		mov ecx, [esp + 0xc] // Get FacingVector from 0xc param
 		mov facing, ecx
-		push ecx // Re-push FacingVector
-		mov ecx, [esp + 0x10] // Get QuatTransforms from 0x8 param
+		mov ecx, [esp + 0x8] // Get QuatTransforms from 0x8 param
 		mov quatTrans, ecx
-		push ecx // Re-push QuatTransforms
-		mov ecx, [esp + 0x10] // Get Transforms from 0x4 param
+		mov ecx, [esp + 0x4] // Get Transforms from 0x4 param
 		mov trans, ecx
-		push ecx // Re-push Transforms
 		mov ecx, pos // Restore Position in ECX register
 	}
 
@@ -403,56 +394,6 @@ void __declspec(naked) Hooks::H_SetViewModelPosition()
 
 	_asm
 	{
-		add esp, 0x10
-		ret
-	}
-}
-
-void __declspec(naked) Hooks::H_SetViewportSize()
-{
-	
-	// Don't mangle the stack
-	_asm
-	{
-		sub esp, 0x4
-		push eax
-		mov eax, [esp + 0xc]
-		add esp, 0x8
-		push eax
-		sub esp, 0x4
-		pop eax
-	}
-
-	// Yoink some of the parameters
-	_asm
-	{
-		//mov numViews, eax
-		//mov vp, ecx
-		push eax
-		mov eax, [esp + 0x4]
-		//mov otherVP, eax
-		pop eax
-	}
-
-	SetViewportSize.Original();
-
-	// Store registers, since calling conventions may mess with it
-	_asm
-	{
-		PUSHAD
-	}
-
-	//OnSetViewportSize();
-	
-	// Restore registers
-	_asm
-	{
-		POPAD
-	}
-
-	_asm
-	{
-		add esp, 0x4
 		ret
 	}
 }
@@ -636,8 +577,6 @@ void __declspec(naked) Hooks::H_UpdateMouseInfo()
 	}
 }
 
-#pragma optimize("", off)
-
 void Hooks::H_FireWeapon(HaloID param1, short param2, bool param3)
 {
 	Game::instance.PreFireWeapon(param1, param2, param3);
@@ -647,8 +586,6 @@ void Hooks::H_FireWeapon(HaloID param1, short param2, bool param3)
 	Game::instance.PostFireWeapon(param1, param2, param3);
 
 }
-
-#pragma optimize("", on)
 
 //================================//Patches//================================//
 
@@ -669,7 +606,7 @@ void Hooks::P_FixTabOut()
 
 void Hooks::P_RemoveCutsceneFPSCap()
 {
-	// Instead of setting the flag for capping the fps to 1 when we are in a cutscene, just clear it
+	// Instead of setting the flag for capping the fps when we are in a cutscene, just clear it
 	byte bytes[2]{ 0x32, 0xdb };
 	SetBytes(o.CutsceneFPSCap.Address, 2, bytes);
 }
