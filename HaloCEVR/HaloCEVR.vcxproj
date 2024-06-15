@@ -179,6 +179,7 @@
     <ClCompile Include="Hooking\SigScanner.cpp" />
     <ClCompile Include="DirectXWrappers\IDirect3D9ExWrapper.cpp" />
     <ClCompile Include="DirectXWrappers\IDirect3DDevice9ExWrapper.cpp" />
+    <ClCompile Include="InputHandler.cpp" />
     <ClCompile Include="Maths\Matrices.cpp" />
     <ClCompile Include="VR\OpenVR.cpp" />
     <ClCompile Include="VR\VREmulator.cpp" />
@@ -203,6 +204,7 @@
     <ClInclude Include="Hooking\SigScanner.h" />
     <ClInclude Include="DirectXWrappers\IDirect3D9ExWrapper.h" />
     <ClInclude Include="DirectXWrappers\IDirect3DDevice9ExWrapper.h" />
+    <ClInclude Include="InputHandler.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="Maths\Matrices.h" />
     <ClInclude Include="VR\OpenVR.h" />

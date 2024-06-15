@@ -38,32 +38,7 @@ void Game::Init()
 
 	vr->Init();
 
-#define RegisterBoolInput(x) x = vr->RegisterBoolInput("default", #x);
-#define RegisterVector2Input(x) x = vr->RegisterVector2Input("default", #x);
-
-	RegisterBoolInput(Jump);
-	RegisterBoolInput(SwitchGrenades);
-	RegisterBoolInput(Interact);
-	RegisterBoolInput(SwitchWeapons);
-	RegisterBoolInput(Melee);
-	RegisterBoolInput(Flashlight);
-	RegisterBoolInput(Grenade);
-	RegisterBoolInput(Fire);
-	RegisterBoolInput(MenuForward);
-	RegisterBoolInput(MenuBack);
-	RegisterBoolInput(Crouch);
-	RegisterBoolInput(Zoom);
-	RegisterBoolInput(Reload);
-
-	RegisterVector2Input(Move);
-	RegisterVector2Input(Look);
-
-	// Temp?
-	RegisterBoolInput(Recentre);
-
-
-#undef RegisterBoolInput
-#undef RegisterVector2Input
+	inputHandler.RegisterInputs();
 
 	BackBufferWidth = vr->GetViewWidth();
 	BackBufferHeight = vr->GetViewHeight();
@@ -118,7 +93,7 @@ void Game::OnInitDirectX()
 
 void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 {
-	LastDeltaTime = deltaTime;
+	lastDeltaTime = deltaTime;
 
 	RenderState = ERenderState::UNKNOWN;
 
@@ -135,9 +110,6 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 	Window->right = vr->GetViewWidth();
 	Window->bottom = vr->GetViewHeight();
 
-	//(*reinterpret_cast<short*>(0x69c642)) = vr->GetViewWidth() - 8;
-	//(*reinterpret_cast<short*>(0x69c640)) = vr->GetViewHeight() - 8;
-
 	// Clear UI surface
 	IDirect3DSurface9* CurrentSurface = nullptr;
 	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &CurrentSurface);
@@ -153,14 +125,6 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 	{
 		bNeedsRecentre = false;
 		vr->Recentre();
-	}
-
-
-	UnitDynamicObject* WeaponFiredPlayer = static_cast<UnitDynamicObject*>(Helpers::GetLocalPlayer());
-
-	if (WeaponFiredPlayer)
-	{
-		//Logger::log << "Pos: " << WeaponFiredPlayer->Position << " Centre: " << WeaponFiredPlayer->Centre << std::endl;
 	}
 
 	vr->PreDrawFrame(renderer, deltaTime);
@@ -197,7 +161,7 @@ void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
 
 void Game::PostDrawEye(struct Renderer* renderer, float deltaTime, int eye)
 {
-	// UI should be drawn via an overlay
+	// UI is usually drawn via an overlay, emulate it in flat (intentionally squashed)
 
 #if EMULATE_VR
 	RECT TargetRect;
@@ -331,9 +295,6 @@ void Game::PostFireWeapon(HaloID& weaponID, short param2, bool param3)
 	weaponHandler.PostFireWeapon(weaponID, param2, param3);
 }
 
-#define ApplyBoolInput(x) controls.##x = vr->GetBoolInput(x) ? 127 : 0;
-#define ApplyImpulseBoolInput(x) controls.##x = vr->GetBoolInput(x, bHasChanged) && bHasChanged ? 127 : 0;
-
 void Game::UpdateInputs()
 {
 	// Don't bother simulating inputs if we aren't actually in vr
@@ -341,41 +302,7 @@ void Game::UpdateInputs()
 	return;
 #endif
 
-	vr->UpdateInputs();
-
-	static bool bHasChanged = false;
-
-	Controls& controls = Helpers::GetControls();
-
-	ApplyBoolInput(Jump);
-	ApplyImpulseBoolInput(SwitchGrenades);
-	ApplyBoolInput(Interact);
-	ApplyImpulseBoolInput(SwitchWeapons);
-	ApplyBoolInput(Melee);
-	ApplyBoolInput(Flashlight);
-	ApplyBoolInput(Grenade);
-	ApplyBoolInput(Fire);
-	ApplyBoolInput(MenuForward);
-	ApplyBoolInput(MenuBack);
-	ApplyBoolInput(Crouch);
-	ApplyImpulseBoolInput(Zoom);
-	ApplyBoolInput(Reload);
-
-	unsigned char MotionControlFlashlight = UpdateFlashlight();
-	if (MotionControlFlashlight > 0)
-	{
-		controls.Flashlight = MotionControlFlashlight;
-	}
-
-	if (vr->GetBoolInput(Recentre))
-	{
-		bNeedsRecentre = true;
-	}
-
-	Vector2 MoveInput = vr->GetVector2Input(Move);
-
-	controls.Left = -MoveInput.x;
-	controls.Forwards = MoveInput.y;
+	inputHandler.UpdateInputs();
 }
 
 
@@ -385,59 +312,7 @@ void Game::UpdateCamera(float& yaw, float& pitch)
 #if EMULATE_VR
 	return;
 #endif
-
-	Vector2 LookInput = vr->GetVector2Input(Look);
-
-	float YawOffset = vr->GetYawOffset();
-
-	if (c_SnapTurn->Value())
-	{
-		if (LastSnapState == 1)
-		{
-			if (LookInput.x < 0.4f)
-			{
-				LastSnapState = 0;
-			}
-		}
-		else if (LastSnapState == -1)
-		{
-			if (LookInput.x > -0.4f)
-			{
-				LastSnapState = 0;
-			}
-		}
-		else
-		{
-			if (LookInput.x > 0.6f)
-			{
-				LastSnapState = 1;
-				YawOffset += c_SnapTurnAmount->Value();
-			}
-			else if (LookInput.x < -0.6f)
-			{
-				LastSnapState = -1;
-				YawOffset -= c_SnapTurnAmount->Value();
-			}
-		}
-	}
-	else
-	{
-		YawOffset += LookInput.x * c_SmoothTurnAmount->Value() * LastDeltaTime;
-	}
-
-	vr->SetYawOffset(YawOffset);
-
-	Vector3 LookHMD = vr->GetHMDTransform().getLeftAxis();
-	// Get current camera angle
-	Vector3 LookGame = Helpers::GetCamera().lookDir;
-	// Apply deltas
-	float YawHMD = atan2(LookHMD.y, LookHMD.x);
-	float YawGame = atan2(LookGame.y, LookGame.x);
-	yaw = (YawHMD - YawGame);
-
-	float PitchHMD = atan2(LookHMD.z, sqrt(LookHMD.x * LookHMD.x + LookHMD.y * LookHMD.y));
-	float PitchGame = atan2(LookGame.z, sqrt(LookGame.x * LookGame.x + LookGame.y * LookGame.y));
-	pitch = (PitchHMD - PitchGame);
+	inputHandler.UpdateCamera(yaw, pitch);
 }
 
 void Game::SetMousePosition(int& x, int& y)
@@ -446,32 +321,16 @@ void Game::SetMousePosition(int& x, int& y)
 #if EMULATE_VR
 	return;
 #endif
-
-	Vector2 MousePos = vr->GetMousePos();
-	x = static_cast<int>(MousePos.x * 640);
-	y = static_cast<int>(MousePos.y * 480);
+	inputHandler.SetMousePosition(x, y);
 }
 
-void Game::UpdateMouseInfo(MouseInfo* MouseInfo)
+void Game::UpdateMouseInfo(MouseInfo* mouseInfo)
 {
 	// Don't bother simulating inputs if we aren't actually in vr
 #if EMULATE_VR
 	return;
 #endif
-
-	if (vr->GetMouseDown())
-	{
-		if (MouseDownState < 255)
-		{
-			MouseDownState++;
-		}
-	}
-	else
-	{
-		MouseDownState = 0;
-	}
-
-	MouseInfo->buttonState[0] = MouseDownState;
+	inputHandler.UpdateMouseInfo(mouseInfo);
 }
 
 void Game::SetViewportScale(Viewport* viewport)
@@ -484,8 +343,6 @@ void Game::SetViewportScale(Viewport* viewport)
 	viewport->bottom = Height;
 	viewport->top = -Height;
 }
-
-#undef ApplyBoolInput
 
 float Game::MetresToWorld(float m)
 {
@@ -551,36 +408,6 @@ void Game::SetupConfigs()
 	weaponHandler.localRotation = Vector3(-11.0f, 0.0f, 0.0f);
 
 	Logger::log << "Loaded configs" << std::endl;
-}
-
-unsigned char Game::UpdateFlashlight()
-{
-	Vector3 HeadPos = vr->GetHMDTransform() * Vector3(0.0f, 0.0f, 0.0f);
-
-	float LeftDistance = c_LeftHandFlashlightDistance->Value();
-	float RightDistance = c_RightHandFlashlightDistance->Value();
-
-	if (LeftDistance > 0.0f)
-	{
-		Vector3 HandPos = vr->GetControllerTransform(ControllerRole::Left) * Vector3(0.0f, 0.0f, 0.0f);
-
-		if ((HeadPos - HandPos).lengthSqr() < LeftDistance * LeftDistance)
-		{
-			return 127;
-		}
-	}
-
-	if (RightDistance > 0.0f)
-	{
-		Vector3 HandPos = vr->GetControllerTransform(ControllerRole::Right) * Vector3(0.0f, 0.0f, 0.0f);
-
-		if ((HeadPos - HandPos).lengthSqr() < RightDistance * RightDistance)
-		{
-			return 127;
-		}
-	}
-
-	return 0;
 }
 
 void Game::CalcFPS(float deltaTime)

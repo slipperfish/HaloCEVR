@@ -9,6 +9,7 @@
 #include "Helpers/Objects.h"
 #include "Maths/Vectors.h"
 #include "WeaponHandler.h"
+#include "InputHandler.h"
 
 enum class ERenderState { UNKNOWN, LEFT_EYE, RIGHT_EYE, GAME};
 
@@ -44,7 +45,7 @@ public:
 	void UpdateInputs();
 	void UpdateCamera(float& yaw, float& pitch);
 	void SetMousePosition(int& x, int& y);
-	void UpdateMouseInfo(struct MouseInfo* MouseInfo);
+	void UpdateMouseInfo(struct MouseInfo* mouseInfo);
 
 	void SetViewportScale(struct Viewport* viewport);
 
@@ -60,6 +61,11 @@ public:
 	UINT BackBufferWidth = 600;
 	UINT BackBufferHeight = 600;
 
+	// HACK: Some places it is hard to get the delta time (e.g. updating the camera)
+	// Using the last known delta time should be good enough
+	float lastDeltaTime = 0.0f;
+
+	bool bNeedsRecentre = true;
 protected:
 
 	void CreateConsole();
@@ -68,20 +74,13 @@ protected:
 
 	void SetupConfigs();
 
-	unsigned char UpdateFlashlight();
-
 	void CalcFPS(float deltaTime);
 
 	void StoreRenderTargets();
 	void RestoreRenderTargets();
 
 	WeaponHandler weaponHandler;
-
-	bool bNeedsRecentre = true;
-	char LastSnapState = 0;
-	float LastDeltaTime = 0.0f;
-
-	unsigned char MouseDownState = 0;
+	InputHandler inputHandler;
 
 	float TimeSinceFPSUpdate = 0.0f;
 	int FramesSinceFPSUpdate = 0;
@@ -105,24 +104,6 @@ protected:
 	CameraFrustum frustum1;
 	CameraFrustum frustum2;
 
-	//======Controls======//
-	InputBindingID Jump;
-	InputBindingID SwitchGrenades;
-	InputBindingID Interact;
-	InputBindingID SwitchWeapons;
-	InputBindingID Melee;
-	InputBindingID Flashlight;
-	InputBindingID Grenade;
-	InputBindingID Fire;
-	InputBindingID MenuForward;
-	InputBindingID MenuBack;
-	InputBindingID Crouch;
-	InputBindingID Zoom;
-	InputBindingID Reload;
-	InputBindingID Move;
-	InputBindingID Look;
-	// Temp?
-	InputBindingID Recentre;
 
 	//======Configs======//
 public:
