@@ -293,11 +293,6 @@ void Game::PostFireWeapon(HaloID& weaponID, short param2, bool param3)
 
 void Game::UpdateInputs()
 {
-	// Don't bother simulating inputs if we aren't actually in vr
-#if EMULATE_VR
-	return;
-#endif
-
 	inputHandler.UpdateInputs();
 }
 

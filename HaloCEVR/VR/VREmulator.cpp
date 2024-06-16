@@ -8,6 +8,11 @@
 #include "../DirectXWrappers/IDirect3DDevice9ExWrapper.h"
 #include "../Game.h"
 
+template<typename T, std::size_t N>
+constexpr std::size_t arraySize(T(&)[N]) {
+	return N;
+}
+
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
@@ -134,30 +139,74 @@ IDirect3DSurface9* VREmulator::GetUISurface()
 
 void VREmulator::UpdateInputs()
 {
+	for (size_t i = 0; i < arraySize(bindings); i++)
+	{
+		bool bPressed = GetAsyncKeyState(bindings[i].virtualKey) & 0x8000;
+		bindings[i].bHasChanged = bPressed != bindings[i].bPressed;
+		bindings[i].bPressed = bPressed;
+	}
+
+	for (size_t i = 0; i < arraySize(axes1D); i++)
+	{
+		axes1D[i] = 0.0f;
+	}
+
+	for (size_t i = 0; i < arraySize(axisBindings); i++)
+	{
+		bool bPressed = GetAsyncKeyState(axisBindings[i].virtualKey) & 0x8000;
+		if (bPressed)
+		{
+			axes1D[axisBindings[i].axisId] += axisBindings[i].scale * 1.0f;
+		}
+	}
 }
 
 InputBindingID VREmulator::RegisterBoolInput(std::string set, std::string action)
 {
-	return InputBindingID();
+	for (size_t i = 0; i < arraySize(bindings); i++)
+	{
+		if (bindings[i].bindingName == action)
+		{
+			return i;
+		}
+	}
+	return 999;
 }
 
 InputBindingID VREmulator::RegisterVector2Input(std::string set, std::string action)
 {
-	return InputBindingID();
+	for (size_t i = 0; i < arraySize(axes2D); i++)
+	{
+		if (axes2D[i].axisName == action)
+		{
+			return i;
+		}
+	}
+	return 999;
 }
 
 bool VREmulator::GetBoolInput(InputBindingID id)
 {
-	return false;
+	static bool bDummy = false;
+	return GetBoolInput(id, bDummy);
 }
 
 bool VREmulator::GetBoolInput(InputBindingID id, bool& bHasChanged)
 {
+	if (id < 12)
+	{
+		bHasChanged = bindings[id].bHasChanged;
+		return bindings[id].bPressed;
+	}
 	return false;
 }
 
 Vector2 VREmulator::GetVector2Input(InputBindingID id)
 {
+	if (id < arraySize(axes2D))
+	{
+		return Vector2(axes1D[axes2D[id].indexX], axes1D[axes2D[id].indexY]);
+	}
 	return Vector2();
 }
 

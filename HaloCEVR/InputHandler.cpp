@@ -86,25 +86,6 @@ void InputHandler::UpdateInputs()
 		SendInput(1, &input, sizeof(INPUT));
 	}
 
-	// temp
-	bool bMenuBackState = !!GetAsyncKeyState(VK_CONTROL);
-	if (bMenuBackState)
-	{
-		bool bIsEscPressed = !!GetAsyncKeyState(VK_ESCAPE);
-
-		if (bIsEscPressed != bMenuBackState)
-		{
-			INPUT input{};
-			input.type = INPUT_KEYBOARD;
-			input.ki.wVk = VK_ESCAPE;
-			if (!bMenuBackState)
-			{
-				input.ki.dwFlags = KEYEVENTF_KEYUP;
-			}
-			SendInput(1, &input, sizeof(INPUT));
-		}
-	}
-
 	Vector2 MoveInput = vr->GetVector2Input(Move);
 
 	controls.Left = -MoveInput.x;

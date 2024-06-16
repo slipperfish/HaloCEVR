@@ -57,5 +57,60 @@ protected:
 
 	struct IDirect3DTexture9* eyeTexture_Game[2][2];
 	struct IDirect3DTexture9* eyeTexture_VR[2][2];
+
+	struct Binding
+	{
+		std::string bindingName;
+		int virtualKey = 0;
+		bool bHasChanged = false;
+		bool bPressed = false;
+	};
+
+	Binding bindings[12] = {
+		{"Jump", VK_SPACE},
+		{"SwitchGrenades", 'G'},
+		{"Interact", 'E'},
+		{"SwitchWeapons", VK_TAB},
+		{"Melee", 'Q'},
+		{"Flashlight", 'F'},
+		{"Grenade", VK_RBUTTON},
+		{"Fire", VK_LBUTTON},
+		{"MenuBack", 'P'}, // Intentionally weird binding because we don't override this in the same way and it would conflict
+		{"Crouch", VK_LCONTROL},
+		{"Zoom", 'Z'},
+		{"Reload", 'R'},
+	};
+
+	struct AxisBinding
+	{
+		int virtualKey = 0;
+		int scale = 0;
+		int axisId = 0;
+	};
+
+	struct Axis2D
+	{
+		std::string axisName;
+		int indexX = 0;
+		int indexY = 0;
+	};
+
+	float axes1D[2] = {
+		0.0f,
+		0.0f
+	};
+
+	Axis2D axes2D[1] =
+	{
+		{"Move", 0, 1}
+	};
+
+	AxisBinding axisBindings[4] =
+	{
+		{'W', 1, 1},
+		{'S', -1, 1},
+		{'A', -1, 0},
+		{'D', 1, 0},
+	};
 };
 
