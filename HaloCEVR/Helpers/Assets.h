@@ -125,11 +125,11 @@ namespace Helpers
 	template<typename T>
 	T* GetTypedAsset(HaloID ID)
 	{
-		if (ID.ID == -1 || ID.Index == -1)
+		if (ID.id == -1 || ID.index == -1)
 		{
 			return nullptr;
 		}
 
-		return reinterpret_cast<T*>(&GetAssetArray()[ID.Index]);
+		return reinterpret_cast<T*>(&GetAssetArray()[ID.index]);
 	}
 }

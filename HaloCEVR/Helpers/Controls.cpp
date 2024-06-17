@@ -1,11 +1,10 @@
 #include "Controls.h"
+#include "../Hooking/Hooks.h"
 
 namespace Helpers
 {
 	Controls& GetControls()
 	{
-		// TODO: Use sigs
-
-		return *reinterpret_cast<Controls*>(0x712498);
+		return *reinterpret_cast<Controls*>(Hooks::o.Controls);
 	}
 }

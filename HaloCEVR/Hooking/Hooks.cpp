@@ -9,11 +9,23 @@
 #include <tlhelp32.h>
 
 #define CREATEHOOK(Func) Func##.CreateHook(#Func, o.##Func##, &H_##Func##)
+#define RESOLVEINDIRECT(Name) ResolveIndirect(o.I_##Name, o.##Name)
 
 bool bPotentiallyFoundChimera = false;
 
 void Hooks::InitHooks()
 {
+	RESOLVEINDIRECT(AssetsArray);
+	RESOLVEINDIRECT(Controls);
+	RESOLVEINDIRECT(DirectX9);
+	RESOLVEINDIRECT(DirectX9Device);
+	RESOLVEINDIRECT(HideMouse);
+	RESOLVEINDIRECT(ObjectTable);
+	RESOLVEINDIRECT(PlayerTable);
+	RESOLVEINDIRECT(LocalPlayer);
+	RESOLVEINDIRECT(WindowRect);
+	RESOLVEINDIRECT(RenderTargets);
+
 	CREATEHOOK(InitDirectX);
 	CREATEHOOK(DrawFrame);
 	CREATEHOOK(DrawHUD);
@@ -35,6 +47,9 @@ void Hooks::InitHooks()
 	SigScanner::UpdateOffset(o.CutsceneFPSCap);
 	SigScanner::UpdateOffset(o.CreateMouseDevice);
 }
+
+#undef CREATEHOOK
+#undef RESOLVEINDIRECT
 
 void Hooks::EnableAllHooks()
 {
@@ -236,6 +251,14 @@ void Hooks::Unfreeze()
 	HeapDestroy(g_hHeap);
 }
 
+//-------------------------------------------------------------------------
+void Hooks::ResolveIndirect(Offset& offset, long long& Address)
+{
+	SigScanner::UpdateOffset(offset);
+	void* pointer = *reinterpret_cast<void**>(offset.Address + Address);
+	Address = reinterpret_cast<long long>(pointer);
+}
+
 //===============================//Hooks//===================================//
 
 void Hooks::H_InitDirectX()
@@ -370,8 +393,6 @@ void __declspec(naked) Hooks::H_SetViewModelPosition()
 	static HaloID id;
 	static TransformQuat* quatTrans;
 	static Transform* trans;
-
-	// TODO: Before submitting, remove the repushing + fix up the esp + 0xXX movs
 
 	_asm
 	{

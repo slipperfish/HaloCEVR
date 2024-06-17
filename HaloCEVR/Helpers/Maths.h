@@ -3,21 +3,21 @@
 
 struct Transform
 {
-	float Scale;
-	float Rotation[9];
-	Vector3 Translation;
+	float scale;
+	float rotation[9];
+	Vector3 translation;
 };
 
 struct TransformQuat
 {
-	Vector4 Rotation; // Quaternion
-	Vector3 Translation;
-	float Scale;
+	Vector4 rotation; // Quaternion
+	Vector3 translation;
+	float scale;
 };
 
 namespace Helpers
 {
-	void MakeTransformFromXZ(const Vector3* FacingVector, const Vector3* UpVector, Transform* OutTransform);
-	void MakeTransformFromQuat(const Vector4* Quaternion, Transform* OutTransform);
-	void CombineTransforms(const Transform* TransformA, const Transform* TransformB, Transform* OutTransform);
+	void MakeTransformFromXZ(const Vector3* facingVector, const Vector3* upVector, Transform* outTransform);
+	void MakeTransformFromQuat(const Vector4* quaternion, Transform* outTransform);
+	void CombineTransforms(const Transform* transformA, const Transform* transformB, Transform* outTransform);
 }

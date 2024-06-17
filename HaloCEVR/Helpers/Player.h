@@ -5,8 +5,9 @@
 
 struct Player
 {
+	float deltaTime;
 	// Unknown
-	uint8_t unk_0[108];
+	uint8_t unk_0[116];
 	// Camera
 	Camera camera;
 	// Position
@@ -22,7 +23,7 @@ struct Player
 	// Unknown
 	uint8_t unk_2[440];
 };
-static_assert(sizeof(Player) == 0x29c);
+static_assert(sizeof(Player) == 0x2a8);
 
 namespace Helpers
 {

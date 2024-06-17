@@ -13,7 +13,6 @@ class Hooks
 {
 public:
 	static void InitHooks();
-
 	static void EnableAllHooks();
 
 	static void SetByte(long long Address, byte Byte);
@@ -21,6 +20,7 @@ public:
 	static void NOPInstructions(long long Address, int Length);
 	static bool Freeze();
 	static void Unfreeze();
+	static void ResolveIndirect(struct Offset& offset, long long& Address);
 
 	// All Hooks go here:
 	DEFINE_HOOK(InitDirectX);
@@ -41,7 +41,7 @@ public:
 	static void P_FixTabOut();
 	static void P_RemoveCutsceneFPSCap();
 	static void P_DontStealMouse();
-private:
+
 	static inline Offsets o;
 };
 

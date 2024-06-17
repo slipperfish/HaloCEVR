@@ -1,6 +1,7 @@
 #include "RenderTarget.h"
+#include "../Hooking/Hooks.h"
 
 RenderTarget* Helpers::GetRenderTargets()
 {
-	return reinterpret_cast<RenderTarget*>(0x69d364);
+	return reinterpret_cast<RenderTarget*>(Hooks::o.RenderTargets);
 }

@@ -17,11 +17,23 @@ struct Offset
 	long long Address;
 };
 
+#define INDIRECT(Name, KnownOffset, ByteOffset, Signature) Offset I_##Name = {#Name, KnownOffset, Signature}; long long Name = ByteOffset
 #define OFFSET(Name, KnownOffset, Signature) Offset Name = {#Name, KnownOffset, Signature}
 
 class Offsets
 {
 public:
+	INDIRECT(AssetsArray,         0x042455, 0x4B, "74 31 57 0f bf f8 69 ff 0c 08 00 00 81 c7 ?? ?? ?? ?? e8 44");
+	INDIRECT(Controls,            0x08b4b0, 0xCD, "83 ec 08 56 57 8d 44 24 08 50 ff 15 ?? ?? ?? ?? 8b 4c 24 0c");
+	INDIRECT(DirectX9,            0x1169c0, 0xE4, "83 ec 60 8b 15 ?? ?? ?? ?? 8b 0d ?? ?? ?? ?? 53 33 db");
+	INDIRECT(DirectX9Device,      0x1169c0, 0x4B, "83 ec 60 8b 15 ?? ?? ?? ?? 8b 0d ?? ?? ?? ?? 53 33 db");
+	INDIRECT(HideMouse,           0x045640, 0x23, "8a 0d ?? ?? ?? ?? 8b 44 24 04 8b 15 ?? ?? ?? ?? 81 ec 90 00 00 00");
+	INDIRECT(ObjectTable,         0x0f4ad0, 0x32, "51 53 56 57 e8 ?? ?? ?? ?? e8 ?? ?? ?? ?? e8 ?? ?? ?? ?? 68 00 08 00 00 68 ?? ?? ?? ?? bb 0c 00 00 00");
+	INDIRECT(PlayerTable,         0x0735b0, 0x21, "51 53 56 6a 10 68 ?? ?? ?? ?? bb 00 02 00 00 e8 ?? ?? ?? ?? 6a 10");
+	INDIRECT(LocalPlayer,         0x047880, 0x0F, "8b 44 24 04 8b 0d ?? ?? ?? ?? 83 ec 24 56 a3 ?? ?? ?? ?? 8b 71 04");
+	INDIRECT(WindowRect,          0x0ca1a0, 0x3E, "66 a1 ?? ?? ?? ?? 81 ec 18 03 00 00 66 3d 01 00 53 55 56 57");
+	INDIRECT(RenderTargets,       0x12ccc0, 0x1E, "83 ec 38 56 57 66 8b f0 33 ff 66 83 fe 09 ?? ?? 66 85 f6");
+
 	OFFSET(TabOutVideo,           0x0c7b74, "38 1D ?? ?? ?? ?? 74 0E 83 FD 01 74 09 83 FD 02 0F 85");
 	OFFSET(TabOutVideo2,          0x0c801c, "75 11 38 1D ?? ?? ?? ?? 75 04 3A C3 74 05 C6 44 24 17 01");
 	OFFSET(TabOutVideo3,          0x0c829c, "38 1D ?? ?? ?? ?? 74 29 0F BF 05 ?? ?? ?? ?? 3B C3 7E 0E");
@@ -37,11 +49,11 @@ public:
 	OFFSET(DrawFrameMPLoading,    0x10c590, "8b 15 ?? ?? ?? ?? 81 ec 70 02 00 00 53 56 42 57");
 
 	OFFSET(SetViewModelPosition,  0x0d6880, "81 ec f0 00 00 00 53 55 25 ff ff 00 00 56 8b f1 8b 0d 14");
-	OFFSET(HandleInputs,          0x08b4b0, "83 ec 08 56 57 8d 44 24 08 50 ff 15 ?? ?? ?? ??");
+	OFFSET(HandleInputs,          0x08b4b0, "83 ec 08 56 57 8d 44 24 08 50 ff 15 ?? ?? ?? ?? 8b 4c 24 0c");
 	OFFSET(UpdatePitchYaw,        0x072160, "81 ec a4 00 00 00 8b 15 ?? ?? ?? ?? 53 0f bf c8");
 	OFFSET(SetMousePosition,      0x097250, "56 8b 35 ?? ?? ?? ?? 33 d2 3b f0 75 ?? 39 0d");
 	OFFSET(UpdateMouseInfo,       0x091bc0, "8b 01 53 55 8b 6c 24 0c 89 45 00 8b 51 04 f7 da 56");
-	OFFSET(FireWeapon,            0x0c3280, "");
+	OFFSET(FireWeapon,            0x0c3280, "83 ec 08 8b 44 24 0c 8b 0d ?? ?? ?? ?? 8b 51 34 25 ff ff 00 00");
 	
 	OFFSET(SetViewportSize,       0x0c8da0, "83 ec 10 53 55 56 57 8b f8 33 c0 83 ff 01 0f 9e c0");
 	OFFSET(SetViewportScale,      0x10ca90, "51 0f bf 50 2e 56 0f bf 70 30 57 0f bf 78 2c 2b f7");
@@ -59,3 +71,4 @@ public:
 };
 
 #undef OFFSET
+#undef INDIRECT

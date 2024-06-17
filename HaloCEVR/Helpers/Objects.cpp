@@ -1,37 +1,38 @@
 #include "Objects.h"
+#include "../Hooking/Hooks.h"
 
 ObjectTable& Helpers::GetObjectTable()
 {
-	return **reinterpret_cast<ObjectTable**>(0x8603b0);
+	return **reinterpret_cast<ObjectTable**>(Hooks::o.ObjectTable);
 }
 
 PlayerTable& Helpers::GetPlayerTable()
 {
-	return **reinterpret_cast<PlayerTable**>(0x87a480);
+	return **reinterpret_cast<PlayerTable**>(Hooks::o.PlayerTable);
 }
 
-BaseDynamicObject* Helpers::GetDynamicObject(HaloID& ID)
+BaseDynamicObject* Helpers::GetDynamicObject(HaloID& id)
 {
-	ObjectTable& Table = GetObjectTable();
+	ObjectTable& table = GetObjectTable();
 
-	if (ID.Index > Table.CurrentSize)
+	if (id.index > table.currentSize)
 	{
 		return nullptr;
 	}
 
-	return Table.FirstElement[ID.Index].DynamicObject;
+	return table.elements[id.index].dynamicObject;
 }
 
-bool Helpers::GetLocalPlayerID(HaloID& OutID)
+bool Helpers::GetLocalPlayerID(HaloID& outID)
 {
-	PlayerTable& Table = GetPlayerTable();
+	PlayerTable& table = GetPlayerTable();
 
-	if (Table.CurrentSize == 0)
+	if (table.currentSize == 0)
 	{
 		return false;
 	}
 
-	OutID = Table.FirstPlayer->ObjectID;
+	outID = table.elements->objectID;
 	return true;
 }
 
@@ -39,11 +40,11 @@ BaseDynamicObject* Helpers::GetLocalPlayer()
 {
 	// TODO: Test this in MP, it may not be that the first player is the local one
 
-	HaloID PlayerID;
-	if (!GetLocalPlayerID(PlayerID))
+	HaloID playerID;
+	if (!GetLocalPlayerID(playerID))
 	{
 		return nullptr;
 	}
 
-	return GetDynamicObject(PlayerID);
+	return GetDynamicObject(playerID);
 }

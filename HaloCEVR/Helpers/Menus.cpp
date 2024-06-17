@@ -1,6 +1,7 @@
 #include "Menus.h"
+#include "../Hooking/Hooks.h"
 
 bool Helpers::IsMouseVisible()
 {
-	return !*reinterpret_cast<bool*>(0x686a98);
+	return !*reinterpret_cast<bool*>(Hooks::o.HideMouse);
 }

@@ -1,23 +1,23 @@
 #include "Maths.h"
 
-void Helpers::MakeTransformFromXZ(const Vector3* FacingVector, const Vector3* UpVector, Transform* OutTransform)
+void Helpers::MakeTransformFromXZ(const Vector3* facingVector, const Vector3* upVector, Transform* outTransform)
 {
-	OutTransform->Scale = 1.0;
-	OutTransform->Rotation[0] = UpVector->x;
-	OutTransform->Rotation[1] = UpVector->y;
-	OutTransform->Rotation[2] = UpVector->z;
-	OutTransform->Rotation[3] = FacingVector->y * UpVector->z - FacingVector->z * UpVector->y;
-	OutTransform->Rotation[4] = FacingVector->z * UpVector->x - UpVector->z * FacingVector->x;
-	OutTransform->Rotation[5] = FacingVector->x * UpVector->y - FacingVector->y * UpVector->x;
-	OutTransform->Rotation[6] = FacingVector->x;
-	OutTransform->Rotation[7] = FacingVector->y;
-	OutTransform->Rotation[8] = FacingVector->z;
-	(OutTransform->Translation).x = 0.0;
-	(OutTransform->Translation).y = 0.0;
-	(OutTransform->Translation).z = 0.0;
+	outTransform->scale = 1.0;
+	outTransform->rotation[0] = upVector->x;
+	outTransform->rotation[1] = upVector->y;
+	outTransform->rotation[2] = upVector->z;
+	outTransform->rotation[3] = facingVector->y * upVector->z - facingVector->z * upVector->y;
+	outTransform->rotation[4] = facingVector->z * upVector->x - upVector->z * facingVector->x;
+	outTransform->rotation[5] = facingVector->x * upVector->y - facingVector->y * upVector->x;
+	outTransform->rotation[6] = facingVector->x;
+	outTransform->rotation[7] = facingVector->y;
+	outTransform->rotation[8] = facingVector->z;
+	(outTransform->translation).x = 0.0;
+	(outTransform->translation).y = 0.0;
+	(outTransform->translation).z = 0.0;
 }
 
-void Helpers::MakeTransformFromQuat(const Vector4* Quaternion, Transform* OutTransform)
+void Helpers::MakeTransformFromQuat(const Vector4* quaternion, Transform* outTransform)
 {
 	float fVar1;
 	float fVar2;
@@ -29,90 +29,90 @@ void Helpers::MakeTransformFromQuat(const Vector4* Quaternion, Transform* OutTra
 	float fVar8;
 	float twoOverLength;
 
-	float len = Quaternion->w * Quaternion->w + Quaternion->z * Quaternion->z + Quaternion->y * Quaternion->y + Quaternion->x * Quaternion->x;
+	float len = quaternion->w * quaternion->w + quaternion->z * quaternion->z + quaternion->y * quaternion->y + quaternion->x * quaternion->x;
 	if (len == 0.0f) {
 		twoOverLength = 0.0f;
 	}
 	else {
 		twoOverLength = 2.0f / len;
 	}
-	float twoX = twoOverLength * Quaternion->x;
-	float twoY = twoOverLength * Quaternion->y;
-	float twoZ = twoOverLength * Quaternion->z;
-	fVar2 = twoX * Quaternion->w;
-	fVar3 = twoY * Quaternion->w;
-	fVar4 = twoZ * Quaternion->w;
-	len = twoX * Quaternion->x;
-	fVar5 = twoY * Quaternion->x;
-	fVar6 = twoZ * Quaternion->x;
-	fVar7 = twoY * Quaternion->y;
-	fVar8 = twoZ * Quaternion->y;
-	fVar1 = twoZ * Quaternion->z;
-	OutTransform->Scale = 1.0f;
-	(OutTransform->Translation).x = 0.0f;
-	(OutTransform->Translation).y = 0.0f;
-	(OutTransform->Translation).z = 0.0f;
-	OutTransform->Rotation[0] = 1.0f - (fVar7 + fVar1);
-	OutTransform->Rotation[1] = fVar5 - fVar4;
-	OutTransform->Rotation[2] = fVar6 + fVar3;
-	OutTransform->Rotation[3] = fVar5 + fVar4;
-	OutTransform->Rotation[4] = 1.0f - (fVar1 + len);
-	OutTransform->Rotation[5] = fVar8 - fVar2;
-	OutTransform->Rotation[6] = fVar6 - fVar3;
-	OutTransform->Rotation[7] = fVar8 + fVar2;
-	OutTransform->Rotation[8] = 1.0f - (fVar7 + len);
+	float twoX = twoOverLength * quaternion->x;
+	float twoY = twoOverLength * quaternion->y;
+	float twoZ = twoOverLength * quaternion->z;
+	fVar2 = twoX * quaternion->w;
+	fVar3 = twoY * quaternion->w;
+	fVar4 = twoZ * quaternion->w;
+	len = twoX * quaternion->x;
+	fVar5 = twoY * quaternion->x;
+	fVar6 = twoZ * quaternion->x;
+	fVar7 = twoY * quaternion->y;
+	fVar8 = twoZ * quaternion->y;
+	fVar1 = twoZ * quaternion->z;
+	outTransform->scale = 1.0f;
+	(outTransform->translation).x = 0.0f;
+	(outTransform->translation).y = 0.0f;
+	(outTransform->translation).z = 0.0f;
+	outTransform->rotation[0] = 1.0f - (fVar7 + fVar1);
+	outTransform->rotation[1] = fVar5 - fVar4;
+	outTransform->rotation[2] = fVar6 + fVar3;
+	outTransform->rotation[3] = fVar5 + fVar4;
+	outTransform->rotation[4] = 1.0f - (fVar1 + len);
+	outTransform->rotation[5] = fVar8 - fVar2;
+	outTransform->rotation[6] = fVar6 - fVar3;
+	outTransform->rotation[7] = fVar8 + fVar2;
+	outTransform->rotation[8] = 1.0f - (fVar7 + len);
 }
 
-void Helpers::CombineTransforms(const Transform* TransformA, const Transform* TransformB, Transform* OutTransform)
+void Helpers::CombineTransforms(const Transform* transformA, const Transform* transformB, Transform* outTransform)
 {
-	Transform TempTransform;
+	Transform tempTransform;
 
-	if (TransformA == OutTransform) {
-		TempTransform = *TransformA;
-		TransformA = &TempTransform;
+	if (transformA == outTransform) {
+		tempTransform = *transformA;
+		transformA = &tempTransform;
 	}
-	if (TransformB == OutTransform) {
-		TempTransform = *TransformB;
-		TransformB = &TempTransform;
+	if (transformB == outTransform) {
+		tempTransform = *transformB;
+		transformB = &tempTransform;
 	}
-	OutTransform->Rotation[0] =
-		TransformB->Rotation[2] * TransformA->Rotation[6] +
-		TransformA->Rotation[0] * TransformB->Rotation[0] + TransformA->Rotation[3] * TransformB->Rotation[1];
-	OutTransform->Rotation[1] =
-		TransformA->Rotation[4] * TransformB->Rotation[1] +
-		TransformA->Rotation[1] * TransformB->Rotation[0] + TransformA->Rotation[7] * TransformB->Rotation[2];
-	OutTransform->Rotation[2] =
-		TransformA->Rotation[5] * TransformB->Rotation[1] +
-		TransformA->Rotation[2] * TransformB->Rotation[0] + TransformA->Rotation[8] * TransformB->Rotation[2];
-	OutTransform->Rotation[3] =
-		TransformA->Rotation[3] * TransformB->Rotation[4] +
-		TransformB->Rotation[5] * TransformA->Rotation[6] + TransformA->Rotation[0] * TransformB->Rotation[3];
-	OutTransform->Rotation[4] =
-		TransformA->Rotation[1] * TransformB->Rotation[3] +
-		TransformA->Rotation[4] * TransformB->Rotation[4] + TransformA->Rotation[7] * TransformB->Rotation[5];
-	OutTransform->Rotation[5] =
-		TransformA->Rotation[2] * TransformB->Rotation[3] +
-		TransformA->Rotation[5] * TransformB->Rotation[4] + TransformA->Rotation[8] * TransformB->Rotation[5];
-	OutTransform->Rotation[6] =
-		TransformA->Rotation[3] * TransformB->Rotation[7] +
-		TransformA->Rotation[0] * TransformB->Rotation[6] + TransformB->Rotation[8] * TransformA->Rotation[6];
-	OutTransform->Rotation[7] =
-		TransformB->Rotation[7] * TransformA->Rotation[4] +
-		TransformB->Rotation[8] * TransformA->Rotation[7] + TransformA->Rotation[1] * TransformB->Rotation[6];
-	OutTransform->Rotation[8] =
-		TransformB->Rotation[7] * TransformA->Rotation[5] +
-		TransformB->Rotation[8] * TransformA->Rotation[8] + TransformA->Rotation[2] * TransformB->Rotation[6];
-	(OutTransform->Translation).x =
-		((TransformB->Translation).z * TransformA->Rotation[6] +
-			TransformA->Rotation[3] * (TransformB->Translation).y + TransformA->Rotation[0] * (TransformB->Translation).x) * TransformA->Scale +
-		(TransformA->Translation).x;
-	(OutTransform->Translation).y =
-		((TransformB->Translation).x * TransformA->Rotation[1] +
-			(TransformB->Translation).y * TransformA->Rotation[4] + TransformA->Rotation[7] * (TransformB->Translation).z) * TransformA->Scale +
-		(TransformA->Translation).y;
-	(OutTransform->Translation).z =
-		((TransformB->Translation).x * TransformA->Rotation[2] +
-			(TransformB->Translation).y * TransformA->Rotation[5] + TransformA->Rotation[8] * (TransformB->Translation).z) * TransformA->Scale +
-		(TransformA->Translation).z;
-	OutTransform->Scale = TransformA->Scale * TransformB->Scale;
+	outTransform->rotation[0] =
+		transformB->rotation[2] * transformA->rotation[6] +
+		transformA->rotation[0] * transformB->rotation[0] + transformA->rotation[3] * transformB->rotation[1];
+	outTransform->rotation[1] =
+		transformA->rotation[4] * transformB->rotation[1] +
+		transformA->rotation[1] * transformB->rotation[0] + transformA->rotation[7] * transformB->rotation[2];
+	outTransform->rotation[2] =
+		transformA->rotation[5] * transformB->rotation[1] +
+		transformA->rotation[2] * transformB->rotation[0] + transformA->rotation[8] * transformB->rotation[2];
+	outTransform->rotation[3] =
+		transformA->rotation[3] * transformB->rotation[4] +
+		transformB->rotation[5] * transformA->rotation[6] + transformA->rotation[0] * transformB->rotation[3];
+	outTransform->rotation[4] =
+		transformA->rotation[1] * transformB->rotation[3] +
+		transformA->rotation[4] * transformB->rotation[4] + transformA->rotation[7] * transformB->rotation[5];
+	outTransform->rotation[5] =
+		transformA->rotation[2] * transformB->rotation[3] +
+		transformA->rotation[5] * transformB->rotation[4] + transformA->rotation[8] * transformB->rotation[5];
+	outTransform->rotation[6] =
+		transformA->rotation[3] * transformB->rotation[7] +
+		transformA->rotation[0] * transformB->rotation[6] + transformB->rotation[8] * transformA->rotation[6];
+	outTransform->rotation[7] =
+		transformB->rotation[7] * transformA->rotation[4] +
+		transformB->rotation[8] * transformA->rotation[7] + transformA->rotation[1] * transformB->rotation[6];
+	outTransform->rotation[8] =
+		transformB->rotation[7] * transformA->rotation[5] +
+		transformB->rotation[8] * transformA->rotation[8] + transformA->rotation[2] * transformB->rotation[6];
+	(outTransform->translation).x =
+		((transformB->translation).z * transformA->rotation[6] +
+			transformA->rotation[3] * (transformB->translation).y + transformA->rotation[0] * (transformB->translation).x) * transformA->scale +
+		(transformA->translation).x;
+	(outTransform->translation).y =
+		((transformB->translation).x * transformA->rotation[1] +
+			(transformB->translation).y * transformA->rotation[4] + transformA->rotation[7] * (transformB->translation).z) * transformA->scale +
+		(transformA->translation).y;
+	(outTransform->translation).z =
+		((transformB->translation).x * transformA->rotation[2] +
+			(transformB->translation).y * transformA->rotation[5] + transformA->rotation[8] * (transformB->translation).z) * transformA->scale +
+		(transformA->translation).z;
+	outTransform->scale = transformA->scale * transformB->scale;
 }

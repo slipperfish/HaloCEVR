@@ -16,7 +16,7 @@ static void ReferenceUpdateViewModelImpl(HaloID& id, Vector3* pos, Vector3* faci
 
 	Transform root;
 	Helpers::MakeTransformFromXZ(up, facing, &root);
-	root.Translation = *pos;
+	root.translation = *pos;
 
 	int i = 0;
 
@@ -35,9 +35,9 @@ static void ReferenceUpdateViewModelImpl(HaloID& id, Vector3* pos, Vector3* faci
 			const Transform* parentTransform = boneIdx == 0 ? &root : &outBoneTransforms[currentBone.Parent];
 			const TransformQuat* currentQuat = &boneTransforms[boneIdx];
 			Transform tempTransform;
-			Helpers::MakeTransformFromQuat(&currentQuat->Rotation, &tempTransform);
-			tempTransform.Scale = currentQuat->Scale;
-			tempTransform.Translation = currentQuat->Translation;
+			Helpers::MakeTransformFromQuat(&currentQuat->rotation, &tempTransform);
+			tempTransform.scale = currentQuat->scale;
+			tempTransform.translation = currentQuat->translation;
 			Helpers::CombineTransforms(parentTransform, &tempTransform, &outBoneTransforms[boneIdx]);
 
 			if (currentBone.LeftLeaf != -1)
@@ -85,7 +85,7 @@ void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, V
 
 	Transform root;
 	Helpers::MakeTransformFromXZ(up, facing, &root);
-	root.Translation = *pos;
+	root.translation = *pos;
 
 	const bool bShouldUpdateCache = cachedViewModel.currentAsset != id;
 	if (bShouldUpdateCache)
@@ -121,9 +121,9 @@ void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, V
 				*parentTransform = realTransforms[currentBone.Parent];
 			}
 
-			Helpers::MakeTransformFromQuat(&currentQuat->Rotation, &tempTransform);
-			tempTransform.Scale = currentQuat->Scale;
-			tempTransform.Translation = currentQuat->Translation;
+			Helpers::MakeTransformFromQuat(&currentQuat->rotation, &tempTransform);
+			tempTransform.scale = currentQuat->scale;
+			tempTransform.translation = currentQuat->translation;
 			Helpers::CombineTransforms(parentTransform, &tempTransform, &outBoneTransforms[boneIndex]);
 
 			if (boneIndex > 0)
@@ -136,7 +136,7 @@ void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, V
 			if (currentBone.Parent == 0 || boneArray[currentBone.Parent].Parent == 0)
 			{
 				// Hide arms/root
-				outBoneTransforms[boneIndex].Scale = 0.0f;
+				outBoneTransforms[boneIndex].scale = 0.0f;
 			}
 			else if (boneIndex == cachedViewModel.rightWristIndex)
 			{
@@ -199,8 +199,8 @@ void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, V
 			}
 			else if (boneIndex == cachedViewModel.gunIndex)
 			{
-				Vector3& gunPos = outBoneTransforms[boneIndex].Translation;
-				Matrix3 gunRot = outBoneTransforms[boneIndex].Rotation;
+				Vector3& gunPos = outBoneTransforms[boneIndex].translation;
+				Matrix3 gunRot = outBoneTransforms[boneIndex].rotation;
 
 				Vector3 handPos = handTransform * Vector3(0.0f, 0.0f, 0.0f);
 				Matrix4 handRotation = handTransform.translate(-handPos);
@@ -255,12 +255,12 @@ void WeaponHandler::CreateEndCap(int boneIndex, const Bone& currentBone, Transfo
 {
 	// Parent bone to the position of the current bone with 0 scale to act as an end cap
 	int idx = currentBone.Parent;
-	outBoneTransforms[idx].Translation = outBoneTransforms[boneIndex].Translation;
+	outBoneTransforms[idx].translation = outBoneTransforms[boneIndex].translation;
 	for (int j = 0; j < 9; j++)
 	{
-		outBoneTransforms[idx].Rotation[j] = outBoneTransforms[boneIndex].Rotation[j];
+		outBoneTransforms[idx].rotation[j] = outBoneTransforms[boneIndex].rotation[j];
 	}
-	outBoneTransforms[idx].Scale = 0.0f;
+	outBoneTransforms[idx].scale = 0.0f;
 }
 
 void WeaponHandler::MoveBoneToTransform(int boneIndex, const Matrix4& newTransform, Transform* realTransforms, Transform* outBoneTransforms)
@@ -276,12 +276,12 @@ void WeaponHandler::MoveBoneToTransform(int boneIndex, const Matrix4& newTransfo
 	//Add Local offset
 	newTranslation += newRotation4 * localOffset;
 
-	outBoneTransforms[boneIndex].Translation = newTranslation;
+	outBoneTransforms[boneIndex].translation = newTranslation;
 	for (int x = 0; x < 3; x++)
 	{
 		for (int y = 0; y < 3; y++)
 		{
-			outBoneTransforms[boneIndex].Rotation[x + y * 3] = newRotation4.get()[x + y * 4];
+			outBoneTransforms[boneIndex].rotation[x + y * 3] = newRotation4.get()[x + y * 4];
 		}
 	}
 	realTransforms[boneIndex] = outBoneTransforms[boneIndex]; // Re-cache value to use updated position
@@ -331,24 +331,24 @@ void WeaponHandler::UpdateCache(HaloID& id, AssetData_ModelAnimations* animation
 		return;
 	}
 
-	BaseDynamicObject* weaponObj = Helpers::GetDynamicObject(player->Weapon);
+	BaseDynamicObject* weaponObj = Helpers::GetDynamicObject(player->weapon);
 	if (!weaponObj)
 	{
-		Logger::log << "[UpdateCache] Can't find weapon from WeaponID " << player->Weapon << std::endl;
-		Logger::log << "[UpdateCache] Player Tag = " << player->TagID << std::endl;
+		Logger::log << "[UpdateCache] Can't find weapon from WeaponID " << player->weapon << std::endl;
+		Logger::log << "[UpdateCache] Player Tag = " << player->tagID << std::endl;
 		return;
 	}
 
-	Asset_Weapon* weapon = Helpers::GetTypedAsset<Asset_Weapon>(weaponObj->TagID);
+	Asset_Weapon* weapon = Helpers::GetTypedAsset<Asset_Weapon>(weaponObj->tagID);
 	if (!weapon)
 	{
-		Logger::log << "[UpdateCache] Can't find weapon asset from TagID " << weaponObj->TagID << std::endl;
+		Logger::log << "[UpdateCache] Can't find weapon asset from TagID " << weaponObj->tagID << std::endl;
 		return;
 	}
 
 	if (!weapon->WeaponData)
 	{
-		Logger::log << "[UpdateCache] Can't find weapon data in weapon asset " << weaponObj->TagID << std::endl;
+		Logger::log << "[UpdateCache] Can't find weapon data in weapon asset " << weaponObj->tagID << std::endl;
 		Logger::log << "[UpdateCache] Weapon Type = " << weapon->GroupID << std::endl;
 		Logger::log << "[UpdateCache] Weapon Path = " << weapon->WeaponAsset << std::endl;
 		return;
@@ -390,7 +390,7 @@ void WeaponHandler::UpdateCache(HaloID& id, AssetData_ModelAnimations* animation
 			cachedViewModel.cookedFireOffset = socket.Transforms[0].Position;
 			Transform rotation;
 			Helpers::MakeTransformFromQuat(&socket.Transforms[0].QRotation, &rotation);
-			cachedViewModel.cookedFireRotation = rotation.Rotation;
+			cachedViewModel.cookedFireRotation = rotation.rotation;
 
 			Logger::log << "[UpdateCache] Position = " << socket.Transforms[0].Position << std::endl;
 			Logger::log << "[UpdateCache] Quaternion = " << socket.Transforms[0].QRotation << std::endl;
@@ -407,7 +407,7 @@ void WeaponHandler::PreFireWeapon(HaloID& WeaponID, short param2, bool param3)
 
 	// Check if the weapon is being used by the player
 	HaloID PlayerID;
-	if (Object && Helpers::GetLocalPlayerID(PlayerID) && PlayerID == Object->Parent)
+	if (Object && Helpers::GetLocalPlayerID(PlayerID) && PlayerID == Object->parent)
 	{
 		// Teleport the player to the controller position so the bullet comes from there instead
 		weaponFiredPlayer = static_cast<UnitDynamicObject*>(Helpers::GetDynamicObject(PlayerID));
@@ -420,7 +420,7 @@ void WeaponHandler::PreFireWeapon(HaloID& WeaponID, short param2, bool param3)
 			Vector3 translation = controllerPos * Vector3(0.0f, 0.0f, 0.0f);
 			controllerPos.translate(-translation);
 			translation *= Game::instance.MetresToWorld(1.0f);
-			translation += weaponFiredPlayer->Position;
+			translation += weaponFiredPlayer->position;
 
 			controllerPos.translate(translation);
 
@@ -435,18 +435,18 @@ void WeaponHandler::PreFireWeapon(HaloID& WeaponID, short param2, bool param3)
 			}
 
 			// Cache the real values so we can restore them after running the original fire function
-			realPlayerPosition = weaponFiredPlayer->Position;
+			realPlayerPosition = weaponFiredPlayer->position;
 			// What are the other aims for??
-			realPlayerAim = weaponFiredPlayer->Aim;
+			realPlayerAim = weaponFiredPlayer->aim;
 
-			Vector3 internalFireOffset = Helpers::GetCamera().position - weaponFiredPlayer->Position;
+			Vector3 internalFireOffset = Helpers::GetCamera().position - weaponFiredPlayer->position;
 
-			weaponFiredPlayer->Position = handPos + handRotation * cachedViewModel.fireOffset;// -internalFireOffset;
-			weaponFiredPlayer->Aim = (handRotation3 * cachedViewModel.fireRotation) * Vector3(1.0f, 0.0f, 0.0f);
+			weaponFiredPlayer->position = handPos + handRotation * cachedViewModel.fireOffset;// -internalFireOffset;
+			weaponFiredPlayer->aim = (handRotation3 * cachedViewModel.fireRotation) * Vector3(1.0f, 0.0f, 0.0f);
 
 #if DRAW_DEBUG_AIM
-			lastFireLocation = weaponFiredPlayer->Position;// +internalFireOffset;
-			lastFireAim = lastFireLocation + weaponFiredPlayer->Aim * 1.0f;
+			lastFireLocation = weaponFiredPlayer->position;// +internalFireOffset;
+			lastFireAim = lastFireLocation + weaponFiredPlayer->aim * 1.0f;
 			Logger::log << "FireOffset: " << cachedViewModel.fireOffset << std::endl;
 			Logger::log << "Player Position: " << realPlayerPosition << std::endl;
 			Logger::log << "Last fire location: " << lastFireLocation << std::endl;
@@ -460,7 +460,7 @@ void WeaponHandler::PostFireWeapon(HaloID& weaponID, short param2, bool param3)
 	// Restore state after firing the weapon
 	if (weaponFiredPlayer)
 	{
-		weaponFiredPlayer->Position = realPlayerPosition;
-		weaponFiredPlayer->Aim = realPlayerAim;
+		weaponFiredPlayer->position = realPlayerPosition;
+		weaponFiredPlayer->aim = realPlayerAim;
 	}
 }
