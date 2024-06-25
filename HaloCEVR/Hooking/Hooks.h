@@ -23,7 +23,7 @@ public:
 	static void ResolveIndirect(struct Offset& offset, long long& Address);
 
 	// All Hooks go here:
-	DEFINE_HOOK(InitDirectX);
+	DEFINE_HOOK_FULL(InitDirectX, bool);
 	DEFINE_HOOK_FULL(DrawFrame, void, Renderer* param1, short param2, short* param3, float param4, float deltaTime);
 	DEFINE_HOOK(DrawHUD);
 	DEFINE_HOOK(DrawMenu);

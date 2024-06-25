@@ -267,11 +267,13 @@ void Hooks::ResolveIndirect(Offset& offset, long long& Address)
 
 //===============================//Hooks//===================================//
 
-void Hooks::H_InitDirectX()
+bool Hooks::H_InitDirectX()
 {
-	InitDirectX.Original();
+	bool bSuccess = InitDirectX.Original();
 
 	Game::instance.OnInitDirectX();
+
+	return bSuccess;
 }
 
 void Hooks::H_DrawFrame(Renderer* param1, short param2, short* param3, float tickProgress, float deltaTime)
