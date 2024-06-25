@@ -48,7 +48,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/default/in/Interact"
+                            "output": "/actions/default/in/MenuBack"
                         }
                     },
                     "mode": "button",
@@ -68,7 +68,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/default/in/Flashlight"
+                            "output": "/actions/default/in/Grenade"
                         }
                     },
                     "mode": "button",
@@ -78,21 +78,11 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/default/in/Reload"
+                            "output": "/actions/default/in/Interact"
                         }
                     },
                     "mode": "button",
                     "path": "/user/hand/right/input/b",
-                    "parameters": {}
-                },
-                {
-                    "inputs": {
-                        "click": {
-                            "output": "/actions/default/in/Grenade"
-                        }
-                    },
-                    "mode": "button",
-                    "path": "/user/hand/left/input/trigger",
                     "parameters": {}
                 },
                 {

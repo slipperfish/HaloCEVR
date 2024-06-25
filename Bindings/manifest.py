@@ -10,6 +10,7 @@ bindings = {
     "SwitchGrenades" : {"h" : "left", "b" : "grip"},
     "SwitchWeapons" : {"h" : "right", "b" : "grip"},
     #"Interact" : {"h" : "left", "b" : "y"}, #Moved to right hand
+    "MenuBack" : {"h" : "left", "b" : "y"},
     "Melee" : {"h" : "left", "b" : "x"},
     #"Flashlight" : {"h" : "right", "b" : "a"}, #Handled by gesture
     #"Reload" : {"h" : "right", "b" : "b"}, #Handled by interact
