@@ -1,0 +1,4 @@
+// Hint files help the Visual Studio IDE interpret Visual C++ identifiers
+// such as names of functions and macros.
+// For more information see https://go.microsoft.com/fwlink/?linkid=865984
+#define DEFINE_HOOK(Name, __VA_ARGS__) DEFINE_HOOK_FULL(Name, void, __VA_ARGS__)

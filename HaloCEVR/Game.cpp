@@ -1,4 +1,4 @@
-#define EMULATE_VR 1
+#define EMULATE_VR 0
 #include "Game.h"
 #include "Logger.h"
 #include "Hooking/Hooks.h"
@@ -89,6 +89,7 @@ void Game::OnInitDirectX()
 	vr->OnGameFinishInit();
 
 	uiSurface = vr->GetUISurface();
+	crosshairSurface = vr->GetCrosshairSurface();
 }
 
 void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
@@ -102,6 +103,8 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 	vr->SetMouseVisibility(Helpers::IsMouseVisible());
 	vr->UpdatePoses();
 
+	UpdateCrosshair();
+
 	StoreRenderTargets();
 
 	sRect* window = Helpers::GetWindowRect();
@@ -110,11 +113,13 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 	window->right = vr->GetViewWidth();
 	window->bottom = vr->GetViewHeight();
 
-	// Clear UI surface
+	// Clear UI surfaces
 	IDirect3DSurface9* currentSurface = nullptr;
 	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &currentSurface);
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, uiSurface);
 	Helpers::GetDirect3DDevice9()->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(0, 0, 0, 0), 1.0f, 0);
+	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, crosshairSurface);
+	Helpers::GetDirect3DDevice9()->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(25, 0, 0, 0), 1.0f, 0);
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, currentSurface);
 	currentSurface->Release();
 
@@ -166,6 +171,9 @@ void Game::PostDrawEye(struct Renderer* renderer, float deltaTime, int eye)
 #if EMULATE_VR
 	RECT targetRect{ 0, 0, 200, 200 };
 	Helpers::GetDirect3DDevice9()->StretchRect(uiSurface, NULL, Helpers::GetRenderTargets()[0].renderSurface, &targetRect, D3DTEXF_NONE);
+
+	targetRect = { 400, 0, 600, 200 };
+	Helpers::GetDirect3DDevice9()->StretchRect(crosshairSurface, NULL, Helpers::GetRenderTargets()[0].renderSurface, &targetRect, D3DTEXF_NONE);
 #endif
 }
 
@@ -276,6 +284,28 @@ void Game::PostDrawLoading(int param1, struct Renderer* renderer)
 	Helpers::GetRenderTargets()[1].renderSurface = uiRealSurface;
 }
 
+void Game::PreDrawCrosshair(short* anchorLocation)
+{
+	// Unlike pre/post ui calls we don't need to check render state
+	// This code path only gets called if the UI needs rendering
+
+	crosshairRealSurface = Helpers::GetRenderTargets()[1].renderSurface;
+	if (anchorLocation && *anchorLocation == 4) // Centre = 4
+	{
+		Helpers::GetRenderTargets()[1].renderSurface = crosshairSurface;
+		Helpers::GetDirect3DDevice9()->SetRenderTarget(0, crosshairSurface);
+	}
+}
+
+void Game::PostDrawCrosshair()
+{
+	// Unlike pre/post ui calls we don't need to check render state
+	// This code path only gets called if the UI needs rendering
+
+	Helpers::GetRenderTargets()[1].renderSurface = crosshairRealSurface;
+	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, crosshairRealSurface);
+}
+
 void Game::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, Vector3* up, TransformQuat* BoneTransforms, Transform* OutBoneTransforms)
 {
 	weaponHandler.UpdateViewModel(id, pos, facing, up, BoneTransforms, OutBoneTransforms);
@@ -384,6 +414,8 @@ void Game::SetupConfigs()
 	c_UIOverlayDistance = config.RegisterFloat("UIOverlayDistance", "Distance in metres in front of the HMD to display the UI", 15.0f);
 	c_UIOverlayScale = config.RegisterFloat("UIOverlayScale", "Width of the UI overlay in metres", 10.0f);
 	c_UIOverlayCurvature = config.RegisterFloat("UIOverlayCurvature", "Curvature of the UI Overlay, on a scale of 0 to 1", 0.1f);
+	c_UIOverlayWidth = config.RegisterInt("UIOverlayWidth", "Width of the UI overlay in pixels", 600);
+	c_UIOverlayHeight = config.RegisterInt("UIOverlayHeight", "Height of the UI overlay in pixels", 600);
 	c_SnapTurn = config.RegisterBool("SnapTurn", "The look input will instantly rotate the view by a fixed amount, rather than smoothly rotating", true);
 	c_SnapTurnAmount = config.RegisterFloat("SnapTurnAmount", "Rotation in degrees a single snap turn will rotate the view by", 45.0f);
 	c_SmoothTurnAmount = config.RegisterFloat("SmoothTurnAmount", "Rotation in degrees per second the view will turn at when not using snap turning", 90.0f);
@@ -392,7 +424,7 @@ void Game::SetupConfigs()
 	c_ControllerOffsetX = config.RegisterFloat("ControllerOffset.X", "Offset from the controller's position used when calculating the in game hand position", -0.045f);
 	c_ControllerOffsetY = config.RegisterFloat("ControllerOffset.Y", "Offset from the controller's position used when calculating the in game hand position", 0.01f);
 	c_ControllerOffsetZ = config.RegisterFloat("ControllerOffset.Z", "Offset from the controller's position used when calculating the in game hand position", 0.0f);
-	c_ControllerRotationX = config.RegisterFloat("ControllerRotation.X", "Rotation added to the controller when calculating the in game hand rotation", -10.0f);
+	c_ControllerRotationX = config.RegisterFloat("ControllerRotation.X", "Rotation added to the controller when calculating the in game hand rotation", 10.0f);
 	c_ControllerRotationY = config.RegisterFloat("ControllerRotation.Y", "Rotation added to the controller when calculating the in game hand rotation", 0.0f);
 	c_ControllerRotationZ = config.RegisterFloat("ControllerRotation.Z", "Rotation added to the controller when calculating the in game hand rotation", 0.0f);
 	
@@ -417,6 +449,33 @@ void Game::CalcFPS(float deltaTime)
 		fpsTracker.framesSinceFPSUpdate = 0;
 		Logger::log << fpsTracker.fps << std::endl;
 	}
+}
+
+void Game::UpdateCrosshair()
+{
+	Vector3 aimPos, aimDir;
+	bool bHasCrosshair = weaponHandler.GetLocalWeaponAim(aimPos, aimDir);
+
+	if (!bHasCrosshair)
+	{
+		return;
+	}
+
+	Matrix4 overlayTransform;
+
+	Vector3 targetPos = aimPos + aimDir * c_UIOverlayDistance->Value();
+
+	Vector3 hmdPos = vr->GetHMDTransform(true) * Vector3(0.0f, 0.0f, 0.0f);
+
+	overlayTransform.translate(targetPos);
+	overlayTransform.lookAt(hmdPos, Vector3(0.0f, 0.0f, 1.0f));
+	
+	overlayTransform.translate(-targetPos);
+	overlayTransform.rotate(90.0f, overlayTransform.getUpAxis());
+	overlayTransform.rotate(-90.0f, overlayTransform.getLeftAxis());
+	overlayTransform.translate(targetPos);
+
+	vr->SetCrosshairTransform(overlayTransform);
 }
 
 void Game::StoreRenderTargets()

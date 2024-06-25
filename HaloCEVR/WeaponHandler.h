@@ -11,6 +11,8 @@ public:
 	void PreFireWeapon(HaloID& weaponID, short param2, bool param3);
 	void PostFireWeapon(HaloID& weaponID, short param2, bool param3);
 
+	bool GetLocalWeaponAim(Vector3& outPosition, Vector3& outAim) const;
+
 	Vector3 localOffset;
 	Vector3 localRotation;
 
@@ -37,8 +39,8 @@ protected:
 
 	// Debug stuff for checking where bullets are coming from/going
 #if DRAW_DEBUG_AIM
-	Vector3 lastFireLocation(0.0f, 0.0f, 0.0f);
-	Vector3 lastFireAim(0.0f, 0.0f, 0.0f);
+	mutable Vector3 lastFireLocation;
+	mutable Vector3 lastFireAim;
 #endif
 };
 

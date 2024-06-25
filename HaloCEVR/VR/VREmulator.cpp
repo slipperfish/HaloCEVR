@@ -137,6 +137,11 @@ IDirect3DSurface9* VREmulator::GetUISurface()
 	return uiSurface;
 }
 
+IDirect3DSurface9* VREmulator::GetCrosshairSurface()
+{
+	return crosshairSurface;
+}
+
 void VREmulator::UpdateInputs()
 {
 	for (size_t i = 0; i < arraySize(bindings); i++)
@@ -308,6 +313,13 @@ void VREmulator::CreateSharedTarget()
 	if (FAILED(res))
 	{
 		Logger::log << "Couldn't create UI render target: " << res << std::endl;
+	}
+
+	res = Helpers::GetDirect3DDevice9()->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_NONE, 0, TRUE, &crosshairSurface, NULL);
+
+	if (FAILED(res))
+	{
+		Logger::log << "Couldn't create Crosshair render target: " << res << std::endl;
 	}
 }
 

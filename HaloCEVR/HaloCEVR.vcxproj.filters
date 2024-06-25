@@ -161,5 +161,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="VR\actions.json" />
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

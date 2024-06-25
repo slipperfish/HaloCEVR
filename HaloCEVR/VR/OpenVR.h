@@ -30,7 +30,9 @@ public:
 	IDirect3DSurface9* GetRenderSurface(int eye) override;
 	IDirect3DTexture9* GetRenderTexture(int eye) override;
 	IDirect3DSurface9* GetUISurface() override;
+	IDirect3DSurface9* GetCrosshairSurface() override;
 	void SetMouseVisibility(bool bIsVisible) override;
+	void SetCrosshairTransform(class Matrix4& newTransform) override;
 	void UpdateInputs() override;
 	InputBindingID RegisterBoolInput(std::string set, std::string action) override;
 	InputBindingID RegisterVector2Input(std::string set, std::string action) override;
@@ -68,26 +70,63 @@ protected:
 	vr::VRActiveActionSet_t actionSets[1];
 
 	vr::VROverlayHandle_t uiOverlay;
+	vr::VROverlayHandle_t crosshairOverlay;
 
 	vr::TrackedDevicePose_t gamePoses[vr::k_unMaxTrackedDeviceCount];
 	vr::TrackedDevicePose_t renderPoses[vr::k_unMaxTrackedDeviceCount];
 
-	IDirect3DSurface9* gameRenderSurface[3];
-	IDirect3DTexture9* gameRenderTexture[3];
+	static constexpr int uiSurface = 2;
+	static constexpr int crosshairSurface = 3;
+
+	IDirect3DSurface9* gameRenderSurface[4];
+	IDirect3DTexture9* gameRenderTexture[4];
 
 	ID3D11Device* d3dDevice;
 
-	ID3D11Texture2D* vrRenderTexture[3];
+	ID3D11Texture2D* vrRenderTexture[4];
 
 
 	Matrix4 ConvertSteamVRMatrixToMatrix4(const vr::HmdMatrix34_t& matPose)
 	{
 		Matrix4 matrixObj(
-			 matPose.m[2][2],  matPose.m[0][2], -matPose.m[1][2], 0.0,
-			 matPose.m[2][0],  matPose.m[0][0], -matPose.m[1][0], 0.0,
-			-matPose.m[2][1], -matPose.m[0][1],  matPose.m[1][1], 0.0,
-			-matPose.m[2][3], -matPose.m[0][3],  matPose.m[1][3], 1.0f
+			matPose.m[2][2], matPose.m[0][2], -matPose.m[1][2], 0.0,
+			matPose.m[2][0], matPose.m[0][0], -matPose.m[1][0], 0.0,
+			-matPose.m[2][1], -matPose.m[0][1], matPose.m[1][1], 0.0,
+			-matPose.m[2][3], -matPose.m[0][3], matPose.m[1][3], 1.0f
 		);
+
+		return matrixObj;
+	}
+
+	/*
+	vr::HmdMatrix34_t ConvertMatrixToSteamVRMatrix4(const Matrix4& matPose)
+	{
+		vr::HmdMatrix34_t matrixObj = {
+			 matPose[1 * 4 + 1], -matPose[1 * 4 + 3],  matPose[1 * 4 + 0],
+			-matPose[2 * 4 + 1],  matPose[2 * 4 + 2], -matPose[2 * 4 + 0],
+			 matPose[0 * 4 + 1], -matPose[0 * 4 + 2],  matPose[0 * 4 + 0],
+			-matPose[3 * 4 + 1],  matPose[3 * 4 + 2], -matPose[3 * 4 + 0]
+		};
+
+		return matrixObj;
+	}
+	*/
+
+	vr::HmdMatrix34_t ConvertMatrixToSteamVRMatrix4(const Matrix4& matPose)
+	{
+		vr::HmdMatrix34_t matrixObj;
+		matrixObj.m[2][2] = matPose[0 * 4 + 0];
+		matrixObj.m[0][2] = matPose[0 * 4 + 1];
+		matrixObj.m[1][2] = -matPose[0 * 4 + 2];
+		matrixObj.m[2][0] = matPose[1 * 4 + 0];
+		matrixObj.m[0][0] = matPose[1 * 4 + 1];
+		matrixObj.m[1][0] = -matPose[1 * 4 + 2];
+		matrixObj.m[2][1] = -matPose[2 * 4 + 0];
+		matrixObj.m[0][1] = -matPose[2 * 4 + 1];
+		matrixObj.m[1][1] = matPose[2 * 4 + 2];
+		matrixObj.m[2][3] = -matPose[3 * 4 + 0];
+		matrixObj.m[0][3] = -matPose[3 * 4 + 1];
+		matrixObj.m[1][3] = matPose[3 * 4 + 2];
 
 		return matrixObj;
 	}

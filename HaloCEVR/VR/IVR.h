@@ -35,8 +35,10 @@ public:
 	virtual struct IDirect3DSurface9* GetRenderSurface(int eye) = 0;
 	virtual struct IDirect3DTexture9* GetRenderTexture(int eye) = 0;
 	virtual struct IDirect3DSurface9* GetUISurface() = 0;
+	virtual struct IDirect3DSurface9* GetCrosshairSurface() = 0;
 
 	virtual void SetMouseVisibility(bool bIsVisible) = 0;
+	virtual void SetCrosshairTransform(class Matrix4& newTransform) = 0;
 	virtual void UpdateInputs() = 0;
 	virtual InputBindingID RegisterBoolInput(std::string set, std::string action) = 0;
 	virtual InputBindingID RegisterVector2Input(std::string set, std::string action) = 0;

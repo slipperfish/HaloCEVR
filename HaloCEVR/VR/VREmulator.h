@@ -27,10 +27,12 @@ public:
 	float GetYawOffset() { return 0.0f; }
 	Matrix4 GetHMDTransform(bool bRenderPose = false) { return Matrix4(); }
 	Matrix4 GetControllerTransform(ControllerRole Role, bool bRenderPose = false);
-	virtual struct IDirect3DSurface9* GetRenderSurface(int eye);
-	virtual struct IDirect3DTexture9* GetRenderTexture(int eye);
-	virtual struct IDirect3DSurface9* GetUISurface();
+	struct IDirect3DSurface9* GetRenderSurface(int eye);
+	struct IDirect3DTexture9* GetRenderTexture(int eye);
+	struct IDirect3DSurface9* GetUISurface();
+	struct IDirect3DSurface9* GetCrosshairSurface();
 	void SetMouseVisibility(bool bIsVisible) {}
+	void SetCrosshairTransform(class Matrix4& newTransform) {}
 	void UpdateInputs();
 	InputBindingID RegisterBoolInput(std::string set, std::string action);
 	InputBindingID RegisterVector2Input(std::string set, std::string action);
@@ -52,6 +54,7 @@ protected:
 	struct IDirect3DDevice9* mirrorDevice = nullptr;
 
 	struct IDirect3DSurface9* uiSurface = nullptr;
+	struct IDirect3DSurface9* crosshairSurface = nullptr;
 	struct IDirect3DSurface9* eyeSurface_Game[2][2];
 	struct IDirect3DSurface9* eyeSurface_VR[2][2];
 

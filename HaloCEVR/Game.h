@@ -38,6 +38,9 @@ public:
 	bool PreDrawLoading(int param1, struct Renderer* renderer);
 	void PostDrawLoading(int param1, struct Renderer* renderer);
 
+	void PreDrawCrosshair(short* anchorLocation);
+	void PostDrawCrosshair();
+
 	void UpdateViewModel(HaloID& id, struct Vector3* pos, struct Vector3* facing, struct Vector3* up, struct TransformQuat* BoneTransforms, struct Transform* OutBoneTransforms);
 	void PreFireWeapon(HaloID& WeaponID, short param2, bool param3);
 	void PostFireWeapon(HaloID& WeaponID, short param2, bool param3);
@@ -76,6 +79,8 @@ protected:
 
 	void CalcFPS(float deltaTime);
 
+	void UpdateCrosshair();
+
 	void StoreRenderTargets();
 	void RestoreRenderTargets();
 
@@ -99,8 +104,9 @@ protected:
 	RenderTarget gameRenderTargets[8];
 
 	struct IDirect3DSurface9* uiSurface;
+	struct IDirect3DSurface9* crosshairSurface;
 	struct IDirect3DSurface9* uiRealSurface;
-	struct IDirect3DSurface9* UIRealSurface2;
+	struct IDirect3DSurface9* crosshairRealSurface;
 
 	ERenderState renderState = ERenderState::UNKNOWN;
 
@@ -116,6 +122,8 @@ public:
 	FloatProperty* c_UIOverlayDistance = nullptr;
 	FloatProperty* c_UIOverlayScale = nullptr;
 	FloatProperty* c_UIOverlayCurvature = nullptr;
+	IntProperty* c_UIOverlayWidth = nullptr;
+	IntProperty* c_UIOverlayHeight = nullptr;
 	BoolProperty* c_SnapTurn = nullptr;
 	FloatProperty* c_SnapTurnAmount = nullptr;
 	FloatProperty* c_SmoothTurnAmount = nullptr;

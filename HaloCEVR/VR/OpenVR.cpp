@@ -51,7 +51,12 @@ void OpenVR::Init()
 
 	vrOverlay->CreateOverlay("UIOverlay", "UIOverlay", &uiOverlay);
 	vrOverlay->SetOverlayFlag(uiOverlay, vr::VROverlayFlags_MakeOverlaysInteractiveIfVisible, true);
+	vrOverlay->SetOverlayFlag(uiOverlay, vr::VROverlayFlags_IsPremultiplied, true);
 	vrOverlay->ShowOverlay(uiOverlay);
+
+	vrOverlay->CreateOverlay("CrosshairOverlay", "CrosshairOverlay", &crosshairOverlay);
+	vrOverlay->SetOverlayFlag(crosshairOverlay, vr::VROverlayFlags_IsPremultiplied, true);
+	vrOverlay->ShowOverlay(crosshairOverlay);
 
 	std::filesystem::path cwd = std::filesystem::current_path() / "VR" / "OpenVR" / "actions.json";
 	vrInput->SetActionManifestPath(cwd.string().c_str());
@@ -119,12 +124,14 @@ void OpenVR::OnGameFinishInit()
 	// Eyes
 	CreateTexAndSurface(0, recommendedWidth, recommendedHeight, desc.Usage, desc.Format);
 	CreateTexAndSurface(1, recommendedWidth, recommendedHeight, desc.Usage, desc.Format);
-	// UI Layer
-	CreateTexAndSurface(2, recommendedWidth, recommendedHeight, desc2.Usage, desc2.Format);
-
-	vrOverlay->SetOverlayFlag(uiOverlay, vr::VROverlayFlags_IsPremultiplied, true);
+	// UI Layers
+	//CreateTexAndSurface(uiSurface, recommendedWidth, recommendedHeight, desc2.Usage, desc2.Format);
+	//CreateTexAndSurface(crosshairSurface, recommendedWidth, recommendedHeight, desc2.Usage, desc2.Format);
+	CreateTexAndSurface(uiSurface, Game::instance.c_UIOverlayWidth->Value(), Game::instance.c_UIOverlayHeight->Value(), desc2.Usage, desc2.Format);
+	CreateTexAndSurface(crosshairSurface, Game::instance.c_UIOverlayWidth->Value(), Game::instance.c_UIOverlayHeight->Value(), desc2.Usage, desc2.Format);
 
 	vrOverlay->SetOverlayWidthInMeters(uiOverlay, Game::instance.c_UIOverlayScale->Value());
+	vrOverlay->SetOverlayWidthInMeters(crosshairOverlay, Game::instance.c_UIOverlayScale->Value());
 	Logger::log << "[OpenVR] Set UI Width = " << Game::instance.c_UIOverlayScale->Value() << std::endl;
 
 	float curvature = Game::instance.c_UIOverlayCurvature->Value();
@@ -141,6 +148,7 @@ void OpenVR::OnGameFinishInit()
 	};
 
 	vrOverlay->SetOverlayTransformAbsolute(uiOverlay, vr::ETrackingUniverseOrigin::TrackingUniverseStanding, &overlayTransform);
+	vrOverlay->SetOverlayTransformAbsolute(crosshairOverlay, vr::ETrackingUniverseOrigin::TrackingUniverseStanding, &overlayTransform);
 
 	Logger::log << "[OpenVR] Finished Initialisation" << std::endl;
 }
@@ -185,7 +193,10 @@ void OpenVR::CreateTexAndSurface(int index, UINT Width, UINT Height, DWORD Usage
 		return;
 	}
 
-	Logger::log << "[OpenVR] Created shared texture " << index << std::endl;
+	D3D11_TEXTURE2D_DESC desc;
+	vrRenderTexture[index]->GetDesc(&desc);
+
+	Logger::log << "[OpenVR] Created shared texture " << index << ", " << desc.Width << "x" << desc.Height << std::endl;
 }
 
 
@@ -239,26 +250,23 @@ void OpenVR::PositionOverlay()
 
 	float distance = Game::instance.c_UIOverlayDistance->Value();
 
-	// Create a new transform from the position
-	vr::HmdMatrix34_t Transform;
+	float len = sqrt(mat.m[0][2] * mat.m[0][2] + mat.m[2][2] * mat.m[2][2]);
 
-	float Len = sqrt(mat.m[0][2] * mat.m[0][2] + mat.m[2][2] * mat.m[2][2]);
-
-	distance /= Len;
+	distance /= len;
 
 	position.v[0] += mat.m[0][2] * -distance;
 	position.v[2] += mat.m[2][2] * -distance;
 
 	// Rotate only around Y for yaw
 	float yaw = atan2(-mat.m[2][0], mat.m[2][2]);
-	Transform = {
+	vr::HmdMatrix34_t transform = {
 		cos(yaw), 0, sin(yaw), position.v[0],
 		0, 1, 0, position.v[1],
 		-sin(yaw), 0, cos(yaw), position.v[2]
 	};
 
 	// Set the transform for the overlay
-	vrOverlay->SetOverlayTransformAbsolute(uiOverlay, vr::TrackingUniverseStanding, &Transform);
+	vrOverlay->SetOverlayTransformAbsolute(uiOverlay, vr::TrackingUniverseStanding, &transform);
 }
 
 void OpenVR::PostDrawFrame(Renderer* renderer, float deltaTime)
@@ -296,12 +304,20 @@ void OpenVR::PostDrawFrame(Renderer* renderer, float deltaTime)
 
 	PositionOverlay();
 
-	vr::Texture_t uiTex{ (void*)vrRenderTexture[2], vr::TextureType_DirectX, vr::ColorSpace_Auto };
+	vr::Texture_t uiTex{ (void*)vrRenderTexture[uiSurface], vr::TextureType_DirectX, vr::ColorSpace_Auto };
 	vr::EVROverlayError oError = vrOverlay->SetOverlayTexture(uiOverlay, &uiTex);
 
-	if (error != vr::EVROverlayError::VROverlayError_None)
+	if (oError != vr::EVROverlayError::VROverlayError_None)
 	{
-		Logger::log << "[OpenVR] Could not submit ui texture: " << error << std::endl;
+		Logger::log << "[OpenVR] Could not submit ui texture: " << oError << std::endl;
+	}
+
+	vr::Texture_t crossTex{ (void*)vrRenderTexture[crosshairSurface], vr::TextureType_DirectX, vr::ColorSpace_Auto };
+	vr::EVROverlayError o2Error = vrOverlay->SetOverlayTexture(crosshairOverlay, &crossTex);
+
+	if (o2Error != vr::EVROverlayError::VROverlayError_None)
+	{
+		Logger::log << "[OpenVR] Could not submit crosshair texture: " << o2Error << std::endl;
 	}
 
 	vrCompositor->PostPresentHandoff();
@@ -424,7 +440,12 @@ IDirect3DTexture9* OpenVR::GetRenderTexture(int eye)
 
 IDirect3DSurface9* OpenVR::GetUISurface()
 {
-    return gameRenderSurface[2];
+    return gameRenderSurface[uiSurface];
+}
+
+IDirect3DSurface9* OpenVR::GetCrosshairSurface()
+{
+	return gameRenderSurface[crosshairSurface];
 }
 
 void OpenVR::SetMouseVisibility(bool bIsVisible)
@@ -447,6 +468,13 @@ void OpenVR::SetMouseVisibility(bool bIsVisible)
 	}
 
 	vrOverlay->SetOverlayInputMethod(uiOverlay, bIsVisible ? vr::VROverlayInputMethod_Mouse : vr::VROverlayInputMethod_None);
+}
+
+void OpenVR::SetCrosshairTransform(Matrix4& newTransform)
+{
+	vr::HmdMatrix34_t overlayMatrix = ConvertMatrixToSteamVRMatrix4(newTransform.rotateZ(yawOffset).translate(positionOffset));
+
+	vrOverlay->SetOverlayTransformAbsolute(crosshairOverlay, vr::TrackingUniverseStanding, &overlayMatrix);
 }
 
 void OpenVR::UpdateInputs()

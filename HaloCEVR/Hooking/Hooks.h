@@ -30,6 +30,7 @@ public:
 	DEFINE_HOOK_FULL(DrawScope, void __stdcall, void* param1); // Disabled
 	DEFINE_HOOK(DrawLoadingScreen);
 	DEFINE_HOOK(SetViewModelPosition);
+	DEFINE_HOOK(DrawCrosshair);
 	DEFINE_HOOK(HandleInputs);
 	DEFINE_HOOK(UpdatePitchYaw);
 	DEFINE_HOOK(SetViewportScale);

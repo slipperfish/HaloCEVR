@@ -221,8 +221,8 @@ void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, V
 
 
 #if DRAW_DEBUG_AIM
-				lastFireLocation = handPos + handRotation3 * cachedViewModel.fireOffset;
-				lastFireAim = lastFireLocation + (handRotation3 * cachedViewModel.fireRotation) * Vector3(1.0f, 0.0f, 0.0f);
+				//lastFireLocation = handPos + handRotation3 * cachedViewModel.fireOffset;
+				//lastFireAim = lastFireLocation + (handRotation3 * cachedViewModel.fireRotation) * Vector3(1.0f, 0.0f, 0.0f);
 #endif
 			}
 #if DRAW_DEBUG_AIM
@@ -397,6 +397,45 @@ void WeaponHandler::UpdateCache(HaloID& id, AssetData_ModelAnimations* animation
 			break;
 		}
 	}
+}
+
+
+bool WeaponHandler::GetLocalWeaponAim(Vector3& outPosition, Vector3& outAim) const
+{
+	HaloID playerID;
+	if (!Helpers::GetLocalPlayerID(playerID))
+	{
+		return false;
+	}
+
+	UnitDynamicObject* player = static_cast<UnitDynamicObject*>(Helpers::GetDynamicObject(playerID));
+	if (!player)
+	{
+		return false;
+	}
+
+	// TODO: Handedness
+	Matrix4 controllerPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Right, true);
+
+	Vector3 handPos = controllerPos * Vector3(0.0f, 0.0f, 0.0f);
+	Matrix4 handRotation = controllerPos.translate(-handPos);
+
+	Matrix3 handRotation3;
+
+	for (int i = 0; i < 3; i++)
+	{
+		handRotation3.setColumn(i, &handRotation.get()[i * 4]);
+	}
+
+	outPosition = handPos + handRotation * cachedViewModel.fireOffset * Game::instance.WorldToMetres(1.0f);
+	outAim = (handRotation3 * cachedViewModel.fireRotation) * Vector3(1.0f, 0.0f, 0.0f);
+
+#if DRAW_DEBUG_AIM
+	lastFireLocation = Helpers::GetCamera().position + outPosition * Game::instance.MetresToWorld(1.0f);
+	lastFireAim = lastFireLocation + outAim * Game::instance.MetresToWorld(Game::instance.c_UIOverlayDistance->Value());
+#endif
+
+	return true;
 }
 
 void WeaponHandler::PreFireWeapon(HaloID& WeaponID, short param2, bool param3)

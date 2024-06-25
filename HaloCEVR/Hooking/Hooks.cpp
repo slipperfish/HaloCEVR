@@ -32,6 +32,7 @@ void Hooks::InitHooks()
 	CREATEHOOK(DrawMenu);
 	//CREATEHOOK(DrawScope);
 	CREATEHOOK(DrawLoadingScreen);
+	CREATEHOOK(DrawCrosshair);
 	CREATEHOOK(SetViewModelPosition);
 	CREATEHOOK(HandleInputs);
 	CREATEHOOK(UpdatePitchYaw);
@@ -59,6 +60,7 @@ void Hooks::EnableAllHooks()
 	DrawMenu.EnableHook();
 	//DrawScope.EnableHook();
 	DrawLoadingScreen.EnableHook();
+	DrawCrosshair.EnableHook();
 	SetViewModelPosition.EnableHook();
 	HandleInputs.EnableHook();
 	UpdatePitchYaw.EnableHook();
@@ -69,8 +71,12 @@ void Hooks::EnableAllHooks()
 
 	Freeze();
 
+	//NOPInstructions(0x494ab8, 5); // Disables UI
+	//NOPInstructions(0x4a9ab6, 5); // Disables Weapons UI
+	//NOPInstructions(0x4b33c1, 5); // Disables Crosshair
+
 	P_RemoveCutsceneFPSCap();
-	//P_DontStealMouse();
+	P_DontStealMouse();
 
 	// If we think the user has chimera installed, don't try to patch their patches
 	if (!bPotentiallyFoundChimera)
@@ -382,6 +388,46 @@ void __declspec(naked) Hooks::H_DrawLoadingScreen()
 
 			ret
 		}
+	}
+}
+
+void __declspec(naked) Hooks::H_DrawCrosshair()
+{
+	static void* retAddress;
+	static float* param1; // We don't actually need this param, but we steal its register for moving some memory around
+	static short* param6;
+
+	_asm
+	{
+		mov param1, eax
+		mov eax, [esp + 0xc]
+		mov param6, eax
+		mov eax, param1
+		pop retAddress
+		pushad
+	}
+
+	Game::instance.PreDrawCrosshair(param6);
+
+	_asm
+	{
+		popad
+	}
+
+	DrawCrosshair.Original();
+
+	_asm
+	{
+		pushad
+	}
+
+	Game::instance.PostDrawCrosshair();
+
+	_asm
+	{
+		popad
+		push retAddress
+		ret
 	}
 }
 

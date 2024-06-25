@@ -47,6 +47,7 @@ public:
 	OFFSET(DrawScope,             0x12d8a0, "8b 44 24 04 83 ec 4c e8 ?? ?? ?? ?? 8b c8 85 c9");
 	OFFSET(DrawLoadingScreen,     0x10bdc0, "55 8b ec 83 e4 f8 81 ec 5c 02 00 00 53 56 8b 75 08");
 	OFFSET(DrawFrameMPLoading,    0x10c590, "8b 15 ?? ?? ?? ?? 81 ec 70 02 00 00 53 56 42 57");
+	OFFSET(DrawCrosshair,         0x0acad0, "");
 
 	OFFSET(SetViewModelPosition,  0x0d6880, "81 ec f0 00 00 00 53 55 25 ff ff 00 00 56 8b f1 8b 0d 14");
 	OFFSET(HandleInputs,          0x08b4b0, "83 ec 08 56 57 8d 44 24 08 50 ff 15 ?? ?? ?? ?? 8b 4c 24 0c");
