@@ -6,18 +6,14 @@
 class DebugRenderer
 {
 public:
-	void Init(struct IDirect3DDevice9* pDevice);
+	void ExtractMatrices(struct Renderer* playerRenderer);
 	int AddLine2D(Vector2 start, Vector2 end, D3DCOLOR color);
 	int AddLine3D(Vector3 start, Vector3 end, D3DCOLOR color);
 	void SetLine2D(int index, Vector2 start, Vector2 end, D3DCOLOR color);
 	void SetLine3D(int index, Vector3 start, Vector3 end, D3DCOLOR color);
 	void Render(struct IDirect3DDevice9* pDevice);
-	void Shutdown();
 
 protected:
-
-	void ExtractMatrices();
-
 	static constexpr int MAX_LINES = 32;
 
 	struct VertexData2D

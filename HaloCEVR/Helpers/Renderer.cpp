@@ -7,4 +7,9 @@ namespace Helpers
 	{
 		return reinterpret_cast<sRect*>(Hooks::o.WindowRect);
 	}
+
+    CameraRenderMatrices* GetActiveCameraMatrices()
+    {
+        return reinterpret_cast<CameraRenderMatrices*>(Hooks::o.CameraMatrices);
+    }
 }

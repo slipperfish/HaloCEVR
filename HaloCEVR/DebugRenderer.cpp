@@ -4,13 +4,9 @@
 #include "Helpers/Maths.h"
 #include "Logger.h"
 #include "Game.h"
+#include "Helpers/Camera.h"
+#include "Hooking/Hooks.h"
 
-
-#pragma optimize("", off)
-
-void DebugRenderer::Init(struct IDirect3DDevice9* pDevice)
-{
-}
 
 int DebugRenderer::AddLine2D(Vector2 start, Vector2 end, D3DCOLOR color)
 {
@@ -25,53 +21,30 @@ int DebugRenderer::AddLine2D(Vector2 start, Vector2 end, D3DCOLOR color)
 	return index;
 }
 
-void DebugRenderer::Shutdown()
+void DebugRenderer::ExtractMatrices(Renderer* playerRenderer)
 {
-}
+	CameraRenderMatrices& cameraMatrices = *Helpers::GetActiveCameraMatrices();
+	Game::instance.SetViewportScale(&cameraMatrices.viewport);
 
-void DebugRenderer::ExtractMatrices()
-{
+	Hooks::SetCameraMatrices(&cameraMatrices.viewport, &playerRenderer->frustum, &cameraMatrices, true);
 
-	// This really needs replacing with signatures/structures, but eh
-	struct CameraRenderMatrices
-	{
-		Viewport viewport;
-		Transform viewMatrix;
-		Transform matrix;
-		Vector4 quaternions[6];
-		float zNear;
-		float zFar;
-		Vector3 vectors[4];
-		Vector3 cameraPosition;
-		Vector3 vector;
-		float floats[6];
-		uint32_t unk;
-		D3DMATRIX projectionMatrix;
-	};
 
-	CameraRenderMatrices& cameraMatrices2 = *reinterpret_cast<CameraRenderMatrices*>(0x7c127c);
-	CameraRenderMatrices& cameraMatrices = *reinterpret_cast<CameraRenderMatrices*>(0x7c3168);
-
-	// The view matrix is bugged for left eye, this is only for debug so just hack around it
-	//if (Game::instance.GetRenderState() == ERenderState::RIGHT_EYE)
-	{
-		view._13 = cameraMatrices.viewMatrix.rotation[2];
-		view._12 = cameraMatrices.viewMatrix.rotation[1];
-		view._23 = cameraMatrices.viewMatrix.rotation[5];
-		view._11 = cameraMatrices.viewMatrix.rotation[0];
-		view._22 = cameraMatrices.viewMatrix.rotation[4];
-		view._33 = cameraMatrices.viewMatrix.rotation[8];
-		view._21 = cameraMatrices.viewMatrix.rotation[3];
-		view._32 = cameraMatrices.viewMatrix.rotation[7];
-		view._43 = cameraMatrices.viewMatrix.translation.z;
-		view._31 = cameraMatrices.viewMatrix.rotation[6];
-		view._42 = cameraMatrices.viewMatrix.translation.y;
-		view._14 = 0.0;
-		view._24 = 0.0;
-		view._34 = 0.0;
-		view._41 = cameraMatrices.viewMatrix.translation.x;
-		view._44 = 1.0;
-	}
+	view._13 = cameraMatrices.viewMatrix.rotation[2];
+	view._12 = cameraMatrices.viewMatrix.rotation[1];
+	view._23 = cameraMatrices.viewMatrix.rotation[5];
+	view._11 = cameraMatrices.viewMatrix.rotation[0];
+	view._22 = cameraMatrices.viewMatrix.rotation[4];
+	view._33 = cameraMatrices.viewMatrix.rotation[8];
+	view._21 = cameraMatrices.viewMatrix.rotation[3];
+	view._32 = cameraMatrices.viewMatrix.rotation[7];
+	view._43 = cameraMatrices.viewMatrix.translation.z;
+	view._31 = cameraMatrices.viewMatrix.rotation[6];
+	view._42 = cameraMatrices.viewMatrix.translation.y;
+	view._14 = 0.0;
+	view._24 = 0.0;
+	view._34 = 0.0;
+	view._41 = cameraMatrices.viewMatrix.translation.x;
+	view._44 = 1.0;
 	world._43 = 0.0;
 	world._42 = 0.0;
 	world._41 = 0.0;
@@ -143,14 +116,15 @@ void DebugRenderer::Render(struct IDirect3DDevice9* pDevice)
 	pDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
 	pDevice->DrawPrimitiveUP(D3DPT_LINELIST, vertex2DCount / 2, vertices2D, sizeof(VertexData2D));
 	pDevice->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
-
-	ExtractMatrices();
 	
 	pDevice->SetTransform(D3DTS_WORLD, &world);
 	pDevice->SetTransform(D3DTS_VIEW, &view);
 	pDevice->SetTransform(D3DTS_PROJECTION, &projection);
 
-	//Logger::log << (int)Game::instance.GetRenderState() << std::endl;
+
+	/*
+	Logger::log << (int)Game::instance.GetRenderState() << std::endl;
+	Logger::log << "Cam pos: " << Helpers::GetCamera().position << std::endl;
 
 	auto LogMatrix = [](D3DMATRIX& m) {
 		for (int i = 0; i < 4; i++) {
@@ -161,15 +135,16 @@ void DebugRenderer::Render(struct IDirect3DDevice9* pDevice)
 		Logger::log << std::endl;
 	};
 
-	//LogMatrix(world);
-	//LogMatrix(view);
-	//LogMatrix(projection);
+	LogMatrix(world);
+	LogMatrix(view);
+	LogMatrix(projection);
+	//*/
 
 	for (int i = 0; i < vertex3DCount; i++)
 	{
 		Vector3 centre = Vector3(vertices3D[i].x, vertices3D[i].y, vertices3D[i].z);
 		DWORD color = vertices3D[i].color;
-		float size = 0.2f;
+		float size = 0.05f;
 
 		const float halfSize = size * 0.5f;
 		VertexData3D vertices[] = {
@@ -199,4 +174,3 @@ void DebugRenderer::Render(struct IDirect3DDevice9* pDevice)
 	pStateBlock->Apply();
 	pStateBlock->Release();
 }
-#pragma optimize("", on)

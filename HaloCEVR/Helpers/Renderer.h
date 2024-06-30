@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
+#include <d3d9.h>
 #include "../Maths/Vectors.h"
+#include "Maths.h"
 
 struct Viewport
 {
@@ -51,7 +53,24 @@ struct Renderer
 };
 static_assert(sizeof(Renderer) == 0xac);
 
+struct CameraRenderMatrices
+{
+	Viewport viewport;
+	Transform viewMatrix;
+	Transform matrix;
+	Vector4 quaternions[6];
+	float zNear;
+	float zFar;
+	Vector3 vectors[4];
+	Vector3 cameraPosition;
+	Vector3 vector;
+	float floats[6];
+	uint32_t unk;
+	D3DMATRIX projectionMatrix;
+};
+
 namespace Helpers
 {
 	sRect* GetWindowRect();
+	CameraRenderMatrices* GetActiveCameraMatrices();
 }

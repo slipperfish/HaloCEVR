@@ -114,11 +114,11 @@ Matrix4 VREmulator::GetControllerTransform(ControllerRole role, bool bRenderPose
 {
 	if (role == ControllerRole::Left)
 	{
-		return Matrix4().translate(0.0f, 0.25f, -0.5f);
+		return Matrix4().translate(0.0f, 0.25f, -0.25f);
 	}
 	else
 	{
-		return Matrix4().translate(0.0f, -0.25f, -0.5f);
+		return Matrix4().translate(0.0f, -0.25f, -0.25f);
 	}
 }
 

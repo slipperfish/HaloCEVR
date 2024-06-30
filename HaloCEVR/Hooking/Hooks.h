@@ -43,7 +43,12 @@ public:
 	static void P_RemoveCutsceneFPSCap();
 	static void P_DontStealMouse();
 
+	static void SetCameraMatrices(struct Viewport* viewport, struct CameraFrustum* frustum, struct CameraRenderMatrices* crm, bool bDoProjection);
+
 	static inline Offsets o;
+
+protected:
+	static inline Func_SetCameraMatrices oSetCameraMatrices = nullptr;
 };
 
 #undef DEFINE_HOOK

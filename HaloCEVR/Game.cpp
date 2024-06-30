@@ -161,6 +161,8 @@ void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
 	primaryRenderTarget[0].renderTexture = vr->GetRenderTexture(eye);
 	primaryRenderTarget[0].width = vr->GetViewWidth();
 	primaryRenderTarget[0].height = vr->GetViewHeight();
+
+	debug.ExtractMatrices(renderer);
 }
 
 
@@ -175,6 +177,8 @@ void Game::PostDrawEye(struct Renderer* renderer, float deltaTime, int eye)
 	targetRect = { 400, 0, 600, 200 };
 	Helpers::GetDirect3DDevice9()->StretchRect(crosshairSurface, NULL, Helpers::GetRenderTargets()[0].renderSurface, &targetRect, D3DTEXF_NONE);
 #endif
+
+	debug.Render(Helpers::GetDirect3DDevice9());
 }
 
 void Game::PreDrawMirror(struct Renderer* renderer, float deltaTime)
@@ -185,11 +189,14 @@ void Game::PreDrawMirror(struct Renderer* renderer, float deltaTime)
 	renderer->frustum2 = frustum2;
 
 	RestoreRenderTargets();
+
+	debug.ExtractMatrices(renderer);
 }
 
 void Game::PostDrawMirror(struct Renderer* renderer, float deltaTime)
 {
 	// Do something here to copy the image into the backbuffer correctly
+	debug.Render(Helpers::GetDirect3DDevice9());
 }
 
 void Game::PostDrawFrame(struct Renderer* renderer, float deltaTime)

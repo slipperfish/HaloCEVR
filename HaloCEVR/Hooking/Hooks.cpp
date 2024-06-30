@@ -25,6 +25,7 @@ void Hooks::InitHooks()
 	RESOLVEINDIRECT(LocalPlayer);
 	RESOLVEINDIRECT(WindowRect);
 	RESOLVEINDIRECT(RenderTargets);
+	RESOLVEINDIRECT(CameraMatrices);
 
 	CREATEHOOK(InitDirectX);
 	CREATEHOOK(DrawFrame);
@@ -47,6 +48,9 @@ void Hooks::InitHooks()
 	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo3) < 0;
 	SigScanner::UpdateOffset(o.CutsceneFPSCap);
 	SigScanner::UpdateOffset(o.CreateMouseDevice);
+
+	SigScanner::UpdateOffset(o.SetCameraMatrices);
+	oSetCameraMatrices = reinterpret_cast<Func_SetCameraMatrices>(o.SetCameraMatrices.Address);
 }
 
 #undef CREATEHOOK
@@ -70,10 +74,6 @@ void Hooks::EnableAllHooks()
 	FireWeapon.EnableHook();
 
 	Freeze();
-
-	//NOPInstructions(0x494ab8, 5); // Disables UI
-	//NOPInstructions(0x4a9ab6, 5); // Disables Weapons UI
-	//NOPInstructions(0x4b33c1, 5); // Disables Crosshair
 
 	P_RemoveCutsceneFPSCap();
 	P_DontStealMouse();
@@ -686,4 +686,30 @@ void Hooks::P_DontStealMouse()
 	// Changing it to non-exclusive is fine for our purposes (VR/testing),
 	// but does cause the mouse to stop being locked to the window in game
 	SetByte(o.CreateMouseDevice.Address + 0x5B, 6);
+}
+
+void Hooks::SetCameraMatrices(struct Viewport* viewport, struct CameraFrustum* frustum, struct CameraRenderMatrices* crm, bool bDoProjection)
+{
+	// Halo loves its non-standard calling conventions...
+	_asm
+	{
+		push eax
+		push ecx
+		push esi
+		movzx eax, bDoProjection
+		push eax
+		mov eax, viewport
+		mov ecx, frustum
+		mov esi, crm
+	}
+	
+	oSetCameraMatrices();
+
+	_asm
+	{
+		pop esi
+		pop ecx
+		pop eax
+		add esp, 0x4
+	}
 }

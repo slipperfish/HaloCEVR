@@ -10,6 +10,7 @@
 #include "Maths/Vectors.h"
 #include "WeaponHandler.h"
 #include "InputHandler.h"
+#include "DebugRenderer.h"
 
 enum class ERenderState { UNKNOWN, LEFT_EYE, RIGHT_EYE, GAME};
 
@@ -113,6 +114,7 @@ protected:
 	CameraFrustum frustum1;
 	CameraFrustum frustum2;
 
+	DebugRenderer debug;
 
 	//======Configs======//
 public:
