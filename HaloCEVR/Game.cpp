@@ -132,6 +132,13 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 		vr->Recentre();
 	}
 
+	//Vector3 testPos;//Helpers::GetCamera().position + Helpers::GetCamera().lookDir * MetresToWorld(0.25f);
+	//Transform trans;
+	//Helpers::MakeTransformFromXZ(&Helpers::GetCamera().lookDir, &Helpers::GetCamera().lookDirUp, &trans);
+	//Matrix3 testRot; // = trans.rotation;
+
+	//debug.DrawCoordinate(testPos, testRot);
+
 	vr->PreDrawFrame(renderer, deltaTime);
 }
 
@@ -202,6 +209,7 @@ void Game::PostDrawMirror(struct Renderer* renderer, float deltaTime)
 void Game::PostDrawFrame(struct Renderer* renderer, float deltaTime)
 {
 	vr->PostDrawFrame(renderer, deltaTime);
+	debug.PostRender();
 }
 
 bool Game::PreDrawHUD()

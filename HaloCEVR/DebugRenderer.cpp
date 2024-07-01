@@ -7,19 +7,74 @@
 #include "Helpers/Camera.h"
 #include "Hooking/Hooks.h"
 
+//================================//Debug API//================================//
 
-int DebugRenderer::AddLine2D(Vector2 start, Vector2 end, D3DCOLOR color)
+void DebugRenderer::DrawLine2D(Vector2& start, Vector2& end, D3DCOLOR color)
 {
-	int index = vertex2DCount;
-	
-	SetLine2D(index, start, end, color);
-	
-	vertex2DCount += 2;
+	VertexData2D startData
+	{
+		start.x,
+		start.y,
+		0.0f,
+		1.0f,
+		color
 
-	vertex2DCount = vertex2DCount % MAX_LINES;
+	};
+	lines2D.push_back(startData);
 
-	return index;
+	VertexData2D endData
+	{
+		end.x,
+		end.y,
+		0.0f,
+		1.0f,
+		color
+
+	};
+	lines2D.push_back(endData);
 }
+
+void DebugRenderer::DrawLine3D(Vector3& start, Vector3& end, D3DCOLOR color, float thickness)
+{
+	VertexData3D startData
+	{
+		start.x,
+		start.y,
+		start.z,
+		color
+
+	};
+	lines3D.push_back(startData);
+
+	VertexData3D endData
+	{
+		end.x,
+		end.y,
+		end.z,
+		color
+
+	};
+	lines3D.push_back(endData);
+}
+
+void DebugRenderer::DrawCoordinate(Vector3& pos, Matrix3& rot, float size)
+{
+	// TODO: Check these are the right way round
+	Vector3 up = pos + rot * Vector3(0.0f, 0.0f, size);
+	Vector3 forward = pos + rot * Vector3(0.0f, size, 0.0f);
+	Vector3 left = pos + rot * Vector3(size, 0.0f, 0.0f);
+
+	DrawLine3D(pos, up, D3DCOLOR_XRGB(0, 0, 255), 0.01f);
+	DrawLine3D(pos, forward, D3DCOLOR_XRGB(0, 255, 0), 0.01f);
+	DrawLine3D(pos, left, D3DCOLOR_XRGB(255, 0, 0), 0.01f);
+}
+
+void DebugRenderer::DrawRenderTarget(IDirect3DSurface9* renderTarget, Vector3& pos, Matrix3& rot, Vector2& size)
+{
+	// todo
+}
+
+//================================//Core Functions//================================//
 
 void DebugRenderer::ExtractMatrices(Renderer* playerRenderer)
 {
@@ -64,83 +119,54 @@ void DebugRenderer::ExtractMatrices(Renderer* playerRenderer)
 	projection = cameraMatrices.projectionMatrix;
 }
 
-int DebugRenderer::AddLine3D(Vector3 start, Vector3 end, D3DCOLOR color)
-{
-	int index = vertex3DCount;
-
-	SetLine3D(index, start, end, color);
-
-	vertex3DCount += 2;
-
-	vertex3DCount = vertex3DCount % MAX_LINES;
-
-	return index;
-}
-
-void DebugRenderer::SetLine2D(int index, Vector2 start, Vector2 end, D3DCOLOR color)
-{
-	vertices2D[index].x = start.x;
-	vertices2D[index].y = start.y;
-	vertices2D[index].z = 0.0f;
-	vertices2D[index].rhw = 1.0f;
-	vertices2D[index].color = color;
-	index++;
-	vertices2D[index].x = end.x;
-	vertices2D[index].y = end.y;
-	vertices2D[index].z = 0.0f;
-	vertices2D[index].rhw = 1.0f;
-	vertices2D[index].color = color;
-}
-
-void DebugRenderer::SetLine3D(int index, Vector3 start, Vector3 end, D3DCOLOR color)
-{
-	vertices3D[index].x = start.x;
-	vertices3D[index].y = start.y;
-	vertices3D[index].z = start.z;
-	vertices3D[index].color = color;
-	index++;
-	vertices3D[index].x = end.x;
-	vertices3D[index].y = end.y;
-	vertices3D[index].z = end.z;
-	vertices3D[index].color = color;
-}
-
-void DebugRenderer::Render(struct IDirect3DDevice9* pDevice)
+void DebugRenderer::Render(IDirect3DDevice9* pDevice)
 {
 	LPDIRECT3DSTATEBLOCK9 pStateBlock = NULL;
 	pDevice->CreateStateBlock(D3DSBT_ALL, &pStateBlock);
 
+	Draw2DLines(pDevice);
+
+	Draw3DLines(pDevice);
+
+	pStateBlock->Apply();
+	pStateBlock->Release();
+}
+
+void DebugRenderer::PostRender()
+{
+	lines2D.clear();
+	lines3D.clear();
+	renderTargets.clear();
+	renderTargetCoords.clear();
+}
+
+//================================//Internal Functions//================================//
+
+void DebugRenderer::Draw2DLines(IDirect3DDevice9* pDevice)
+{
 	pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 	pDevice->SetRenderState(D3DRS_LIGHTING, false);
 	pDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
 	pDevice->DrawPrimitiveUP(D3DPT_LINELIST, vertex2DCount / 2, vertices2D, sizeof(VertexData2D));
+}
+
+void DebugRenderer::Draw3DLines(IDirect3DDevice9* pDevice)
+{
+	if (lines3D.empty())
+	{
+		return;
+	}
+
+	pDevice->SetRenderState(D3DRS_ZENABLE, true);
 	pDevice->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
-	
 	pDevice->SetTransform(D3DTS_WORLD, &world);
 	pDevice->SetTransform(D3DTS_VIEW, &view);
 	pDevice->SetTransform(D3DTS_PROJECTION, &projection);
 
-
+	// TODO: replace this with actual line thickness
 	/*
-	Logger::log << (int)Game::instance.GetRenderState() << std::endl;
-	Logger::log << "Cam pos: " << Helpers::GetCamera().position << std::endl;
-
-	auto LogMatrix = [](D3DMATRIX& m) {
-		for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < 4; j++) {
-				Logger::log << m.m[i][j] << " ";
-			}
-		}
-		Logger::log << std::endl;
-	};
-
-	LogMatrix(world);
-	LogMatrix(view);
-	LogMatrix(projection);
-	//*/
-
-	for (int i = 0; i < vertex3DCount; i++)
+	for (int i = 0; i < lines3D.size(); i++)
 	{
 		Vector3 centre = Vector3(vertices3D[i].x, vertices3D[i].y, vertices3D[i].z);
 		DWORD color = vertices3D[i].color;
@@ -168,9 +194,7 @@ void DebugRenderer::Render(struct IDirect3DDevice9* pDevice)
 		};
 		pDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0, 8, 12, indices, D3DFMT_INDEX16, vertices, sizeof(VertexData3D));
 	}
+	*/
 
-	pDevice->DrawPrimitiveUP(D3DPT_LINELIST, vertex3DCount / 2, vertices3D, sizeof(VertexData3D));
-
-	pStateBlock->Apply();
-	pStateBlock->Release();
+	pDevice->DrawPrimitiveUP(D3DPT_LINELIST, lines3D.size() / 2, lines3D.data(), sizeof(VertexData3D));
 }
