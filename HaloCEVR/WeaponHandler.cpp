@@ -218,21 +218,12 @@ void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, V
 				cachedViewModel.fireOffset = inverseHand * cachedViewModel.fireOffset;
 
 				cachedViewModel.fireRotation = cachedViewModel.cookedFireRotation * gunRot * inverseHand;
-
+			}
 
 #if DRAW_DEBUG_AIM
-				//lastFireLocation = handPos + handRotation3 * cachedViewModel.fireOffset;
-				//lastFireAim = lastFireLocation + (handRotation3 * cachedViewModel.fireRotation) * Vector3(1.0f, 0.0f, 0.0f);
-#endif
-			}
-#if DRAW_DEBUG_AIM
-			else if (strstr(currentBone.BoneName, "l thumb tip"))
+			if (currentBone.Parent != -1)
 			{
-				outBoneTransforms[boneIndex].translation = lastFireAim;
-			}
-			else if (strstr(currentBone.BoneName, "l thumb mid"))
-			{
-				outBoneTransforms[boneIndex].translation = lastFireLocation;
+				Game::instance.debug.DrawLine3D(outBoneTransforms[boneIndex].translation, outBoneTransforms[currentBone.Parent].translation, D3DCOLOR_ARGB(127, 127, 127, 127), false);
 			}
 #endif
 
@@ -427,12 +418,22 @@ bool WeaponHandler::GetLocalWeaponAim(Vector3& outPosition, Vector3& outAim) con
 		handRotation3.setColumn(i, &handRotation.get()[i * 4]);
 	}
 
+	Matrix3 finalRot = cachedViewModel.fireRotation * handRotation3;
+
 	outPosition = handPos + handRotation * cachedViewModel.fireOffset * Game::instance.WorldToMetres(1.0f);
-	outAim = (handRotation3 * cachedViewModel.fireRotation) * Vector3(1.0f, 0.0f, 0.0f);
+	outAim = finalRot * Vector3(1.0f, 0.0f, 0.0f);
 
 #if DRAW_DEBUG_AIM
-	lastFireLocation = Helpers::GetCamera().position + outPosition * Game::instance.MetresToWorld(1.0f);
-	lastFireAim = lastFireLocation + outAim * Game::instance.MetresToWorld(Game::instance.c_UIOverlayDistance->Value());
+	// N.b. - This function is in local (i.e. vr) coordinate space, convert to world for debug to be correct
+	Vector3 worldOutPos = Helpers::GetCamera().position + outPosition * Game::instance.MetresToWorld(1.0f);
+	Game::instance.debug.DrawCoordinate(worldOutPos, finalRot, 0.02f);
+	Vector3 worldHandPos = Helpers::GetCamera().position + handPos * Game::instance.MetresToWorld(1.0f);
+	Game::instance.debug.DrawCoordinate(worldHandPos, handRotation3, 0.015f, false);
+
+	Vector3 aimTarget = worldOutPos + outAim * Game::instance.MetresToWorld(Game::instance.c_UIOverlayDistance->Value());
+	Game::instance.debug.DrawLine3D(worldOutPos, aimTarget, D3DCOLOR_ARGB(255, 255, 20, 20));
+
+	Game::instance.debug.DrawLine3D(lastFireLocation, lastFireAim, D3DCOLOR_ARGB(255, 20, 255, 255));
 #endif
 
 	return true;
@@ -478,13 +479,12 @@ void WeaponHandler::PreFireWeapon(HaloID& WeaponID, short param2, bool param3)
 			// What are the other aims for??
 			realPlayerAim = weaponFiredPlayer->aim;
 
-			Vector3 internalFireOffset = Helpers::GetCamera().position - weaponFiredPlayer->position;
-
-			weaponFiredPlayer->position = handPos + handRotation * cachedViewModel.fireOffset;// -internalFireOffset;
-			weaponFiredPlayer->aim = (handRotation3 * cachedViewModel.fireRotation) * Vector3(1.0f, 0.0f, 0.0f);
+			weaponFiredPlayer->position = handPos + handRotation * cachedViewModel.fireOffset;
+			weaponFiredPlayer->aim = (cachedViewModel.fireRotation * handRotation3) * Vector3(1.0f, 0.0f, 0.0f);
 
 #if DRAW_DEBUG_AIM
-			lastFireLocation = weaponFiredPlayer->position;// +internalFireOffset;
+			Vector3 internalFireOffset = Helpers::GetCamera().position - realPlayerPosition;
+			lastFireLocation = weaponFiredPlayer->position + internalFireOffset;
 			lastFireAim = lastFireLocation + weaponFiredPlayer->aim * 1.0f;
 			Logger::log << "FireOffset: " << cachedViewModel.fireOffset << std::endl;
 			Logger::log << "Player Position: " << realPlayerPosition << std::endl;

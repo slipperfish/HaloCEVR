@@ -29,6 +29,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 void VREmulator::Init()
 {
+	inputMoveHandFlat = RegisterVector2Input("default", "EMU_MoveHandFlat");
+	inputMoveHandVert = RegisterVector2Input("default", "EMU_MoveHandVert");
+	inputMoveHandSwap = RegisterBoolInput("default", "EMU_MoveHandSwap");
+
+	mainHandOffset = Vector3(0.0f, -0.25f, -0.25f);
 }
 
 void VREmulator::OnGameFinishInit()
@@ -118,7 +123,12 @@ Matrix4 VREmulator::GetControllerTransform(ControllerRole role, bool bRenderPose
 	}
 	else
 	{
-		return Matrix4().translate(0.0f, -0.25f, -0.25f);
+		Matrix4 trans;
+		trans.rotateZ(mainHandRot.z);
+		trans.rotateY(mainHandRot.y);
+		trans.rotateX(mainHandRot.x);
+		trans.translate(mainHandOffset);
+		return trans;
 	}
 }
 
@@ -164,6 +174,35 @@ void VREmulator::UpdateInputs()
 			axes1D[axisBindings[i].axisId] += axisBindings[i].scale * 1.0f;
 		}
 	}
+
+	// Respond to fake inputs used to control gun hand
+
+	Vector2 handMoveFlat = GetVector2Input(inputMoveHandFlat) * Game::instance.lastDeltaTime;
+	Vector2 handMoveVert = GetVector2Input(inputMoveHandVert) * Game::instance.lastDeltaTime;
+
+	// Swap between moving/rotating
+	bool bhandModeChanged;
+	bool bSwapHandMove = GetBoolInput(inputMoveHandSwap, bhandModeChanged);
+	if (bhandModeChanged && bSwapHandMove)
+	{
+		bMoveHand ^= true;
+	}
+
+	constexpr float moveSpeed = 0.5f;
+	constexpr float rotSpeed = 180.0f;
+
+	if (bMoveHand)
+	{
+		mainHandOffset.x += handMoveFlat.x * moveSpeed;
+		mainHandOffset.y += handMoveFlat.y * moveSpeed;
+		mainHandOffset.z += handMoveVert.x * moveSpeed;
+	}
+	else
+	{
+		mainHandRot.x += handMoveFlat.x * rotSpeed;
+		mainHandRot.y += handMoveFlat.y * rotSpeed;
+		mainHandRot.z += handMoveVert.x * rotSpeed;
+	}
 }
 
 InputBindingID VREmulator::RegisterBoolInput(std::string set, std::string action)
@@ -198,7 +237,7 @@ bool VREmulator::GetBoolInput(InputBindingID id)
 
 bool VREmulator::GetBoolInput(InputBindingID id, bool& bHasChanged)
 {
-	if (id < 12)
+	if (id < arraySize(bindings))
 	{
 		bHasChanged = bindings[id].bHasChanged;
 		return bindings[id].bPressed;

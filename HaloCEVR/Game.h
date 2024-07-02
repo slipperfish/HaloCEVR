@@ -70,6 +70,8 @@ public:
 	float lastDeltaTime = 0.0f;
 
 	bool bNeedsRecentre = true;
+
+	DebugRenderer debug;
 protected:
 
 	void CreateConsole();
@@ -113,8 +115,6 @@ protected:
 
 	CameraFrustum frustum1;
 	CameraFrustum frustum2;
-
-	DebugRenderer debug;
 
 	//======Configs======//
 public:

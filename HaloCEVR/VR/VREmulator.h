@@ -69,7 +69,7 @@ protected:
 		bool bPressed = false;
 	};
 
-	Binding bindings[12] = {
+	Binding bindings[13] = {
 		{"Jump", VK_SPACE},
 		{"SwitchGrenades", 'G'},
 		{"Interact", 'E'},
@@ -82,6 +82,7 @@ protected:
 		{"Crouch", VK_LCONTROL},
 		{"Zoom", 'Z'},
 		{"Reload", 'R'},
+		{"EMU_MoveHandSwap", 'H'}
 	};
 
 	struct AxisBinding
@@ -98,22 +99,41 @@ protected:
 		int indexY = 0;
 	};
 
-	float axes1D[2] = {
+	float axes1D[6] = {
+		0.0f,
+		0.0f,
+		0.0f,
 		0.0f,
 		0.0f
 	};
 
-	Axis2D axes2D[1] =
+	Axis2D axes2D[3] =
 	{
-		{"Move", 0, 1}
+		{"Move", 0, 1},
+		{"EMU_MoveHandFlat", 2, 3},
+		{"EMU_MoveHandVert", 4, 5}
 	};
 
-	AxisBinding axisBindings[4] =
+	AxisBinding axisBindings[10] =
 	{
 		{'W', 1, 1},
 		{'S', -1, 1},
 		{'A', -1, 0},
 		{'D', 1, 0},
+		{'I', 1, 3},
+		{'K', -1, 3},
+		{'J', -1, 2},
+		{'L', 1, 2},
+		{'U', -1, 4},
+		{'O', 1, 4},
 	};
+
+	InputBindingID inputMoveHandFlat = 0;
+	InputBindingID inputMoveHandVert = 0;
+	InputBindingID inputMoveHandSwap = 0;
+	bool bMoveHand = true;
+
+	Vector3 mainHandOffset;
+	Vector3 mainHandRot;
 };
 

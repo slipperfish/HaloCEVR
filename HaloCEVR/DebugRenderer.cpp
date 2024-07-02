@@ -34,7 +34,7 @@ void DebugRenderer::DrawLine2D(Vector2& start, Vector2& end, D3DCOLOR color)
 	lines2D.push_back(endData);
 }
 
-void DebugRenderer::DrawLine3D(Vector3& start, Vector3& end, D3DCOLOR color, float thickness)
+void DebugRenderer::DrawLine3D(Vector3& start, Vector3& end, D3DCOLOR color, bool bRespectDepth, float thickness)
 {
 	VertexData3D startData
 	{
@@ -44,7 +44,15 @@ void DebugRenderer::DrawLine3D(Vector3& start, Vector3& end, D3DCOLOR color, flo
 		color
 
 	};
-	lines3D.push_back(startData);
+
+	if (bRespectDepth)
+	{
+		depthLines3D.push_back(startData);
+	}
+	else
+	{
+		lines3D.push_back(startData);
+	}
 
 	VertexData3D endData
 	{
@@ -54,19 +62,27 @@ void DebugRenderer::DrawLine3D(Vector3& start, Vector3& end, D3DCOLOR color, flo
 		color
 
 	};
-	lines3D.push_back(endData);
+
+	if (bRespectDepth)
+	{
+		depthLines3D.push_back(endData);
+	}
+	else
+	{
+		lines3D.push_back(endData);
+	}
 }
 
-void DebugRenderer::DrawCoordinate(Vector3& pos, Matrix3& rot, float size)
+void DebugRenderer::DrawCoordinate(Vector3& pos, Matrix3& rot, float size, bool bRespectDepth)
 {
 	// TODO: Check these are the right way round
 	Vector3 up = pos + rot * Vector3(0.0f, 0.0f, size);
 	Vector3 forward = pos + rot * Vector3(0.0f, size, 0.0f);
 	Vector3 left = pos + rot * Vector3(size, 0.0f, 0.0f);
 
-	DrawLine3D(pos, up, D3DCOLOR_XRGB(0, 0, 255), 0.01f);
-	DrawLine3D(pos, forward, D3DCOLOR_XRGB(0, 255, 0), 0.01f);
-	DrawLine3D(pos, left, D3DCOLOR_XRGB(255, 0, 0), 0.01f);
+	DrawLine3D(pos, up, D3DCOLOR_XRGB(0, 0, 255), bRespectDepth, 0.01f);
+	DrawLine3D(pos, forward, D3DCOLOR_XRGB(0, 255, 0), bRespectDepth, 0.01f);
+	DrawLine3D(pos, left, D3DCOLOR_XRGB(255, 0, 0), bRespectDepth, 0.01f);
 }
 
 void DebugRenderer::DrawRenderTarget(IDirect3DSurface9* renderTarget, Vector3& pos, Matrix3& rot, Vector2& size)
@@ -136,6 +152,7 @@ void DebugRenderer::PostRender()
 {
 	lines2D.clear();
 	lines3D.clear();
+	depthLines3D.clear();
 	renderTargets.clear();
 	renderTargetCoords.clear();
 }
@@ -153,7 +170,7 @@ void DebugRenderer::Draw2DLines(IDirect3DDevice9* pDevice)
 
 void DebugRenderer::Draw3DLines(IDirect3DDevice9* pDevice)
 {
-	if (lines3D.empty())
+	if (lines3D.empty() && depthLines3D.empty())
 	{
 		return;
 	}
@@ -196,5 +213,7 @@ void DebugRenderer::Draw3DLines(IDirect3DDevice9* pDevice)
 	}
 	*/
 
+	pDevice->DrawPrimitiveUP(D3DPT_LINELIST, depthLines3D.size() / 2, depthLines3D.data(), sizeof(VertexData3D));
+	pDevice->SetRenderState(D3DRS_ZENABLE, false);
 	pDevice->DrawPrimitiveUP(D3DPT_LINELIST, lines3D.size() / 2, lines3D.data(), sizeof(VertexData3D));
 }

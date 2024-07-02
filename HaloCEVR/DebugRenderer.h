@@ -9,8 +9,8 @@ class DebugRenderer
 public:
 	// Debug API functions
 	void DrawLine2D(struct Vector2& start, struct Vector2& end, D3DCOLOR color);
-	void DrawLine3D(struct Vector3& start, struct Vector3& end, D3DCOLOR color, float thickness);
-	void DrawCoordinate(struct Vector3& pos, class Matrix3& rot, float size = 0.05f);
+	void DrawLine3D(struct Vector3& start, struct Vector3& end, D3DCOLOR color, bool bRespectDepth = true, float thickness = 0.05f);
+	void DrawCoordinate(struct Vector3& pos, class Matrix3& rot, float size = 0.05f, bool bRespectDepth = true);
 	void DrawRenderTarget(struct IDirect3DSurface9* renderTarget, struct Vector3& pos, class Matrix3& rot, struct Vector2& size);
 
 	// Core functions
@@ -43,6 +43,7 @@ protected:
 
 	std::vector<VertexData2D> lines2D;
 	std::vector<VertexData3D> lines3D;
+	std::vector<VertexData3D> depthLines3D;
 	std::vector<struct IDirect3DSurface9*> renderTargets;
 	std::vector<VertexData3D> renderTargetCoords;
 
