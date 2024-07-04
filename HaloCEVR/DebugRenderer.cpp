@@ -85,9 +85,18 @@ void DebugRenderer::DrawCoordinate(Vector3& pos, Matrix3& rot, float size, bool 
 	DrawLine3D(pos, left, D3DCOLOR_XRGB(255, 0, 0), bRespectDepth, 0.01f);
 }
 
-void DebugRenderer::DrawRenderTarget(IDirect3DSurface9* renderTarget, Vector3& pos, Matrix3& rot, Vector2& size)
+void DebugRenderer::DrawRenderTarget(IDirect3DTexture9* renderTarget, Vector3& pos, Matrix3& rot, Vector2& size, bool bRespectDepth)
 {
-	// todo
+	RenderTarget rtData
+	{
+		pos,
+		rot,
+		size * 0.5f,
+		renderTarget,
+		bRespectDepth
+	};
+
+	renderTargets.push_back(rtData);
 }
 
 //================================//Core Functions//================================//
@@ -144,6 +153,8 @@ void DebugRenderer::Render(IDirect3DDevice9* pDevice)
 
 	Draw3DLines(pDevice);
 
+	DrawRenderTargets(pDevice);
+
 	pStateBlock->Apply();
 	pStateBlock->Release();
 }
@@ -154,7 +165,6 @@ void DebugRenderer::PostRender()
 	lines3D.clear();
 	depthLines3D.clear();
 	renderTargets.clear();
-	renderTargetCoords.clear();
 }
 
 //================================//Internal Functions//================================//
@@ -216,4 +226,40 @@ void DebugRenderer::Draw3DLines(IDirect3DDevice9* pDevice)
 	pDevice->DrawPrimitiveUP(D3DPT_LINELIST, depthLines3D.size() / 2, depthLines3D.data(), sizeof(VertexData3D));
 	pDevice->SetRenderState(D3DRS_ZENABLE, false);
 	pDevice->DrawPrimitiveUP(D3DPT_LINELIST, lines3D.size() / 2, lines3D.data(), sizeof(VertexData3D));
+}
+
+void DebugRenderer::DrawRenderTargets(IDirect3DDevice9* pDevice)
+{
+	pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE); 
+	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE); 
+	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+	pDevice->SetFVF(D3DFVF_XYZ | D3DFVF_TEX1);
+	pDevice->SetTransform(D3DTS_WORLD, &world);
+	pDevice->SetTransform(D3DTS_VIEW, &view);
+	pDevice->SetTransform(D3DTS_PROJECTION, &projection);
+
+	static WORD indices[] = {
+		0, 1, 3, 2, 3, 1
+	};
+
+	for (size_t i = 0; i < renderTargets.size(); i++)
+	{
+		Vector3 centre = renderTargets[i].pos;
+		Vector3 sizeTR = renderTargets[i].rot * Vector3(renderTargets[i].size.x, 0.0f, renderTargets[i].size.y);
+		Vector3 sizeBR = renderTargets[i].rot * Vector3(renderTargets[i].size.x, 0.0f, -renderTargets[i].size.y);
+		Vector3 sizeBL = renderTargets[i].rot * Vector3(-renderTargets[i].size.x, 0.0f, -renderTargets[i].size.y);
+		Vector3 sizeTL = renderTargets[i].rot * Vector3(-renderTargets[i].size.x, 0.0f, renderTargets[i].size.y);
+
+		VertexDataTex vertices[] = {
+			{centre.x + sizeTR.x, centre.y + sizeTR.y, centre.z + sizeTR.z, 1.0f, 0.0f},
+			{centre.x + sizeBR.x, centre.y + sizeBR.y, centre.z + sizeBR.z, 1.0f, 1.0f},
+			{centre.x + sizeBL.x, centre.y + sizeBL.y, centre.z + sizeBL.z, 0.0f, 1.0f},
+			{centre.x + sizeTL.x, centre.y + sizeTL.y, centre.z + sizeTL.z, 0.0f, 0.0f}
+		};
+
+		pDevice->SetRenderState(D3DRS_ZENABLE, renderTargets[i].bRespectDepth);
+
+		pDevice->SetTexture(0, renderTargets[i].texture);
+		pDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0, 4, 2, indices, D3DFMT_INDEX16, vertices, sizeof(VertexDataTex));
+	}
 }

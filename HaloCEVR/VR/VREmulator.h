@@ -32,7 +32,7 @@ public:
 	struct IDirect3DSurface9* GetUISurface();
 	struct IDirect3DSurface9* GetCrosshairSurface();
 	void SetMouseVisibility(bool bIsVisible) {}
-	void SetCrosshairTransform(class Matrix4& newTransform) {}
+	void SetCrosshairTransform(class Matrix4& newTransform);
 	void UpdateInputs();
 	InputBindingID RegisterBoolInput(std::string set, std::string action);
 	InputBindingID RegisterVector2Input(std::string set, std::string action);
@@ -54,7 +54,9 @@ protected:
 	struct IDirect3DDevice9* mirrorDevice = nullptr;
 
 	struct IDirect3DSurface9* uiSurface = nullptr;
+	struct IDirect3DTexture9* uiTexture = nullptr;
 	struct IDirect3DSurface9* crosshairSurface = nullptr;
+	struct IDirect3DTexture9* crosshairTexture = nullptr;
 	struct IDirect3DSurface9* eyeSurface_Game[2][2];
 	struct IDirect3DSurface9* eyeSurface_VR[2][2];
 

@@ -152,6 +152,26 @@ IDirect3DSurface9* VREmulator::GetCrosshairSurface()
 	return crosshairSurface;
 }
 
+void VREmulator::SetCrosshairTransform(Matrix4& newTransform)
+{
+	Vector3 pos = (newTransform * Vector3(0.0f, 0.0f, 0.0f)) * Game::instance.MetresToWorld(1.0f) + Helpers::GetCamera().position;
+	Matrix3 rot;
+	Vector2 size(1.33f, 1.0f);
+	size *= Game::instance.MetresToWorld(15.0f);
+
+	newTransform.translate(-pos);
+	newTransform.rotate(90.0f, newTransform.getLeftAxis());
+	newTransform.rotate(-90.0f, newTransform.getUpAxis());
+	newTransform.rotate(-90.0f, newTransform.getLeftAxis());
+
+	for (int i = 0; i < 3; i++)
+	{
+		rot.setColumn(i, &newTransform.get()[i * 4]);
+	}
+
+	Game::instance.debug.DrawRenderTarget(crosshairTexture, pos, rot, size, false);
+}
+
 void VREmulator::UpdateInputs()
 {
 	for (size_t i = 0; i < arraySize(bindings); i++)
@@ -269,6 +289,27 @@ void VREmulator::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 	{
 		Logger::log << "Failed to call mirror begin scene: " << result << std::endl;
 	}
+
+	Vector3 pos = Helpers::GetCamera().position + Helpers::GetCamera().lookDir * Game::instance.MetresToWorld(3.0f);
+	Matrix3 rot;
+	Vector2 size(1.33f, 1.0f);
+	size *= Game::instance.MetresToWorld(2.0f);
+
+	Matrix4 overlayTransform;
+	overlayTransform.translate(pos);
+	overlayTransform.lookAt(Helpers::GetCamera().position, Vector3(0.0f, 0.0f, 1.0f));
+
+	overlayTransform.translate(-pos);
+	overlayTransform.rotate(-90.0f, overlayTransform.getLeftAxis());
+	overlayTransform.translate(Helpers::GetCamera().position);
+
+	for (int i = 0; i < 3; i++)
+	{
+		rot.setColumn(i, &overlayTransform.get()[i * 4]);
+	}
+
+	Game::instance.debug.DrawRenderTarget(uiTexture, pos, rot, size, false);
+	//Game::instance.debug.DrawCoordinate(pos, rot, 0.05f, false);
 }
 
 void VREmulator::DrawEye(struct Renderer* renderer, float deltaTime, int eye)
@@ -347,18 +388,32 @@ void VREmulator::CreateSharedTarget()
 	CreateTexAndSurface(0, width, height, desc.Usage, desc.Format);
 	CreateTexAndSurface(1, width, height, desc2.Usage, desc2.Format);
 
-	HRESULT res = Helpers::GetDirect3DDevice9()->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_NONE, 0, TRUE, &uiSurface, NULL);
+	HRESULT res = Helpers::GetDirect3DDevice9()->CreateTexture(width, height, 1, desc2.Usage, desc2.Format, D3DPOOL_DEFAULT, &uiTexture, NULL);
+
+	if (FAILED(res))
+	{
+		Logger::log << "Couldn't create UI texture: " << res << std::endl;
+	}
+
+	res = uiTexture->GetSurfaceLevel(0, &uiSurface);
 
 	if (FAILED(res))
 	{
 		Logger::log << "Couldn't create UI render target: " << res << std::endl;
 	}
 
-	res = Helpers::GetDirect3DDevice9()->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_NONE, 0, TRUE, &crosshairSurface, NULL);
+	res = Helpers::GetDirect3DDevice9()->CreateTexture(width, height, 1, desc2.Usage, desc2.Format, D3DPOOL_DEFAULT, &crosshairTexture, NULL);
 
 	if (FAILED(res))
 	{
-		Logger::log << "Couldn't create Crosshair render target: " << res << std::endl;
+		Logger::log << "Couldn't create crosshair texture: " << res << std::endl;
+	}
+
+	res = crosshairTexture->GetSurfaceLevel(0, &crosshairSurface);
+
+	if (FAILED(res))
+	{
+		Logger::log << "Couldn't create crosshair render target: " << res << std::endl;
 	}
 }
 

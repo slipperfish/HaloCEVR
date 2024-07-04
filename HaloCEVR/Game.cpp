@@ -119,7 +119,7 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, uiSurface);
 	Helpers::GetDirect3DDevice9()->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(0, 0, 0, 0), 1.0f, 0);
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, crosshairSurface);
-	Helpers::GetDirect3DDevice9()->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(25, 0, 0, 0), 1.0f, 0);
+	Helpers::GetDirect3DDevice9()->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(0, 0, 0, 0), 1.0f, 0);
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, currentSurface);
 	currentSurface->Release();
 
@@ -131,13 +131,6 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 		bNeedsRecentre = false;
 		vr->Recentre();
 	}
-
-	//Vector3 testPos;//Helpers::GetCamera().position + Helpers::GetCamera().lookDir * MetresToWorld(0.25f);
-	//Transform trans;
-	//Helpers::MakeTransformFromXZ(&Helpers::GetCamera().lookDir, &Helpers::GetCamera().lookDirUp, &trans);
-	//Matrix3 testRot; // = trans.rotation;
-
-	//debug.DrawCoordinate(testPos, testRot);
 
 	vr->PreDrawFrame(renderer, deltaTime);
 }
@@ -175,16 +168,6 @@ void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
 
 void Game::PostDrawEye(struct Renderer* renderer, float deltaTime, int eye)
 {
-	// UI is usually drawn via an overlay, emulate it in flat (intentionally squashed)
-
-#if EMULATE_VR
-	RECT targetRect{ 0, 0, 200, 200 };
-	Helpers::GetDirect3DDevice9()->StretchRect(uiSurface, NULL, Helpers::GetRenderTargets()[0].renderSurface, &targetRect, D3DTEXF_NONE);
-
-	targetRect = { 400, 0, 600, 200 };
-	Helpers::GetDirect3DDevice9()->StretchRect(crosshairSurface, NULL, Helpers::GetRenderTargets()[0].renderSurface, &targetRect, D3DTEXF_NONE);
-#endif
-
 	debug.Render(Helpers::GetDirect3DDevice9());
 }
 
