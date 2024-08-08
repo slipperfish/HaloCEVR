@@ -113,6 +113,8 @@ void VREmulator::UpdateCameraFrustum(CameraFrustum* frustum, int eye)
 	Vector3 rightVec = frustum->facingDirection.cross(frustum->upDirection);
 
 	frustum->position += rightVec * DIST * (float)(2 * eye - 1);
+
+	frustum->fov = 1.0472f; // 60 degrees
 }
 
 Matrix4 VREmulator::GetControllerTransform(ControllerRole role, bool bRenderPose)
@@ -152,6 +154,16 @@ IDirect3DSurface9* VREmulator::GetCrosshairSurface()
 	return crosshairSurface;
 }
 
+IDirect3DSurface9* VREmulator::GetScopeSurface()
+{
+	return scopeSurface;
+}
+
+IDirect3DTexture9* VREmulator::GetScopeTexture()
+{
+	return scopeTexture;
+}
+
 void VREmulator::SetCrosshairTransform(Matrix4& newTransform)
 {
 	Vector3 pos = (newTransform * Vector3(0.0f, 0.0f, 0.0f)) * Game::instance.MetresToWorld(1.0f) + Helpers::GetCamera().position;
@@ -170,6 +182,31 @@ void VREmulator::SetCrosshairTransform(Matrix4& newTransform)
 	}
 
 	Game::instance.debug.DrawRenderTarget(crosshairTexture, pos, rot, size, false);
+}
+
+void VREmulator::SetScopeTransform(Matrix4& newTransform, bool bIsVisible)
+{
+	if (!bIsVisible)
+	{
+		return;
+	}
+
+	Vector3 pos = (newTransform * Vector3(0.0f, 0.0f, 0.0f)) * Game::instance.MetresToWorld(1.0f) + Helpers::GetCamera().position;
+	Matrix3 rot;
+	Vector2 size(1.33f, 1.0f);
+	size *= Game::instance.MetresToWorld(Game::instance.GetScopeSize()) / size.x;
+
+	newTransform.translate(-pos);
+	newTransform.rotate(90.0f, newTransform.getLeftAxis());
+	newTransform.rotate(-90.0f, newTransform.getUpAxis());
+	newTransform.rotate(-90.0f, newTransform.getLeftAxis());
+
+	for (int i = 0; i < 3; i++)
+	{
+		rot.setColumn(i, &newTransform.get()[i * 4]);
+	}
+
+	Game::instance.debug.DrawRenderTarget(scopeTexture, pos, rot, size, false);
 }
 
 void VREmulator::UpdateInputs()
@@ -386,9 +423,9 @@ void VREmulator::CreateSharedTarget()
 	const UINT height = GetViewHeight();
 
 	CreateTexAndSurface(0, width, height, desc.Usage, desc.Format);
-	CreateTexAndSurface(1, width, height, desc2.Usage, desc2.Format);
+	CreateTexAndSurface(1, width, height, desc.Usage, desc.Format);
 
-	HRESULT res = Helpers::GetDirect3DDevice9()->CreateTexture(width, height, 1, desc2.Usage, desc2.Format, D3DPOOL_DEFAULT, &uiTexture, NULL);
+	HRESULT res = Helpers::GetDirect3DDevice9()->CreateTexture(Game::instance.c_UIOverlayWidth->Value(), Game::instance.c_UIOverlayHeight->Value(), 1, desc2.Usage, desc2.Format, D3DPOOL_DEFAULT, &uiTexture, NULL);
 
 	if (FAILED(res))
 	{
@@ -402,7 +439,7 @@ void VREmulator::CreateSharedTarget()
 		Logger::log << "Couldn't create UI render target: " << res << std::endl;
 	}
 
-	res = Helpers::GetDirect3DDevice9()->CreateTexture(width, height, 1, desc2.Usage, desc2.Format, D3DPOOL_DEFAULT, &crosshairTexture, NULL);
+	res = Helpers::GetDirect3DDevice9()->CreateTexture(Game::instance.c_UIOverlayWidth->Value(), Game::instance.c_UIOverlayHeight->Value(), 1, desc2.Usage, desc2.Format, D3DPOOL_DEFAULT, &crosshairTexture, NULL);
 
 	if (FAILED(res))
 	{
@@ -414,6 +451,20 @@ void VREmulator::CreateSharedTarget()
 	if (FAILED(res))
 	{
 		Logger::log << "Couldn't create crosshair render target: " << res << std::endl;
+	}
+
+	res = Helpers::GetDirect3DDevice9()->CreateTexture(Game::instance.c_UIOverlayWidth->Value(), Game::instance.c_UIOverlayHeight->Value(), 1, desc.Usage, desc.Format, D3DPOOL_DEFAULT, &scopeTexture, NULL);
+
+	if (FAILED(res))
+	{
+		Logger::log << "Couldn't create scope texture: " << res << std::endl;
+	}
+
+	res = scopeTexture->GetSurfaceLevel(0, &scopeSurface);
+
+	if (FAILED(res))
+	{
+		Logger::log << "Couldn't create scope render target: " << res << std::endl;
 	}
 }
 

@@ -200,6 +200,23 @@ HRESULT __stdcall IDirect3DDevice9ExWrapper::CreateOffscreenPlainSurface(UINT Wi
 
 HRESULT __stdcall IDirect3DDevice9ExWrapper::SetRenderTarget(DWORD RenderTargetIndex, IDirect3DSurface9* pRenderTarget)
 {
+	/*
+	RenderTarget* renderTargets = Helpers::GetRenderTargets();
+
+	for (int i = 0; i < 8; i++)
+	{
+		if (renderTargets[i].renderSurface == pRenderTarget)
+		{
+			D3DSURFACE_DESC desc;
+			pRenderTarget->GetDesc(&desc);
+
+			Logger::log << "SetRenderTarget (" << i << ") " << desc.Width << "x" << desc.Height << " 0x" << std::hex << pRenderTarget << std::dec << std::endl;
+			Logger::log << "Stored Size: " << renderTargets[i].width << "x" << renderTargets[i].height << std::endl;
+			break;
+		}
+	}
+	//*/
+
 	return Real->SetRenderTarget(RenderTargetIndex, pRenderTarget);
 }
 
@@ -260,6 +277,7 @@ HRESULT __stdcall IDirect3DDevice9ExWrapper::MultiplyTransform(D3DTRANSFORMSTATE
 
 HRESULT __stdcall IDirect3DDevice9ExWrapper::SetViewport(const D3DVIEWPORT9* pViewport)
 {
+	//Logger::log << "SetViewport " << pViewport->Width << "x" << pViewport->Height << std::endl;
     return Real->SetViewport(pViewport);
 }
 

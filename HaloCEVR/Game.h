@@ -12,7 +12,7 @@
 #include "InputHandler.h"
 #include "DebugRenderer.h"
 
-enum class ERenderState { UNKNOWN, LEFT_EYE, RIGHT_EYE, GAME};
+enum class ERenderState { UNKNOWN, LEFT_EYE, RIGHT_EYE, GAME, SCOPE};
 
 class Game
 {
@@ -25,7 +25,9 @@ public:
 	void OnInitDirectX();
 	void PreDrawFrame(struct Renderer* renderer, float deltaTime);
 	void PreDrawEye(struct Renderer* renderer, float deltaTime, int eye);
-	void PostDrawEye(struct Renderer* renderer, float DeltaTime, int eye);
+	void PostDrawEye(struct Renderer* renderer, float deltaTime, int eye);
+	bool PreDrawScope(struct Renderer* renderer, float deltaTime);
+	void PostDrawScope(struct Renderer* renderer, float deltaTime);
 	void PreDrawMirror(struct Renderer* renderer, float deltaTime);
 	void PostDrawMirror(struct Renderer* renderer, float deltaTime);
 	void PostDrawFrame(struct Renderer* renderer, float deltaTime);
@@ -57,6 +59,8 @@ public:
 
 	ERenderState GetRenderState() const { return renderState; }
 
+	float GetScopeSize() const { return 0.05f; }
+
 	static float MetresToWorld(float m);
 	static float WorldToMetres(float w);
 
@@ -82,10 +86,12 @@ protected:
 
 	void CalcFPS(float deltaTime);
 
-	void UpdateCrosshair();
+	void UpdateCrosshairAndScope();
 
 	void StoreRenderTargets();
 	void RestoreRenderTargets();
+
+	void CreateTextureAndSurface(UINT Width, UINT Height, DWORD Usage, D3DFORMAT Format, struct IDirect3DSurface9** OutSurface, struct IDirect3DTexture9** OutTexture);
 
 	WeaponHandler weaponHandler;
 	InputHandler inputHandler;
@@ -111,10 +117,15 @@ protected:
 	struct IDirect3DSurface9* uiRealSurface;
 	struct IDirect3DSurface9* crosshairRealSurface;
 
+	struct IDirect3DSurface9* scopeSurfaces[3];
+	struct IDirect3DTexture9* scopeTextures[3];
+
 	ERenderState renderState = ERenderState::UNKNOWN;
 
 	CameraFrustum frustum1;
 	CameraFrustum frustum2;
+
+	short realZoom = -1;
 
 	//======Configs======//
 public:
@@ -137,5 +148,7 @@ public:
 	FloatProperty* c_ControllerRotationX = nullptr;
 	FloatProperty* c_ControllerRotationY = nullptr;
 	FloatProperty* c_ControllerRotationZ = nullptr;
+	FloatProperty* c_ScopeRenderScale = nullptr;
+	FloatProperty* c_ScopeScale = nullptr;
 };
 

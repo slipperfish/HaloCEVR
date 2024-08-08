@@ -230,8 +230,9 @@ void DebugRenderer::Draw3DLines(IDirect3DDevice9* pDevice)
 
 void DebugRenderer::DrawRenderTargets(IDirect3DDevice9* pDevice)
 {
-	pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE); 
-	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE); 
+	pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+	pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 	pDevice->SetFVF(D3DFVF_XYZ | D3DFVF_TEX1);
 	pDevice->SetTransform(D3DTS_WORLD, &world);

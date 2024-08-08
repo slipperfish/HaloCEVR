@@ -34,18 +34,19 @@ public:
 	INDIRECT(WindowRect,          0x0ca1a0, 0x3E, "66 a1 ?? ?? ?? ?? 81 ec 18 03 00 00 66 3d 01 00 53 55 56 57");
 	INDIRECT(RenderTargets,       0x12ccc0, 0x1E, "83 ec 38 56 57 66 8b f0 33 ff 66 83 fe 09 ?? ?? 66 85 f6");
 	INDIRECT(CameraMatrices,      0x10bfb0, 0x5A, "81 ec a0 02 00 00 53 55 8b ac 24 ac 02 00 00 56");
+	INDIRECT(InputData,           0x0735b0, 0xAD, "51 53 56 6a 10 68 ?? ?? ?? ?? bb 00 02 00 00 e8 ?? ?? ?? ?? 6a 10");
 
 	OFFSET(TabOutVideo,           0x0c7b74, "38 1D ?? ?? ?? ?? 74 0E 83 FD 01 74 09 83 FD 02 0F 85");
 	OFFSET(TabOutVideo2,          0x0c801c, "75 11 38 1D ?? ?? ?? ?? 75 04 3A C3 74 05 C6 44 24 17 01");
 	OFFSET(TabOutVideo3,          0x0c829c, "38 1D ?? ?? ?? ?? 74 29 0F BF 05 ?? ?? ?? ?? 3B C3 7E 0E");
 	OFFSET(CutsceneFPSCap,        0x0c9fb5, "b3 01 eb ?? 32 db 8b 2d ?? ?? ?? ?? 8d 4c");
 	OFFSET(CreateMouseDevice,     0x0919c0, "6a 17 ff 15 ?? ?? ?? ?? 85 c0 74 ?? 66 c7 05 ?? ?? ?? ?? 02 00");
+	OFFSET(SetViewModelVisible,   0x092430, "51 8b 0d ?? ?? ?? ?? 66 83 f9 ff 74 ?? 8b 15 ?? ?? ?? ?? 56 0f bf f1");
 
 	OFFSET(InitDirectX,           0x1169c0, "83 ec 60 8b 15 ?? ?? ?? ?? 8b 0d ?? ?? ?? ?? 53 33 db");
 	OFFSET(DrawFrame,             0x10bea0, "83 ec 14 8b 15 ?? ?? ?? ?? 8b 44 24 24 8b 4c 24 28 42");
 	OFFSET(DrawHUD,               0x094730, "83 ec 40 66 83 3d ?? ?? ?? ?? ff ?? ?? ?? ?? ?? ?? 8d 04 24");
 	OFFSET(DrawMenu,              0x0984c0, "33 c9 83 ec 14 66 3d ff ff 0f 94 c1 53 33 db 49 23 c8");
-	OFFSET(DrawScope,             0x12d8a0, "8b 44 24 04 83 ec 4c e8 ?? ?? ?? ?? 8b c8 85 c9");
 	OFFSET(DrawLoadingScreen,     0x10bdc0, "55 8b ec 83 e4 f8 81 ec 5c 02 00 00 53 56 8b 75 08");
 	OFFSET(DrawFrameMPLoading,    0x10c590, "8b 15 ?? ?? ?? ?? 81 ec 70 02 00 00 53 56 42 57");
 	OFFSET(DrawCrosshair,         0x0acad0, "83 ec 28 84 db 55 8b 6c 24 38 56 8b 74 24 38 57 8b f8");

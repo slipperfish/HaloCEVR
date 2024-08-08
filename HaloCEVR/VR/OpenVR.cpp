@@ -58,6 +58,9 @@ void OpenVR::Init()
 	vrOverlay->SetOverlayFlag(crosshairOverlay, vr::VROverlayFlags_IsPremultiplied, true);
 	vrOverlay->ShowOverlay(crosshairOverlay);
 
+	vrOverlay->CreateOverlay("ScopeOverlay", "ScopeOverlay", &scopeOverlay);
+	vrOverlay->SetOverlayFlag(scopeOverlay, vr::VROverlayFlags_IsPremultiplied, true);
+
 	std::filesystem::path cwd = std::filesystem::current_path() / "VR" / "OpenVR" / "actions.json";
 	vrInput->SetActionManifestPath(cwd.string().c_str());
 
@@ -125,14 +128,33 @@ void OpenVR::OnGameFinishInit()
 	CreateTexAndSurface(0, recommendedWidth, recommendedHeight, desc.Usage, desc.Format);
 	CreateTexAndSurface(1, recommendedWidth, recommendedHeight, desc.Usage, desc.Format);
 	// UI Layers
-	//CreateTexAndSurface(uiSurface, recommendedWidth, recommendedHeight, desc2.Usage, desc2.Format);
-	//CreateTexAndSurface(crosshairSurface, recommendedWidth, recommendedHeight, desc2.Usage, desc2.Format);
 	CreateTexAndSurface(uiSurface, Game::instance.c_UIOverlayWidth->Value(), Game::instance.c_UIOverlayHeight->Value(), desc2.Usage, desc2.Format);
 	CreateTexAndSurface(crosshairSurface, Game::instance.c_UIOverlayWidth->Value(), Game::instance.c_UIOverlayHeight->Value(), desc2.Usage, desc2.Format);
+	scopeWidth = static_cast<uint32_t>(Game::instance.c_ScopeRenderScale->Value() * recommendedWidth);
+	scopeHeight = static_cast<uint32_t>(Game::instance.c_ScopeRenderScale->Value() * recommendedWidth * 0.75f); // Maintain the 4x3 aspect ratio halo works best with
+	CreateTexAndSurface(scopeSurface, scopeWidth, scopeHeight, desc2.Usage, desc2.Format);
 
-	vrOverlay->SetOverlayWidthInMeters(uiOverlay, Game::instance.c_UIOverlayScale->Value());
-	vrOverlay->SetOverlayWidthInMeters(crosshairOverlay, Game::instance.c_UIOverlayScale->Value());
+	vr::EVROverlayError err;
+
+	err = vrOverlay->SetOverlayWidthInMeters(uiOverlay, Game::instance.c_UIOverlayScale->Value());
+	if (err != vr::VROverlayError_None)
+	{
+		Logger::log << "[OpenVR] Error setting overlay width: " << err << std::endl;
+	}
 	Logger::log << "[OpenVR] Set UI Width = " << Game::instance.c_UIOverlayScale->Value() << std::endl;
+	err = vrOverlay->SetOverlayWidthInMeters(crosshairOverlay, Game::instance.c_UIOverlayScale->Value());
+	if (err != vr::VROverlayError_None)
+	{
+		Logger::log << "[OpenVR] Error setting overlay width: " << err << std::endl;
+	}
+	Logger::log << "[OpenVR] Set Crosshair Width = " << Game::instance.c_UIOverlayScale->Value() << std::endl;
+	err = vrOverlay->SetOverlayWidthInMeters(scopeOverlay, Game::instance.GetScopeSize());
+	if (err != vr::VROverlayError_None)
+	{
+		Logger::log << "[OpenVR] Error setting overlay width: " << err << std::endl;
+	}
+	Logger::log << "[OpenVR] Set Scope Width = " << Game::instance.GetScopeSize() << std::endl;
+
 
 	float curvature = Game::instance.c_UIOverlayCurvature->Value();
 	if (curvature != 0.0f)
@@ -149,6 +171,7 @@ void OpenVR::OnGameFinishInit()
 
 	vrOverlay->SetOverlayTransformAbsolute(uiOverlay, vr::ETrackingUniverseOrigin::TrackingUniverseStanding, &overlayTransform);
 	vrOverlay->SetOverlayTransformAbsolute(crosshairOverlay, vr::ETrackingUniverseOrigin::TrackingUniverseStanding, &overlayTransform);
+	vrOverlay->SetOverlayTransformAbsolute(scopeOverlay, vr::ETrackingUniverseOrigin::TrackingUniverseStanding, &overlayTransform);
 
 	Logger::log << "[OpenVR] Finished Initialisation" << std::endl;
 }
@@ -320,6 +343,14 @@ void OpenVR::PostDrawFrame(Renderer* renderer, float deltaTime)
 		Logger::log << "[OpenVR] Could not submit crosshair texture: " << o2Error << std::endl;
 	}
 
+	vr::Texture_t scopeTex{ (void*)vrRenderTexture[scopeSurface], vr::TextureType_DirectX, vr::ColorSpace_Auto };
+	vr::EVROverlayError o3Error = vrOverlay->SetOverlayTexture(scopeOverlay, &scopeTex);
+
+	if (o3Error != vr::EVROverlayError::VROverlayError_None)
+	{
+		Logger::log << "[OpenVR] Could not submit scope texture: " << o3Error << std::endl;
+	}
+
 	vrCompositor->PostPresentHandoff();
 }
 
@@ -370,6 +401,16 @@ float OpenVR::GetViewHeightStretch()
 float OpenVR::GetAspect()
 {
 	return aspect;
+}
+
+int OpenVR::GetScopeWidth()
+{
+	return scopeWidth;
+}
+
+int OpenVR::GetScopeHeight()
+{
+	return scopeHeight;
 }
 
 void OpenVR::Recentre()
@@ -448,6 +489,16 @@ IDirect3DSurface9* OpenVR::GetCrosshairSurface()
 	return gameRenderSurface[crosshairSurface];
 }
 
+IDirect3DSurface9* OpenVR::GetScopeSurface()
+{
+	return gameRenderSurface[scopeSurface];
+}
+
+IDirect3DTexture9* OpenVR::GetScopeTexture()
+{
+	return gameRenderTexture[scopeSurface];
+}
+
 void OpenVR::SetMouseVisibility(bool bIsVisible)
 {
 	if (!vrOverlay)
@@ -475,6 +526,22 @@ void OpenVR::SetCrosshairTransform(Matrix4& newTransform)
 	vr::HmdMatrix34_t overlayMatrix = ConvertMatrixToSteamVRMatrix4(newTransform.rotateZ(yawOffset).translate(positionOffset));
 
 	vrOverlay->SetOverlayTransformAbsolute(crosshairOverlay, vr::TrackingUniverseStanding, &overlayMatrix);
+}
+
+void OpenVR::SetScopeTransform(Matrix4& newTransform, bool bIsVisible)
+{
+	if (bIsVisible)
+	{
+		vrOverlay->ShowOverlay(scopeOverlay);
+
+		vr::HmdMatrix34_t overlayMatrix = ConvertMatrixToSteamVRMatrix4(newTransform.rotateZ(yawOffset).translate(positionOffset));
+
+		vrOverlay->SetOverlayTransformAbsolute(scopeOverlay, vr::TrackingUniverseStanding, &overlayMatrix);
+	}
+	else
+	{
+		vrOverlay->HideOverlay(scopeOverlay);
+	}
 }
 
 void OpenVR::UpdateInputs()

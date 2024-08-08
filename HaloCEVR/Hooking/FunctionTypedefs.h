@@ -18,3 +18,5 @@ typedef void(*Func_SetMousePosition)();
 typedef void(*Func_UpdateMouseInfo)();
 typedef void(__cdecl* Func_FireWeapon)(HaloID, short, bool);
 typedef void(*Func_SetCameraMatrices)();
+
+typedef int(__cdecl* Func_MaybeNightVision)(float* param1);

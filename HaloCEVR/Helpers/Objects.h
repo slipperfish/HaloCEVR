@@ -184,7 +184,9 @@ struct UnitDynamicObject : public BaseDynamicObject
 	float N00000333; //0x02CC
 	float N00000334; //0x02D0
 	float N00000335; //0x02D4
-	char pad_02D8[80]; //0x02D8
+	char pad_02D8[72]; //0x02D8
+	int16_t zoom; //0x0320
+	char pad_0322[6]; //0x0322
 };
 
 struct PlayerTable : public BaseTable

@@ -390,7 +390,6 @@ void WeaponHandler::UpdateCache(HaloID& id, AssetData_ModelAnimations* animation
 	}
 }
 
-
 bool WeaponHandler::GetLocalWeaponAim(Vector3& outPosition, Vector3& outAim) const
 {
 	HaloID playerID;
@@ -434,6 +433,64 @@ bool WeaponHandler::GetLocalWeaponAim(Vector3& outPosition, Vector3& outAim) con
 	Game::instance.debug.DrawLine3D(worldOutPos, aimTarget, D3DCOLOR_ARGB(255, 255, 20, 20));
 
 	Game::instance.debug.DrawLine3D(lastFireLocation, lastFireAim, D3DCOLOR_ARGB(255, 20, 255, 255));
+#endif
+
+	return true;
+}
+
+bool WeaponHandler::GetWorldWeaponAim(Vector3& outPosition, Vector3& outAim) const
+{
+	bool bSuccess = GetLocalWeaponAim(outPosition, outAim);
+
+	outPosition = Helpers::GetCamera().position + outPosition * Game::instance.MetresToWorld(1.0f);
+
+	return false;
+}
+
+bool WeaponHandler::GetLocalWeaponScope(Vector3& outPosition, Vector3& outAim, Vector3& upDir) const
+{
+	HaloID playerID;
+	if (!Helpers::GetLocalPlayerID(playerID))
+	{
+		return false;
+	}
+
+	UnitDynamicObject* player = static_cast<UnitDynamicObject*>(Helpers::GetDynamicObject(playerID));
+	if (!player)
+	{
+		return false;
+	}
+
+	// TODO: Handedness
+	Matrix4 controllerPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Right, true);
+
+	Vector3 handPos = controllerPos * Vector3(0.0f, 0.0f, 0.0f);
+	Matrix4 handRotation = controllerPos.translate(-handPos);
+
+	Matrix3 handRotation3;
+
+	for (int i = 0; i < 3; i++)
+	{
+		handRotation3.setColumn(i, &handRotation.get()[i * 4]);
+	}
+
+	Matrix3 finalRot = cachedViewModel.fireRotation * handRotation3;
+
+	Vector3 scopeOffset = Vector3(-0.1f, 0.0f, 0.15f);
+
+	outPosition = handPos + handRotation * scopeOffset;
+	outAim = finalRot * Vector3(1.0f, 0.0f, 0.0f);
+	upDir = finalRot * Vector3(0.0f, 0.0f, 1.0f);
+
+#if DRAW_DEBUG_AIM
+	// N.b. - This function is in local (i.e. vr) coordinate space, convert to world for debug to be correct
+	Vector3 worldOutPos = Helpers::GetCamera().position + outPosition * Game::instance.MetresToWorld(1.0f);
+	Game::instance.debug.DrawCoordinate(worldOutPos, finalRot, 0.02f);
+	Vector3 worldHandPos = Helpers::GetCamera().position + handPos * Game::instance.MetresToWorld(1.0f);
+	Game::instance.debug.DrawCoordinate(worldHandPos, handRotation3, 0.015f, false);
+
+	Vector3 aimTarget = worldOutPos + outAim * Game::instance.MetresToWorld(Game::instance.c_UIOverlayDistance->Value());
+	Game::instance.debug.DrawLine3D(worldOutPos, aimTarget, D3DCOLOR_ARGB(255, 255, 20, 20));
 #endif
 
 	return true;

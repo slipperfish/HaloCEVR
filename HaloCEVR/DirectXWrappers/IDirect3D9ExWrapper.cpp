@@ -10,6 +10,7 @@ HRESULT IDirect3D9ExWrapper::CreateDevice(UINT Adapter, D3DDEVTYPE DeviceType, H
 	Logger::log << "Given present params: " << pPresentationParameters->PresentationInterval << ", " << pPresentationParameters->BackBufferWidth << ", " << pPresentationParameters->BackBufferHeight << std::endl;
 	pPresentationParameters->PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 	
+	// It should be possible to avoid this hack by using a similar approach to scope, but the code path is slightly different
 	if (pPresentationParameters->BackBufferWidth != 1200 || pPresentationParameters->BackBufferHeight != 600)
 	{
 		pPresentationParameters->BackBufferWidth = Game::instance.backBufferWidth;

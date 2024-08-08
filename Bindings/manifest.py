@@ -17,11 +17,12 @@ bindings = {
     "Grenade" : {"h" : "right", "b" : "a"},
     "Interact" : {"h" : "right", "b" : "b"},
     #"Grenade" : {"h" : "left", "b" : "trigger"}, #Moved to right hand
+    "Zoom" : {"h" : "left", "b" : "trigger"},
     "Fire" : {"h" : "right", "b" : "trigger"},
     "Crouch" : {"h" : "right", "b" : "joystick|south"},
     "Look" : {"h" : "right", "b" : "joystick"},
     "Move" : {"h" : "left", "b" : "joystick"},
-    "Zoom" : {"h" : "right", "b" : "thumbrest"},
+    #"Zoom" : {"h" : "right", "b" : "thumbrest"},
     "Recentre" : {"h" : "left", "b" : "thumbrest"},
 }
 

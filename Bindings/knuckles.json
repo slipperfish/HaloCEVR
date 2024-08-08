@@ -88,6 +88,16 @@
                 {
                     "inputs": {
                         "click": {
+                            "output": "/actions/default/in/Zoom"
+                        }
+                    },
+                    "mode": "button",
+                    "path": "/user/hand/left/input/trigger",
+                    "parameters": {}
+                },
+                {
+                    "inputs": {
+                        "click": {
                             "output": "/actions/default/in/Fire"
                         }
                     },
@@ -113,16 +123,6 @@
                     },
                     "mode": "joystick",
                     "path": "/user/hand/left/input/joystick",
-                    "parameters": {}
-                },
-                {
-                    "inputs": {
-                        "click": {
-                            "output": "/actions/default/in/Zoom"
-                        }
-                    },
-                    "mode": "button",
-                    "path": "/user/hand/right/input/thumbrest",
                     "parameters": {}
                 },
                 {

@@ -1,4 +1,4 @@
-#define EMULATE_VR 1
+#define EMULATE_VR 0
 #include "Game.h"
 #include "Logger.h"
 #include "Hooking/Hooks.h"
@@ -90,6 +90,15 @@ void Game::OnInitDirectX()
 
 	uiSurface = vr->GetUISurface();
 	crosshairSurface = vr->GetCrosshairSurface();
+
+	scopeSurfaces[0] = vr->GetScopeSurface();
+	scopeTextures[0] = vr->GetScopeTexture();
+
+	D3DSURFACE_DESC desc;
+	scopeSurfaces[0]->GetDesc(&desc);
+
+	CreateTextureAndSurface(desc.Width, desc.Height, desc.Usage, desc.Format, &scopeSurfaces[1], &scopeTextures[1]);
+	CreateTextureAndSurface(desc.Width / 2, desc.Height / 2, desc.Usage, desc.Format, &scopeSurfaces[2], &scopeTextures[2]);
 }
 
 void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
@@ -103,7 +112,7 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 	vr->SetMouseVisibility(Helpers::IsMouseVisible());
 	vr->UpdatePoses();
 
-	UpdateCrosshair();
+	UpdateCrosshairAndScope();
 
 	StoreRenderTargets();
 
@@ -120,6 +129,8 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 	Helpers::GetDirect3DDevice9()->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(0, 0, 0, 0), 1.0f, 0);
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, crosshairSurface);
 	Helpers::GetDirect3DDevice9()->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(0, 0, 0, 0), 1.0f, 0);
+	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, scopeSurfaces[0]);
+	Helpers::GetDirect3DDevice9()->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(255, 0, 0, 0), 1.0f, 0);
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, currentSurface);
 	currentSurface->Release();
 
@@ -142,16 +153,6 @@ void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
 	renderer->frustum = frustum1;
 	renderer->frustum2 = frustum2;
 
-	// For performance reasons, we should prevent the game from calling SceneStart/SceneEnd for each eye
-	if (eye == 0)
-	{
-		reinterpret_cast<IDirect3DDevice9ExWrapper*>(Helpers::GetDirect3DDevice9())->bIgnoreNextEnd = true;
-	}
-	else
-	{
-		reinterpret_cast<IDirect3DDevice9ExWrapper*>(Helpers::GetDirect3DDevice9())->bIgnoreNextStart = true;
-	}
-
 	vr->UpdateCameraFrustum(&renderer->frustum, eye);
 	vr->UpdateCameraFrustum(&renderer->frustum2, eye);
 
@@ -171,6 +172,79 @@ void Game::PostDrawEye(struct Renderer* renderer, float deltaTime, int eye)
 	debug.Render(Helpers::GetDirect3DDevice9());
 }
 
+bool Game::PreDrawScope(Renderer* renderer, float deltaTime)
+{
+	UnitDynamicObject* player = static_cast<UnitDynamicObject*>(Helpers::GetLocalPlayer());
+
+	if (!player || player->zoom == -1)
+	{
+		return false;
+	}
+
+	renderState = ERenderState::SCOPE;
+
+	renderer->frustum = frustum1;
+	renderer->frustum2 = frustum2;
+
+	Vector3 aimPos, aimDir, upDir;
+
+	weaponHandler.GetWorldWeaponAim(aimPos, aimDir);
+
+	upDir = Vector3(0.0f, 0.0f, 1.0f);
+	upDir = aimDir.cross(upDir);
+	upDir = upDir.cross(aimDir);
+
+	renderer->frustum.position = aimPos;
+	renderer->frustum2.position = aimPos;
+	renderer->frustum.facingDirection = aimDir;
+	renderer->frustum2.facingDirection = aimDir;
+	renderer->frustum.upDirection = upDir;
+	renderer->frustum2.upDirection = upDir;
+
+	RenderTarget* primaryRenderTarget = Helpers::GetRenderTargets();
+
+	primaryRenderTarget[0].renderSurface = scopeSurfaces[0];
+	primaryRenderTarget[0].renderTexture = scopeTextures[0];
+	primaryRenderTarget[0].width = vr->GetScopeWidth();
+	primaryRenderTarget[0].height = vr->GetScopeHeight();
+	primaryRenderTarget[1].renderSurface = scopeSurfaces[1];
+	primaryRenderTarget[1].renderTexture = scopeTextures[1];
+	primaryRenderTarget[1].width = vr->GetScopeWidth();
+	primaryRenderTarget[1].height = vr->GetScopeHeight();
+	primaryRenderTarget[2].renderSurface = scopeSurfaces[2];
+	primaryRenderTarget[2].renderTexture = scopeTextures[2];
+	primaryRenderTarget[2].width = vr->GetScopeWidth() / 2;
+	primaryRenderTarget[2].height = vr->GetScopeHeight() / 2;
+
+
+	sRect* windowMain = Helpers::GetWindowRect();
+	windowMain->top = 0;
+	windowMain->left = 0;
+	windowMain->right = vr->GetScopeWidth();
+	windowMain->bottom = vr->GetScopeHeight();
+
+	{
+		sRect& window = renderer->frustum.WindowViewport;
+		window.top = 0;
+		window.left = 0;
+		window.right = vr->GetScopeWidth();
+		window.bottom = vr->GetScopeHeight();
+
+		sRect& window2 = renderer->frustum2.WindowViewport;
+		window2.top = 0;
+		window2.left = 0;
+		window2.right = vr->GetScopeWidth();
+		window2.bottom = vr->GetScopeHeight();
+	}
+
+	return true;
+}
+
+void Game::PostDrawScope(Renderer* renderer, float deltaTime)
+{
+	RestoreRenderTargets();
+}
+
 void Game::PreDrawMirror(struct Renderer* renderer, float deltaTime)
 {
 	renderState = ERenderState::GAME;
@@ -179,6 +253,12 @@ void Game::PreDrawMirror(struct Renderer* renderer, float deltaTime)
 	renderer->frustum2 = frustum2;
 
 	RestoreRenderTargets();
+
+	sRect* windowMain = Helpers::GetWindowRect();
+	windowMain->top = 0;
+	windowMain->left = 0;
+	windowMain->right = Helpers::GetRenderTargets()[0].width;
+	windowMain->bottom = Helpers::GetRenderTargets()[0].height;
 
 	debug.ExtractMatrices(renderer);
 }
@@ -191,6 +271,7 @@ void Game::PostDrawMirror(struct Renderer* renderer, float deltaTime)
 
 void Game::PostDrawFrame(struct Renderer* renderer, float deltaTime)
 {
+	RestoreRenderTargets();
 	vr->PostDrawFrame(renderer, deltaTime);
 	debug.PostRender();
 }
@@ -200,9 +281,21 @@ bool Game::PreDrawHUD()
 	// Only render UI once per frame
 	if (GetRenderState() != ERenderState::LEFT_EYE)
 	{
+		// Remove zoom effect from game view
+		if (GetRenderState() == ERenderState::GAME)
+		{
+			short* zoom = &Helpers::GetInputData().zoomLevel;
+			realZoom = *zoom;
+			*zoom = -1;
+		}
+
 		// ...but try to avoid breaking the game view (for now at least)
-		return GetRenderState() == ERenderState::GAME;
+		return GetRenderState() == ERenderState::GAME || GetRenderState() == ERenderState::SCOPE;
 	}
+
+	short* zoom = &Helpers::GetInputData().zoomLevel;
+	realZoom = *zoom;
+	*zoom = -1;
 
 	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &uiRealSurface);
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, uiSurface);
@@ -217,8 +310,18 @@ void Game::PostDrawHUD()
 	// Only render UI once per frame
 	if (GetRenderState() != ERenderState::LEFT_EYE)
 	{
+		// Remove zoom effect from game view
+		if (GetRenderState() == ERenderState::GAME)
+		{
+			short* zoom = &Helpers::GetInputData().zoomLevel;
+			*zoom = realZoom;
+		}
+
 		return;
 	}
+
+	short* zoom = &Helpers::GetInputData().zoomLevel;
+	*zoom = realZoom;
 
 	Helpers::GetRenderTargets()[1].renderSurface = uiRealSurface;
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, uiRealSurface);
@@ -284,8 +387,11 @@ void Game::PostDrawLoading(int param1, struct Renderer* renderer)
 
 void Game::PreDrawCrosshair(short* anchorLocation)
 {
-	// Unlike pre/post ui calls we don't need to check render state
-	// This code path only gets called if the UI needs rendering
+	// Draw things normally for the scope
+	if (GetRenderState() == ERenderState::SCOPE)
+	{
+		return;
+	}
 
 	crosshairRealSurface = Helpers::GetRenderTargets()[1].renderSurface;
 	if (anchorLocation && *anchorLocation == 4) // Centre = 4
@@ -297,8 +403,11 @@ void Game::PreDrawCrosshair(short* anchorLocation)
 
 void Game::PostDrawCrosshair()
 {
-	// Unlike pre/post ui calls we don't need to check render state
-	// This code path only gets called if the UI needs rendering
+	// Draw things normally for the scope
+	if (GetRenderState() == ERenderState::SCOPE)
+	{
+		return;
+	}
 
 	Helpers::GetRenderTargets()[1].renderSurface = crosshairRealSurface;
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, crosshairRealSurface);
@@ -425,7 +534,10 @@ void Game::SetupConfigs()
 	c_ControllerRotationX = config.RegisterFloat("ControllerRotation.X", "Rotation added to the controller when calculating the in game hand rotation", 10.0f);
 	c_ControllerRotationY = config.RegisterFloat("ControllerRotation.Y", "Rotation added to the controller when calculating the in game hand rotation", 0.0f);
 	c_ControllerRotationZ = config.RegisterFloat("ControllerRotation.Z", "Rotation added to the controller when calculating the in game hand rotation", 0.0f);
-	
+	c_ScopeRenderScale = config.RegisterFloat("ScopeRenderScale", "Size of the scope render target, expressed as a proportion of the headset's render scale (e.g. 0.5 = half resolution)", 0.75f);
+	// Do we want to expose this to users?
+	//c_ScopeScale = config.RegisterFloat("ScopeScale", "Width of the scope view in metres", 0.05f);
+
 	config.LoadFromFile("VR/config.txt");
 	config.SaveToFile("VR/config.txt");
 
@@ -449,7 +561,7 @@ void Game::CalcFPS(float deltaTime)
 	}
 }
 
-void Game::UpdateCrosshair()
+void Game::UpdateCrosshairAndScope()
 {
 	Vector3 aimPos, aimDir;
 	bool bHasCrosshair = weaponHandler.GetLocalWeaponAim(aimPos, aimDir);
@@ -458,6 +570,13 @@ void Game::UpdateCrosshair()
 	{
 		return;
 	}
+
+	auto fixupRotation = [](Matrix4& m, Vector3& pos) {
+		m.translate(-pos);
+		m.rotate(90.0f, m.getUpAxis());
+		m.rotate(-90.0f, m.getLeftAxis());
+		m.translate(pos);
+	};
 
 	Matrix4 overlayTransform;
 
@@ -468,12 +587,49 @@ void Game::UpdateCrosshair()
 	overlayTransform.translate(targetPos);
 	overlayTransform.lookAt(hmdPos, Vector3(0.0f, 0.0f, 1.0f));
 	
-	overlayTransform.translate(-targetPos);
-	overlayTransform.rotate(90.0f, overlayTransform.getUpAxis());
-	overlayTransform.rotate(-90.0f, overlayTransform.getLeftAxis());
-	overlayTransform.translate(targetPos);
+	fixupRotation(overlayTransform, targetPos);
 
 	vr->SetCrosshairTransform(overlayTransform);
+	overlayTransform.identity();
+
+	short* zoom = &Helpers::GetInputData().zoomLevel;
+
+	Vector3 upDir;
+
+	bool bHasScope = (*zoom != -1) && weaponHandler.GetLocalWeaponScope(aimPos, aimDir, upDir);
+
+	if (!bHasScope)
+	{
+		vr->SetScopeTransform(overlayTransform, false);
+		return;
+	}
+
+	overlayTransform.translate(aimPos);
+	overlayTransform.lookAt(aimPos - aimDir, upDir);
+
+	fixupRotation(overlayTransform, aimPos);
+
+	vr->SetScopeTransform(overlayTransform, true);
+
+	// debug!
+	{
+		Vector3 pos = (overlayTransform * Vector3(0.0f, 0.0f, 0.0f)) * Game::instance.MetresToWorld(1.0f) + Helpers::GetCamera().position;
+		Matrix3 rot;
+		Vector2 size(1.33f, 1.0f);
+		size *= Game::instance.MetresToWorld(GetScopeSize()) / size.x;
+
+		overlayTransform.translate(-pos);
+		overlayTransform.rotate(90.0f, overlayTransform.getLeftAxis());
+		overlayTransform.rotate(-90.0f, overlayTransform.getUpAxis());
+		overlayTransform.rotate(-90.0f, overlayTransform.getLeftAxis());
+
+		for (int i = 0; i < 3; i++)
+		{
+			rot.setColumn(i, &overlayTransform.get()[i * 4]);
+		}
+
+		debug.DrawCoordinate(pos, rot);
+	}
 }
 
 void Game::StoreRenderTargets()
@@ -497,5 +653,22 @@ void Game::RestoreRenderTargets()
 		Helpers::GetRenderTargets()[i].format = gameRenderTargets[i].format;
 		Helpers::GetRenderTargets()[i].renderSurface = gameRenderTargets[i].renderSurface;
 		Helpers::GetRenderTargets()[i].renderTexture = gameRenderTargets[i].renderTexture;
+	}
+}
+
+void Game::CreateTextureAndSurface(UINT Width, UINT Height, DWORD Usage, D3DFORMAT Format, IDirect3DSurface9** OutSurface, IDirect3DTexture9** OutTexture)
+{
+	HRESULT result = Helpers::GetDirect3DDevice9()->CreateTexture(Width, Height, 1, Usage, Format, D3DPOOL_DEFAULT, OutTexture, nullptr);
+	if (FAILED(result))
+	{
+		Logger::err << "[DX9] Failed to create game texture: " << result << std::endl;
+		return;
+	}
+
+	result = (*OutTexture)->GetSurfaceLevel(0, OutSurface);
+	if (FAILED(result))
+	{
+		Logger::err << "[DX9] Failed to retrieve game surface: " << result << std::endl;
+		return;
 	}
 }

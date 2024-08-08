@@ -3,5 +3,6 @@
 
 RenderTarget* Helpers::GetRenderTargets()
 {
-	return reinterpret_cast<RenderTarget*>(Hooks::o.RenderTargets);
+	// Source for this offset is accessing values in the middle of the struct
+	return reinterpret_cast<RenderTarget*>(Hooks::o.RenderTargets - 0xc);
 }

@@ -12,6 +12,8 @@ public:
 	void PostFireWeapon(HaloID& weaponID, short param2, bool param3);
 
 	bool GetLocalWeaponAim(Vector3& outPosition, Vector3& outAim) const;
+	bool GetWorldWeaponAim(Vector3& outPosition, Vector3& outAim) const;
+	bool GetLocalWeaponScope(Vector3& outPosition, Vector3& outAim, Vector3& upDir) const;
 
 	Vector3 localOffset;
 	Vector3 localRotation;

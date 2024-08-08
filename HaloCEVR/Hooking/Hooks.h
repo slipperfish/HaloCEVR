@@ -27,7 +27,6 @@ public:
 	DEFINE_HOOK_FULL(DrawFrame, void, Renderer* param1, short param2, short* param3, float param4, float deltaTime);
 	DEFINE_HOOK(DrawHUD);
 	DEFINE_HOOK(DrawMenu);
-	DEFINE_HOOK_FULL(DrawScope, void __stdcall, void* param1); // Disabled
 	DEFINE_HOOK(DrawLoadingScreen);
 	DEFINE_HOOK(SetViewModelPosition);
 	DEFINE_HOOK(DrawCrosshair);
@@ -41,6 +40,7 @@ public:
 	// All direct patches go here:
 	static void P_FixTabOut();
 	static void P_RemoveCutsceneFPSCap();
+	static void P_KeepViewModelVisible();
 	static void P_DontStealMouse();
 
 	static void SetCameraMatrices(struct Viewport* viewport, struct CameraFrustum* frustum, struct CameraRenderMatrices* crm, bool bDoProjection);

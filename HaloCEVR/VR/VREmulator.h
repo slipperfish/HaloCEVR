@@ -15,11 +15,13 @@ public:
 
 	void UpdateCameraFrustum(struct CameraFrustum* frustum, int eye);
 
-	int GetViewWidth() { return 600; }
-	int GetViewHeight() { return 600; }
+	int GetViewWidth() { return 1400; }
+	int GetViewHeight() { return 1400; }
 	float GetViewWidthStretch() { return 1.0f; }
 	float GetViewHeightStretch() { return 1.0f; }
 	float GetAspect() { return 1.0f; }
+	int GetScopeWidth() { return 800; }
+	int GetScopeHeight() { return 600; }
 	void Recentre() {};
 	void SetLocationOffset(Vector3 newOffset) {}
 	Vector3 GetLocationOffset() { return Vector3(0.0f, 0.0f, 0.0f); }
@@ -31,8 +33,11 @@ public:
 	struct IDirect3DTexture9* GetRenderTexture(int eye);
 	struct IDirect3DSurface9* GetUISurface();
 	struct IDirect3DSurface9* GetCrosshairSurface();
+	struct IDirect3DSurface9* GetScopeSurface();
+	struct IDirect3DTexture9* GetScopeTexture();
 	void SetMouseVisibility(bool bIsVisible) {}
 	void SetCrosshairTransform(class Matrix4& newTransform);
+	void SetScopeTransform(class Matrix4& newTransform, bool bIsVisible);
 	void UpdateInputs();
 	InputBindingID RegisterBoolInput(std::string set, std::string action);
 	InputBindingID RegisterVector2Input(std::string set, std::string action);
@@ -57,6 +62,8 @@ protected:
 	struct IDirect3DTexture9* uiTexture = nullptr;
 	struct IDirect3DSurface9* crosshairSurface = nullptr;
 	struct IDirect3DTexture9* crosshairTexture = nullptr;
+	struct IDirect3DSurface9* scopeSurface = nullptr;
+	struct IDirect3DTexture9* scopeTexture = nullptr;
 	struct IDirect3DSurface9* eyeSurface_Game[2][2];
 	struct IDirect3DSurface9* eyeSurface_VR[2][2];
 

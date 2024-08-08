@@ -7,6 +7,7 @@
 #include "../Helpers/Maths.h"
 
 #include <tlhelp32.h>
+#include "../DirectXWrappers/IDirect3DDevice9ExWrapper.h"
 
 #define CREATEHOOK(Func) Func##.CreateHook(#Func, o.##Func##, &H_##Func##)
 #define RESOLVEINDIRECT(Name) ResolveIndirect(o.I_##Name, o.##Name)
@@ -26,12 +27,12 @@ void Hooks::InitHooks()
 	RESOLVEINDIRECT(WindowRect);
 	RESOLVEINDIRECT(RenderTargets);
 	RESOLVEINDIRECT(CameraMatrices);
+	RESOLVEINDIRECT(InputData);
 
 	CREATEHOOK(InitDirectX);
 	CREATEHOOK(DrawFrame);
 	CREATEHOOK(DrawHUD);
 	CREATEHOOK(DrawMenu);
-	//CREATEHOOK(DrawScope);
 	CREATEHOOK(DrawLoadingScreen);
 	CREATEHOOK(DrawCrosshair);
 	CREATEHOOK(SetViewModelPosition);
@@ -48,6 +49,7 @@ void Hooks::InitHooks()
 	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo3) < 0;
 	SigScanner::UpdateOffset(o.CutsceneFPSCap);
 	SigScanner::UpdateOffset(o.CreateMouseDevice);
+	SigScanner::UpdateOffset(o.SetViewModelVisible);
 
 	SigScanner::UpdateOffset(o.SetCameraMatrices);
 	oSetCameraMatrices = reinterpret_cast<Func_SetCameraMatrices>(o.SetCameraMatrices.Address);
@@ -62,7 +64,6 @@ void Hooks::EnableAllHooks()
 	DrawFrame.EnableHook();
 	DrawHUD.EnableHook();
 	DrawMenu.EnableHook();
-	//DrawScope.EnableHook();
 	DrawLoadingScreen.EnableHook();
 	DrawCrosshair.EnableHook();
 	SetViewModelPosition.EnableHook();
@@ -76,6 +77,7 @@ void Hooks::EnableAllHooks()
 	Freeze();
 
 	P_RemoveCutsceneFPSCap();
+	P_KeepViewModelVisible();
 	P_DontStealMouse();
 
 	// If we think the user has chimera installed, don't try to patch their patches
@@ -263,6 +265,7 @@ void Hooks::ResolveIndirect(Offset& offset, long long& Address)
 	SigScanner::UpdateOffset(offset);
 	void* pointer = *reinterpret_cast<void**>(offset.Address + Address);
 	Address = reinterpret_cast<long long>(pointer);
+	Logger::log << "Calculated indirect address: 0x" << std::hex << Address << std::dec << std::endl;
 }
 
 //===============================//Hooks//===================================//
@@ -278,15 +281,45 @@ bool Hooks::H_InitDirectX()
 
 void Hooks::H_DrawFrame(Renderer* param1, short param2, short* param3, float tickProgress, float deltaTime)
 {
+	/*
+	In order to get each perspective (left eye, right eye, PiP scope, mirror [todo: just blit an eye for the mirror])
+	we need to call the draw function multiple times, but should take care to avoid creating multiple d3d scenes as
+	according to the docs you should only call this once per frame.
+	The shim we use to upgrade D3D9 to D3D9Ex has some functionality added to skip these calls when necessary
+	*/
+
+	bool bDrawMirror = Game::instance.GetDrawMirror();
+
 	Game::instance.PreDrawFrame(param1, deltaTime);
+	reinterpret_cast<IDirect3DDevice9ExWrapper*>(Helpers::GetDirect3DDevice9())->bIgnoreNextEnd = true;
+
+	// Draw scope if necessary
+	if (Game::instance.PreDrawScope(param1, deltaTime))
+	{
+		DrawFrame.Original(param1, param2, param3, tickProgress, deltaTime);
+		Game::instance.PostDrawScope(param1, deltaTime);
+
+		reinterpret_cast<IDirect3DDevice9ExWrapper*>(Helpers::GetDirect3DDevice9())->bIgnoreNextStart = true;
+		reinterpret_cast<IDirect3DDevice9ExWrapper*>(Helpers::GetDirect3DDevice9())->bIgnoreNextEnd = true;
+	}
+
+	// Draw left eye
 	Game::instance.PreDrawEye(param1, deltaTime, 0);
 	DrawFrame.Original(param1, param2, param3, tickProgress, deltaTime);
 	Game::instance.PostDrawEye(param1, deltaTime, 0);
+
+	reinterpret_cast<IDirect3DDevice9ExWrapper*>(Helpers::GetDirect3DDevice9())->bIgnoreNextStart = true;
+	reinterpret_cast<IDirect3DDevice9ExWrapper*>(Helpers::GetDirect3DDevice9())->bIgnoreNextEnd = bDrawMirror;
+
+	// Draw right eye
 	Game::instance.PreDrawEye(param1, deltaTime, 1);
 	DrawFrame.Original(param1, param2, param3, tickProgress, deltaTime);
 	Game::instance.PostDrawEye(param1, deltaTime, 1);
-	if (Game::instance.GetDrawMirror())
+	// Draw Mirror view, should be replaced at some point as it is wasteful to draw an entirely new viewport
+	if (bDrawMirror)
 	{
+		reinterpret_cast<IDirect3DDevice9ExWrapper*>(Helpers::GetDirect3DDevice9())->bIgnoreNextStart = true;
+
 		Game::instance.PreDrawMirror(param1, deltaTime);
 		DrawFrame.Original(param1, param2, param3, tickProgress, deltaTime);
 		Game::instance.PostDrawMirror(param1, deltaTime);
@@ -323,15 +356,6 @@ void __declspec(naked) Hooks::H_DrawMenu()
 		ret
 	}
 }
-
-void Hooks::H_DrawScope(void* param1)
-{
-	if (Game::instance.GetRenderState() == ERenderState::GAME)
-	{
-		DrawScope.Original(param1);
-	}
-}
-
 
 void __declspec(naked) Hooks::H_DrawLoadingScreen()
 {
@@ -678,6 +702,12 @@ void Hooks::P_RemoveCutsceneFPSCap()
 	// Instead of setting the flag for capping the fps when we are in a cutscene, just clear it
 	byte bytes[2]{ 0x32, 0xdb };
 	SetBytes(o.CutsceneFPSCap.Address, 2, bytes);
+}
+
+void Hooks::P_KeepViewModelVisible()
+{
+	// Replace "bShowViewModel = false" with "bShowViewModel = true"
+	SetByte(o.SetViewModelVisible.Address + 0x55, 0x1);
 }
 
 void Hooks::P_DontStealMouse()

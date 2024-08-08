@@ -25,6 +25,8 @@ public:
 	virtual float GetViewWidthStretch() = 0;
 	virtual float GetViewHeightStretch() = 0;
 	virtual float GetAspect() = 0;
+	virtual int GetScopeWidth() = 0;
+	virtual int GetScopeHeight() = 0;
 	virtual void Recentre() = 0;
 	virtual void SetLocationOffset(Vector3 newOffset) = 0;
 	virtual Vector3 GetLocationOffset() = 0;
@@ -36,9 +38,12 @@ public:
 	virtual struct IDirect3DTexture9* GetRenderTexture(int eye) = 0;
 	virtual struct IDirect3DSurface9* GetUISurface() = 0;
 	virtual struct IDirect3DSurface9* GetCrosshairSurface() = 0;
+	virtual struct IDirect3DSurface9* GetScopeSurface() = 0;
+	virtual struct IDirect3DTexture9* GetScopeTexture() = 0;
 
 	virtual void SetMouseVisibility(bool bIsVisible) = 0;
 	virtual void SetCrosshairTransform(class Matrix4& newTransform) = 0;
+	virtual void SetScopeTransform(class Matrix4& newTransform, bool bIsVisible) = 0;
 	virtual void UpdateInputs() = 0;
 	virtual InputBindingID RegisterBoolInput(std::string set, std::string action) = 0;
 	virtual InputBindingID RegisterVector2Input(std::string set, std::string action) = 0;
