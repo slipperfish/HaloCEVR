@@ -453,7 +453,7 @@ void VREmulator::CreateSharedTarget()
 		Logger::log << "Couldn't create crosshair render target: " << res << std::endl;
 	}
 
-	res = Helpers::GetDirect3DDevice9()->CreateTexture(Game::instance.c_UIOverlayWidth->Value(), Game::instance.c_UIOverlayHeight->Value(), 1, desc.Usage, desc.Format, D3DPOOL_DEFAULT, &scopeTexture, NULL);
+	res = Helpers::GetDirect3DDevice9()->CreateTexture(GetScopeWidth(), GetScopeHeight(), 1, desc.Usage, desc.Format, D3DPOOL_DEFAULT, &scopeTexture, NULL);
 
 	if (FAILED(res))
 	{
