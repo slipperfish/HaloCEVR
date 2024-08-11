@@ -1,4 +1,4 @@
-#define EMULATE_VR 0
+#define EMULATE_VR 1
 #include "Game.h"
 #include "Logger.h"
 #include "Hooking/Hooks.h"
@@ -592,11 +592,11 @@ void Game::UpdateCrosshairAndScope()
 	vr->SetCrosshairTransform(overlayTransform);
 	overlayTransform.identity();
 
-	short* zoom = &Helpers::GetInputData().zoomLevel;
+	short zoom = Helpers::GetInputData().zoomLevel;
 
-	Vector3 upDir;
+	Vector3 upDir = Vector3(0.0f, 0.0f, 1.0f);
 
-	bool bHasScope = (*zoom != -1) && weaponHandler.GetLocalWeaponScope(aimPos, aimDir, upDir);
+	bool bHasScope = (zoom != -1) && weaponHandler.GetLocalWeaponScope(aimPos, aimDir, upDir);
 
 	if (!bHasScope)
 	{
@@ -613,22 +613,11 @@ void Game::UpdateCrosshairAndScope()
 
 	// debug!
 	{
-		Vector3 pos = (overlayTransform * Vector3(0.0f, 0.0f, 0.0f)) * Game::instance.MetresToWorld(1.0f) + Helpers::GetCamera().position;
+		Vector3 pos, aim;
 		Matrix3 rot;
-		Vector2 size(1.33f, 1.0f);
-		size *= Game::instance.MetresToWorld(GetScopeSize()) / size.x;
+		weaponHandler.GetWorldWeaponScope(pos, aim, upDir);
 
-		overlayTransform.translate(-pos);
-		overlayTransform.rotate(90.0f, overlayTransform.getLeftAxis());
-		overlayTransform.rotate(-90.0f, overlayTransform.getUpAxis());
-		overlayTransform.rotate(-90.0f, overlayTransform.getLeftAxis());
-
-		for (int i = 0; i < 3; i++)
-		{
-			rot.setColumn(i, &overlayTransform.get()[i * 4]);
-		}
-
-		debug.DrawCoordinate(pos, rot);
+		//debug.DrawCoordinate(pos, rot);
 	}
 }
 

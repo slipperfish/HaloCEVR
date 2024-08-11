@@ -14,6 +14,7 @@ public:
 	bool GetLocalWeaponAim(Vector3& outPosition, Vector3& outAim) const;
 	bool GetWorldWeaponAim(Vector3& outPosition, Vector3& outAim) const;
 	bool GetLocalWeaponScope(Vector3& outPosition, Vector3& outAim, Vector3& upDir) const;
+	bool GetWorldWeaponScope(Vector3& outPosition, Vector3& outAim, Vector3& upDir) const;
 
 	Vector3 localOffset;
 	Vector3 localRotation;
@@ -22,6 +23,8 @@ protected:
 	inline void CreateEndCap(int boneIndex, const struct Bone& currentBone, struct Transform* outBoneTransforms);
 	inline void MoveBoneToTransform(int boneIndex, const class Matrix4& newTransform, struct Transform* realTransforms, struct Transform* outBoneTransforms);
 	inline void UpdateCache(struct HaloID& id, struct AssetData_ModelAnimations* animationData);
+
+	inline Vector3 GetScopeLocation() const { return Vector3(-0.1f, 0.0f, 0.15f); } // TODO: per gun overrides
 
 	struct ViewModelCache
 	{
@@ -32,6 +35,7 @@ protected:
 		Vector3 cookedFireOffset;
 		Matrix3 cookedFireRotation;
 		Vector3 fireOffset;
+		Vector3 gunOffset;
 		Matrix3 fireRotation;
 	} cachedViewModel;
 

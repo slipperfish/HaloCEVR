@@ -217,6 +217,9 @@ void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, V
 				cachedViewModel.fireOffset = (gunPos - handPos) + (gunRot * cachedViewModel.cookedFireOffset);
 				cachedViewModel.fireOffset = inverseHand * cachedViewModel.fireOffset;
 
+				cachedViewModel.gunOffset = (gunPos - handPos);
+				cachedViewModel.gunOffset = inverseHand * cachedViewModel.gunOffset;
+
 				cachedViewModel.fireRotation = cachedViewModel.cookedFireRotation * gunRot * inverseHand;
 			}
 
@@ -310,6 +313,9 @@ void WeaponHandler::UpdateCache(HaloID& id, AssetData_ModelAnimations* animation
 	}
 
 	cachedViewModel.fireOffset = Vector3();
+	cachedViewModel.cookedFireOffset = Vector3();
+	cachedViewModel.cookedFireRotation = Matrix3();
+	cachedViewModel.gunOffset = Vector3();
 
 	// weapon model can be found from this chain:
 	// player->WeaponID (DynamicObject)->WeaponID (weapon Asset)->WeaponData->ViewModelID (GBX Asset)
@@ -444,7 +450,7 @@ bool WeaponHandler::GetWorldWeaponAim(Vector3& outPosition, Vector3& outAim) con
 
 	outPosition = Helpers::GetCamera().position + outPosition * Game::instance.MetresToWorld(1.0f);
 
-	return false;
+	return bSuccess;
 }
 
 bool WeaponHandler::GetLocalWeaponScope(Vector3& outPosition, Vector3& outAim, Vector3& upDir) const
@@ -476,9 +482,11 @@ bool WeaponHandler::GetLocalWeaponScope(Vector3& outPosition, Vector3& outAim, V
 
 	Matrix3 finalRot = cachedViewModel.fireRotation * handRotation3;
 
-	Vector3 scopeOffset = Vector3(-0.1f, 0.0f, 0.15f);
+	Vector3 scopeOffset = GetScopeLocation();
 
-	outPosition = handPos + handRotation * scopeOffset;
+	Vector3 gunOffset = handPos + handRotation * cachedViewModel.gunOffset * Game::instance.WorldToMetres(1.0f);
+
+	outPosition = gunOffset + finalRot * scopeOffset;
 	outAim = finalRot * Vector3(1.0f, 0.0f, 0.0f);
 	upDir = finalRot * Vector3(0.0f, 0.0f, 1.0f);
 
@@ -494,6 +502,15 @@ bool WeaponHandler::GetLocalWeaponScope(Vector3& outPosition, Vector3& outAim, V
 #endif
 
 	return true;
+}
+
+bool WeaponHandler::GetWorldWeaponScope(Vector3& outPosition, Vector3& outAim, Vector3& upDir) const
+{
+	bool bSuccess = GetLocalWeaponScope(outPosition, outAim, upDir);
+
+	outPosition = Helpers::GetCamera().position + outPosition * Game::instance.MetresToWorld(1.0f);
+
+	return bSuccess;
 }
 
 void WeaponHandler::PreFireWeapon(HaloID& WeaponID, short param2, bool param3)
