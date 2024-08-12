@@ -10,7 +10,7 @@
 #include "Maths/Vectors.h"
 #include "WeaponHandler.h"
 #include "InputHandler.h"
-#include "DebugRenderer.h"
+#include "InGameRenderer.h"
 
 enum class ERenderState { UNKNOWN, LEFT_EYE, RIGHT_EYE, GAME, SCOPE};
 
@@ -59,7 +59,7 @@ public:
 
 	ERenderState GetRenderState() const { return renderState; }
 
-	float GetScopeSize() const { return 0.05f; }
+	float GetScopeSize() const { return 0.2f; }
 
 	static float MetresToWorld(float m);
 	static float WorldToMetres(float w);
@@ -75,7 +75,7 @@ public:
 
 	bool bNeedsRecentre = true;
 
-	DebugRenderer debug;
+	InGameRenderer inGameRenderer;
 protected:
 
 	void CreateConsole();

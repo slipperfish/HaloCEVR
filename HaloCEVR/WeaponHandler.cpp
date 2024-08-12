@@ -226,7 +226,7 @@ void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, V
 #if DRAW_DEBUG_AIM
 			if (currentBone.Parent != -1)
 			{
-				Game::instance.debug.DrawLine3D(outBoneTransforms[boneIndex].translation, outBoneTransforms[currentBone.Parent].translation, D3DCOLOR_ARGB(127, 127, 127, 127), false);
+				Game::instance.inGameRenderer.DrawLine3D(outBoneTransforms[boneIndex].translation, outBoneTransforms[currentBone.Parent].translation, D3DCOLOR_ARGB(127, 127, 127, 127), false);
 			}
 #endif
 
@@ -431,14 +431,14 @@ bool WeaponHandler::GetLocalWeaponAim(Vector3& outPosition, Vector3& outAim) con
 #if DRAW_DEBUG_AIM
 	// N.b. - This function is in local (i.e. vr) coordinate space, convert to world for debug to be correct
 	Vector3 worldOutPos = Helpers::GetCamera().position + outPosition * Game::instance.MetresToWorld(1.0f);
-	Game::instance.debug.DrawCoordinate(worldOutPos, finalRot, 0.02f);
+	Game::instance.inGameRenderer.DrawCoordinate(worldOutPos, finalRot, 0.02f);
 	Vector3 worldHandPos = Helpers::GetCamera().position + handPos * Game::instance.MetresToWorld(1.0f);
-	Game::instance.debug.DrawCoordinate(worldHandPos, handRotation3, 0.015f, false);
+	Game::instance.inGameRenderer.DrawCoordinate(worldHandPos, handRotation3, 0.015f, false);
 
 	Vector3 aimTarget = worldOutPos + outAim * Game::instance.MetresToWorld(Game::instance.c_UIOverlayDistance->Value());
-	Game::instance.debug.DrawLine3D(worldOutPos, aimTarget, D3DCOLOR_ARGB(255, 255, 20, 20));
+	Game::instance.inGameRenderer.DrawLine3D(worldOutPos, aimTarget, D3DCOLOR_ARGB(255, 255, 20, 20));
 
-	Game::instance.debug.DrawLine3D(lastFireLocation, lastFireAim, D3DCOLOR_ARGB(255, 20, 255, 255));
+	Game::instance.inGameRenderer.DrawLine3D(lastFireLocation, lastFireAim, D3DCOLOR_ARGB(255, 20, 255, 255));
 #endif
 
 	return true;
@@ -493,12 +493,12 @@ bool WeaponHandler::GetLocalWeaponScope(Vector3& outPosition, Vector3& outAim, V
 #if DRAW_DEBUG_AIM
 	// N.b. - This function is in local (i.e. vr) coordinate space, convert to world for debug to be correct
 	Vector3 worldOutPos = Helpers::GetCamera().position + outPosition * Game::instance.MetresToWorld(1.0f);
-	Game::instance.debug.DrawCoordinate(worldOutPos, finalRot, 0.02f);
+	Game::instance.inGameRenderer.DrawCoordinate(worldOutPos, finalRot, 0.02f);
 	Vector3 worldHandPos = Helpers::GetCamera().position + handPos * Game::instance.MetresToWorld(1.0f);
-	Game::instance.debug.DrawCoordinate(worldHandPos, handRotation3, 0.015f, false);
+	Game::instance.inGameRenderer.DrawCoordinate(worldHandPos, handRotation3, 0.015f, false);
 
 	Vector3 aimTarget = worldOutPos + outAim * Game::instance.MetresToWorld(Game::instance.c_UIOverlayDistance->Value());
-	Game::instance.debug.DrawLine3D(worldOutPos, aimTarget, D3DCOLOR_ARGB(255, 255, 20, 20));
+	Game::instance.inGameRenderer.DrawLine3D(worldOutPos, aimTarget, D3DCOLOR_ARGB(255, 255, 20, 20));
 #endif
 
 	return true;

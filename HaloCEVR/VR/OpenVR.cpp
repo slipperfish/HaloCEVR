@@ -8,6 +8,7 @@
 #include "../Helpers/DX9.h"
 #include "../Helpers/Renderer.h"
 #include "../Helpers/RenderTarget.h"
+#include "../Helpers/Camera.h"
 
 #pragma comment(lib, "openvr_api.lib")
 #pragma comment(lib, "d3d11.lib")
@@ -57,9 +58,6 @@ void OpenVR::Init()
 	vrOverlay->CreateOverlay("CrosshairOverlay", "CrosshairOverlay", &crosshairOverlay);
 	vrOverlay->SetOverlayFlag(crosshairOverlay, vr::VROverlayFlags_IsPremultiplied, true);
 	vrOverlay->ShowOverlay(crosshairOverlay);
-
-	vrOverlay->CreateOverlay("ScopeOverlay", "ScopeOverlay", &scopeOverlay);
-	vrOverlay->SetOverlayFlag(scopeOverlay, vr::VROverlayFlags_IsPremultiplied, true);
 
 	std::filesystem::path cwd = std::filesystem::current_path() / "VR" / "OpenVR" / "actions.json";
 	vrInput->SetActionManifestPath(cwd.string().c_str());
@@ -148,12 +146,6 @@ void OpenVR::OnGameFinishInit()
 		Logger::log << "[OpenVR] Error setting overlay width: " << err << std::endl;
 	}
 	Logger::log << "[OpenVR] Set Crosshair Width = " << Game::instance.c_UIOverlayScale->Value() << std::endl;
-	err = vrOverlay->SetOverlayWidthInMeters(scopeOverlay, Game::instance.GetScopeSize());
-	if (err != vr::VROverlayError_None)
-	{
-		Logger::log << "[OpenVR] Error setting overlay width: " << err << std::endl;
-	}
-	Logger::log << "[OpenVR] Set Scope Width = " << Game::instance.GetScopeSize() << std::endl;
 
 
 	float curvature = Game::instance.c_UIOverlayCurvature->Value();
@@ -171,7 +163,6 @@ void OpenVR::OnGameFinishInit()
 
 	vrOverlay->SetOverlayTransformAbsolute(uiOverlay, vr::ETrackingUniverseOrigin::TrackingUniverseStanding, &overlayTransform);
 	vrOverlay->SetOverlayTransformAbsolute(crosshairOverlay, vr::ETrackingUniverseOrigin::TrackingUniverseStanding, &overlayTransform);
-	vrOverlay->SetOverlayTransformAbsolute(scopeOverlay, vr::ETrackingUniverseOrigin::TrackingUniverseStanding, &overlayTransform);
 
 	Logger::log << "[OpenVR] Finished Initialisation" << std::endl;
 }
@@ -341,14 +332,6 @@ void OpenVR::PostDrawFrame(Renderer* renderer, float deltaTime)
 	if (o2Error != vr::EVROverlayError::VROverlayError_None)
 	{
 		Logger::log << "[OpenVR] Could not submit crosshair texture: " << o2Error << std::endl;
-	}
-
-	vr::Texture_t scopeTex{ (void*)vrRenderTexture[scopeSurface], vr::TextureType_DirectX, vr::ColorSpace_Auto };
-	vr::EVROverlayError o3Error = vrOverlay->SetOverlayTexture(scopeOverlay, &scopeTex);
-
-	if (o3Error != vr::EVROverlayError::VROverlayError_None)
-	{
-		Logger::log << "[OpenVR] Could not submit scope texture: " << o3Error << std::endl;
 	}
 
 	vrCompositor->PostPresentHandoff();
@@ -530,18 +513,28 @@ void OpenVR::SetCrosshairTransform(Matrix4& newTransform)
 
 void OpenVR::SetScopeTransform(Matrix4& newTransform, bool bIsVisible)
 {
-	if (bIsVisible)
+	// Use the dx9 renderer to draw this directly in game, since we can't adjust the near clip plane of steamvr overlays
+	if (!bIsVisible)
 	{
-		vrOverlay->ShowOverlay(scopeOverlay);
-
-		vr::HmdMatrix34_t overlayMatrix = ConvertMatrixToSteamVRMatrix4(newTransform.rotateZ(yawOffset).translate(positionOffset));
-
-		vrOverlay->SetOverlayTransformAbsolute(scopeOverlay, vr::TrackingUniverseStanding, &overlayMatrix);
+		return;
 	}
-	else
+
+	Vector3 pos = (newTransform * Vector3(0.0f, 0.0f, 0.0f)) * Game::instance.MetresToWorld(1.0f) + Helpers::GetCamera().position;
+	Matrix3 rot;
+	Vector2 size(1.33f, 1.0f);
+	size *= Game::instance.MetresToWorld(Game::instance.GetScopeSize()) / size.x;
+
+	newTransform.translate(-pos);
+	newTransform.rotate(90.0f, newTransform.getLeftAxis());
+	newTransform.rotate(-90.0f, newTransform.getUpAxis());
+	newTransform.rotate(-90.0f, newTransform.getLeftAxis());
+
+	for (int i = 0; i < 3; i++)
 	{
-		vrOverlay->HideOverlay(scopeOverlay);
+		rot.setColumn(i, &newTransform.get()[i * 4]);
 	}
+
+	Game::instance.inGameRenderer.DrawRenderTarget(GetScopeTexture(), pos, rot, size, false);
 }
 
 void OpenVR::UpdateInputs()

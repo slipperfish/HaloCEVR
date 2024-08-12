@@ -1,4 +1,4 @@
-#define EMULATE_VR 1
+#define EMULATE_VR 0
 #include "Game.h"
 #include "Logger.h"
 #include "Hooking/Hooks.h"
@@ -163,13 +163,13 @@ void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
 	primaryRenderTarget[0].width = vr->GetViewWidth();
 	primaryRenderTarget[0].height = vr->GetViewHeight();
 
-	debug.ExtractMatrices(renderer);
+	inGameRenderer.ExtractMatrices(renderer);
 }
 
 
 void Game::PostDrawEye(struct Renderer* renderer, float deltaTime, int eye)
 {
-	debug.Render(Helpers::GetDirect3DDevice9());
+	inGameRenderer.Render(Helpers::GetDirect3DDevice9());
 }
 
 bool Game::PreDrawScope(Renderer* renderer, float deltaTime)
@@ -260,20 +260,20 @@ void Game::PreDrawMirror(struct Renderer* renderer, float deltaTime)
 	windowMain->right = Helpers::GetRenderTargets()[0].width;
 	windowMain->bottom = Helpers::GetRenderTargets()[0].height;
 
-	debug.ExtractMatrices(renderer);
+	inGameRenderer.ExtractMatrices(renderer);
 }
 
 void Game::PostDrawMirror(struct Renderer* renderer, float deltaTime)
 {
 	// Do something here to copy the image into the backbuffer correctly
-	debug.Render(Helpers::GetDirect3DDevice9());
+	inGameRenderer.Render(Helpers::GetDirect3DDevice9());
 }
 
 void Game::PostDrawFrame(struct Renderer* renderer, float deltaTime)
 {
 	RestoreRenderTargets();
 	vr->PostDrawFrame(renderer, deltaTime);
-	debug.PostRender();
+	inGameRenderer.PostRender();
 }
 
 bool Game::PreDrawHUD()
@@ -610,15 +610,6 @@ void Game::UpdateCrosshairAndScope()
 	fixupRotation(overlayTransform, aimPos);
 
 	vr->SetScopeTransform(overlayTransform, true);
-
-	// debug!
-	{
-		Vector3 pos, aim;
-		Matrix3 rot;
-		weaponHandler.GetWorldWeaponScope(pos, aim, upDir);
-
-		//debug.DrawCoordinate(pos, rot);
-	}
 }
 
 void Game::StoreRenderTargets()

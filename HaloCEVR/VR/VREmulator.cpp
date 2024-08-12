@@ -181,7 +181,7 @@ void VREmulator::SetCrosshairTransform(Matrix4& newTransform)
 		rot.setColumn(i, &newTransform.get()[i * 4]);
 	}
 
-	Game::instance.debug.DrawRenderTarget(crosshairTexture, pos, rot, size, false);
+	Game::instance.inGameRenderer.DrawRenderTarget(crosshairTexture, pos, rot, size, false);
 }
 
 void VREmulator::SetScopeTransform(Matrix4& newTransform, bool bIsVisible)
@@ -206,7 +206,7 @@ void VREmulator::SetScopeTransform(Matrix4& newTransform, bool bIsVisible)
 		rot.setColumn(i, &newTransform.get()[i * 4]);
 	}
 
-	Game::instance.debug.DrawRenderTarget(scopeTexture, pos, rot, size, false);
+	Game::instance.inGameRenderer.DrawRenderTarget(scopeTexture, pos, rot, size, false);
 }
 
 void VREmulator::UpdateInputs()
@@ -345,8 +345,8 @@ void VREmulator::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 		rot.setColumn(i, &overlayTransform.get()[i * 4]);
 	}
 
-	Game::instance.debug.DrawRenderTarget(uiTexture, pos, rot, size, false);
-	//Game::instance.debug.DrawCoordinate(pos, rot, 0.05f, false);
+	Game::instance.inGameRenderer.DrawRenderTarget(uiTexture, pos, rot, size, false);
+	//Game::instance.inGameRenderer.DrawCoordinate(pos, rot, 0.05f, false);
 }
 
 void VREmulator::DrawEye(struct Renderer* renderer, float deltaTime, int eye)

@@ -78,7 +78,6 @@ protected:
 
 	vr::VROverlayHandle_t uiOverlay;
 	vr::VROverlayHandle_t crosshairOverlay;
-	vr::VROverlayHandle_t scopeOverlay;
 
 	vr::TrackedDevicePose_t gamePoses[vr::k_unMaxTrackedDeviceCount];
 	vr::TrackedDevicePose_t renderPoses[vr::k_unMaxTrackedDeviceCount];

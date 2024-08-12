@@ -5,7 +5,7 @@
 #include <d3d9.h>
 
 
-class DebugRenderer
+class InGameRenderer
 {
 public:
 	// Debug API functions

@@ -1,4 +1,4 @@
-#include "DebugRenderer.h"
+#include "InGameRenderer.h"
 #include "Helpers/RenderTarget.h"
 #include "Helpers/Renderer.h"
 #include "Helpers/Maths.h"
@@ -9,7 +9,7 @@
 
 //================================//Debug API//================================//
 
-void DebugRenderer::DrawLine2D(Vector2& start, Vector2& end, D3DCOLOR color)
+void InGameRenderer::DrawLine2D(Vector2& start, Vector2& end, D3DCOLOR color)
 {
 	VertexData2D startData
 	{
@@ -34,7 +34,7 @@ void DebugRenderer::DrawLine2D(Vector2& start, Vector2& end, D3DCOLOR color)
 	lines2D.push_back(endData);
 }
 
-void DebugRenderer::DrawLine3D(Vector3& start, Vector3& end, D3DCOLOR color, bool bRespectDepth, float thickness)
+void InGameRenderer::DrawLine3D(Vector3& start, Vector3& end, D3DCOLOR color, bool bRespectDepth, float thickness)
 {
 	VertexData3D startData
 	{
@@ -73,7 +73,7 @@ void DebugRenderer::DrawLine3D(Vector3& start, Vector3& end, D3DCOLOR color, boo
 	}
 }
 
-void DebugRenderer::DrawCoordinate(Vector3& pos, Matrix3& rot, float size, bool bRespectDepth)
+void InGameRenderer::DrawCoordinate(Vector3& pos, Matrix3& rot, float size, bool bRespectDepth)
 {
 	// TODO: Check these are the right way round
 	Vector3 up = pos + rot * Vector3(0.0f, 0.0f, size);
@@ -85,7 +85,7 @@ void DebugRenderer::DrawCoordinate(Vector3& pos, Matrix3& rot, float size, bool 
 	DrawLine3D(pos, left, D3DCOLOR_XRGB(255, 0, 0), bRespectDepth, 0.01f);
 }
 
-void DebugRenderer::DrawRenderTarget(IDirect3DTexture9* renderTarget, Vector3& pos, Matrix3& rot, Vector2& size, bool bRespectDepth)
+void InGameRenderer::DrawRenderTarget(IDirect3DTexture9* renderTarget, Vector3& pos, Matrix3& rot, Vector2& size, bool bRespectDepth)
 {
 	RenderTarget rtData
 	{
@@ -101,7 +101,7 @@ void DebugRenderer::DrawRenderTarget(IDirect3DTexture9* renderTarget, Vector3& p
 
 //================================//Core Functions//================================//
 
-void DebugRenderer::ExtractMatrices(Renderer* playerRenderer)
+void InGameRenderer::ExtractMatrices(Renderer* playerRenderer)
 {
 	CameraRenderMatrices& cameraMatrices = *Helpers::GetActiveCameraMatrices();
 	Game::instance.SetViewportScale(&cameraMatrices.viewport);
@@ -142,9 +142,21 @@ void DebugRenderer::ExtractMatrices(Renderer* playerRenderer)
 	world._22 = 1.0;
 	world._11 = 1.0;
 	projection = cameraMatrices.projectionMatrix;
+
+	// Extract the near/far clipping planes then bring them in close to prevent clipping on scopes and such
+
+	float nearZ = projection._43 / (projection._33 - 1.0f);
+
+	float farZ = projection._43 / (projection._33 + 1.0f);
+
+	float newNear = nearZ * 0.1f;
+	float newFar = farZ * 0.1f;
+
+	projection._33 = -(newFar + newNear) / (newFar - newNear);
+	projection._43 = -(2.0f * newFar * newNear) / (newFar - newNear);
 }
 
-void DebugRenderer::Render(IDirect3DDevice9* pDevice)
+void InGameRenderer::Render(IDirect3DDevice9* pDevice)
 {
 	LPDIRECT3DSTATEBLOCK9 pStateBlock = NULL;
 	pDevice->CreateStateBlock(D3DSBT_ALL, &pStateBlock);
@@ -159,7 +171,7 @@ void DebugRenderer::Render(IDirect3DDevice9* pDevice)
 	pStateBlock->Release();
 }
 
-void DebugRenderer::PostRender()
+void InGameRenderer::PostRender()
 {
 	lines2D.clear();
 	lines3D.clear();
@@ -169,7 +181,7 @@ void DebugRenderer::PostRender()
 
 //================================//Internal Functions//================================//
 
-void DebugRenderer::Draw2DLines(IDirect3DDevice9* pDevice)
+void InGameRenderer::Draw2DLines(IDirect3DDevice9* pDevice)
 {
 	pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
@@ -178,7 +190,7 @@ void DebugRenderer::Draw2DLines(IDirect3DDevice9* pDevice)
 	pDevice->DrawPrimitiveUP(D3DPT_LINELIST, vertex2DCount / 2, vertices2D, sizeof(VertexData2D));
 }
 
-void DebugRenderer::Draw3DLines(IDirect3DDevice9* pDevice)
+void InGameRenderer::Draw3DLines(IDirect3DDevice9* pDevice)
 {
 	if (lines3D.empty() && depthLines3D.empty())
 	{
@@ -228,7 +240,7 @@ void DebugRenderer::Draw3DLines(IDirect3DDevice9* pDevice)
 	pDevice->DrawPrimitiveUP(D3DPT_LINELIST, lines3D.size() / 2, lines3D.data(), sizeof(VertexData3D));
 }
 
-void DebugRenderer::DrawRenderTargets(IDirect3DDevice9* pDevice)
+void InGameRenderer::DrawRenderTargets(IDirect3DDevice9* pDevice)
 {
 	pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 	pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
