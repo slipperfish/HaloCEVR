@@ -432,14 +432,14 @@ void Game::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, Vector3* u
 	weaponHandler.UpdateViewModel(id, pos, facing, up, BoneTransforms, OutBoneTransforms);
 }
 
-void Game::PreFireWeapon(HaloID& weaponID, short param2, bool param3)
+void Game::PreFireWeapon(HaloID& weaponID, short param2)
 {
-	weaponHandler.PreFireWeapon(weaponID, param2, param3);
+	weaponHandler.PreFireWeapon(weaponID, param2);
 }
 
-void Game::PostFireWeapon(HaloID& weaponID, short param2, bool param3)
+void Game::PostFireWeapon(HaloID& weaponID, short param2)
 {
-	weaponHandler.PostFireWeapon(weaponID, param2, param3);
+	weaponHandler.PostFireWeapon(weaponID, param2);
 }
 
 void Game::UpdateInputs()

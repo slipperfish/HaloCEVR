@@ -16,8 +16,8 @@ class WeaponHandler
 {
 public:
 	void UpdateViewModel(struct HaloID& id, struct Vector3* pos, struct Vector3* facing, struct Vector3* up, struct TransformQuat* boneTransforms, struct Transform* outBoneTransforms);
-	void PreFireWeapon(HaloID& weaponID, short param2, bool param3);
-	void PostFireWeapon(HaloID& weaponID, short param2, bool param3);
+	void PreFireWeapon(HaloID& weaponID, short param2);
+	void PostFireWeapon(HaloID& weaponID, short param2);
 
 	bool GetLocalWeaponAim(Vector3& outPosition, Vector3& outAim) const;
 	bool GetWorldWeaponAim(Vector3& outPosition, Vector3& outAim) const;

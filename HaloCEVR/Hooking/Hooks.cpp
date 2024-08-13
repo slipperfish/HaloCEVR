@@ -670,13 +670,13 @@ void __declspec(naked) Hooks::H_UpdateMouseInfo()
 	}
 }
 
-void Hooks::H_FireWeapon(HaloID param1, short param2, bool param3)
+void Hooks::H_FireWeapon(HaloID param1, short param2)
 {
-	Game::instance.PreFireWeapon(param1, param2, param3);
+	Game::instance.PreFireWeapon(param1, param2);
 
-	FireWeapon.Original(param1, param2, param3);
+	FireWeapon.Original(param1, param2);
 
-	Game::instance.PostFireWeapon(param1, param2, param3);
+	Game::instance.PostFireWeapon(param1, param2);
 
 }
 

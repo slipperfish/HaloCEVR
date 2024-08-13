@@ -35,7 +35,7 @@ public:
 	DEFINE_HOOK(SetViewportScale);
 	DEFINE_HOOK(SetMousePosition);
 	DEFINE_HOOK(UpdateMouseInfo);
-	DEFINE_HOOK_FULL(FireWeapon, void __cdecl, HaloID param1, short param2, bool param3);
+	DEFINE_HOOK_FULL(FireWeapon, void __cdecl, HaloID param1, short param2);
 
 	// All direct patches go here:
 	static void P_FixTabOut();

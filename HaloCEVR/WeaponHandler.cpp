@@ -548,7 +548,7 @@ bool WeaponHandler::GetWorldWeaponScope(Vector3& outPosition, Vector3& outAim, V
 	return bSuccess;
 }
 
-void WeaponHandler::PreFireWeapon(HaloID& WeaponID, short param2, bool param3)
+void WeaponHandler::PreFireWeapon(HaloID& WeaponID, short param2)
 {
 	BaseDynamicObject* Object = Helpers::GetDynamicObject(WeaponID);
 
@@ -603,12 +603,13 @@ void WeaponHandler::PreFireWeapon(HaloID& WeaponID, short param2, bool param3)
 	}
 }
 
-void WeaponHandler::PostFireWeapon(HaloID& weaponID, short param2, bool param3)
+void WeaponHandler::PostFireWeapon(HaloID& weaponID, short param2)
 {
 	// Restore state after firing the weapon
 	if (weaponFiredPlayer)
 	{
 		weaponFiredPlayer->position = realPlayerPosition;
 		weaponFiredPlayer->aim = realPlayerAim;
+		weaponFiredPlayer = nullptr;
 	}
 }
