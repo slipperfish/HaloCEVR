@@ -528,12 +528,8 @@ void Game::SetupConfigs()
 	c_SmoothTurnAmount = config.RegisterFloat("SmoothTurnAmount", "Rotation in degrees per second the view will turn at when not using snap turning", 90.0f);
 	c_LeftHandFlashlightDistance = config.RegisterFloat("LeftHandFlashlight", "Bringing the left hand within this distance of the head will toggle the flashlight (<0 to disable)", 0.2f);
 	c_RightHandFlashlightDistance = config.RegisterFloat("RightHandFlashlight", "Bringing the right hand within this distance of the head will toggle the flashlight (<0 to disable)", -1.0f);
-	c_ControllerOffsetX = config.RegisterFloat("ControllerOffset.X", "Offset from the controller's position used when calculating the in game hand position", -0.045f);
-	c_ControllerOffsetY = config.RegisterFloat("ControllerOffset.Y", "Offset from the controller's position used when calculating the in game hand position", 0.01f);
-	c_ControllerOffsetZ = config.RegisterFloat("ControllerOffset.Z", "Offset from the controller's position used when calculating the in game hand position", 0.0f);
-	c_ControllerRotationX = config.RegisterFloat("ControllerRotation.X", "Rotation added to the controller when calculating the in game hand rotation", 10.0f);
-	c_ControllerRotationY = config.RegisterFloat("ControllerRotation.Y", "Rotation added to the controller when calculating the in game hand rotation", 0.0f);
-	c_ControllerRotationZ = config.RegisterFloat("ControllerRotation.Z", "Rotation added to the controller when calculating the in game hand rotation", 0.0f);
+	c_ControllerOffset = config.RegisterVector3("ControllerOffset", "Offset from the controller's position used when calculating the in game hand position", Vector3(-0.045f, 0.01f, 0.0f));
+	c_ControllerRotation = config.RegisterVector3("ControllerRotation", "Rotation added to the controller when calculating the in game hand rotation", Vector3(10.0f, 0.0f, 0.0f));
 	c_ScopeRenderScale = config.RegisterFloat("ScopeRenderScale", "Size of the scope render target, expressed as a proportion of the headset's render scale (e.g. 0.5 = half resolution)", 0.75f);
 	c_ScopeScale = config.RegisterFloat("ScopeScale", "Width of the scope view in metres", 0.2f);
 	c_ScopeOffsetPistol = config.RegisterVector3("ScopeOffsetPistol", "Offset of the scope view relative to the pistol's location", Vector3(-0.1f, 0.0f, 0.15f));
@@ -543,8 +539,8 @@ void Game::SetupConfigs()
 	config.LoadFromFile("VR/config.txt");
 	config.SaveToFile("VR/config.txt");
 
-	weaponHandler.localOffset = Vector3(c_ControllerOffsetX->Value(), c_ControllerOffsetY->Value(), c_ControllerOffsetZ->Value());
-	weaponHandler.localRotation = Vector3(c_ControllerRotationX->Value(), c_ControllerRotationY->Value(), c_ControllerRotationZ->Value());
+	weaponHandler.localOffset = Vector3(c_ControllerOffset->Value().x, c_ControllerOffset->Value().y, c_ControllerOffset->Value().z);
+	weaponHandler.localRotation = Vector3(c_ControllerRotation->Value().x, c_ControllerRotation->Value().y, c_ControllerRotation->Value().z);
 
 	Logger::log << "Loaded configs" << std::endl;
 }

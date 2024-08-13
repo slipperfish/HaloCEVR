@@ -142,12 +142,8 @@ public:
 	FloatProperty* c_SmoothTurnAmount = nullptr;
 	FloatProperty* c_LeftHandFlashlightDistance = nullptr;
 	FloatProperty* c_RightHandFlashlightDistance = nullptr;
-	FloatProperty* c_ControllerOffsetX = nullptr;
-	FloatProperty* c_ControllerOffsetY = nullptr;
-	FloatProperty* c_ControllerOffsetZ = nullptr;
-	FloatProperty* c_ControllerRotationX = nullptr;
-	FloatProperty* c_ControllerRotationY = nullptr;
-	FloatProperty* c_ControllerRotationZ = nullptr;
+	Vector3Property* c_ControllerOffset = nullptr;
+	Vector3Property* c_ControllerRotation = nullptr;
 	FloatProperty* c_ScopeRenderScale = nullptr;
 	FloatProperty* c_ScopeScale = nullptr;
 	Vector3Property* c_ScopeOffsetPistol = nullptr;

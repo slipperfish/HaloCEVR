@@ -176,6 +176,12 @@ public:
 				return !std::isspace(ch);
 				}).base(), value.end());
 
+			if (properties_.find(name) == properties_.end())
+			{
+				Logger::log << "[Config] Found invalid property " << name << ", ignoring" << std::endl;
+				continue;
+			}
+
 			// Update the corresponding property
 			Property* prop = properties_[name];
 			if (dynamic_cast<BoolProperty*>(prop)) {
