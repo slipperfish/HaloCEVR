@@ -2,7 +2,9 @@
 #include <fstream>
 #include <string>
 #include <unordered_map>
-#include <algorithm> 
+#include <algorithm>
+#include "../Maths/Vectors.h"
+#include "../Logger.h"
 
 class Property {
 public:
@@ -61,6 +63,17 @@ private:
 	friend class Config;
 };
 
+class Vector3Property : public Property {
+public:
+	Vector3Property(const Vector3& value, const std::string& description) : value_(value), default_(value), Property(description) {}
+	Vector3 Value() const { return value_; }
+	Vector3 DefaultValue() const { return default_; }
+private:
+	Vector3 value_;
+	Vector3 default_;
+	friend class Config;
+};
+
 class Config {
 public:
 	BoolProperty* RegisterBool(const std::string& name, const std::string& description, bool defaultValue) {
@@ -86,6 +99,13 @@ public:
 
 	StringProperty* RegisterString(const std::string& name, const std::string& description, const std::string& defaultValue) {
 		StringProperty* newProp = new StringProperty(defaultValue, description);
+		newProp->guid = guid++;
+		properties_[name] = newProp;
+		return newProp;
+	}
+
+	Vector3Property* RegisterVector3(const std::string& name, const std::string& description, const Vector3 defaultValue) {
+		Vector3Property* newProp = new Vector3Property(defaultValue, description);
 		newProp->guid = guid++;
 		properties_[name] = newProp;
 		return newProp;
@@ -118,6 +138,11 @@ public:
 			else if (StringProperty* stringProp = dynamic_cast<StringProperty*>(prop)) {
 				file << "//[String] " << stringProp->GetDesc() << " (Default Value: \"" << stringProp->DefaultValue() << "\")\n";
 				file << name << " = " << stringProp->Value() << "\n\n";
+			}
+			else if (Vector3Property* vec3Prop = dynamic_cast<Vector3Property*>(prop))
+			{
+				file << "//[Vector3] " << vec3Prop->GetDesc() << " (Default Value: \"" << vec3Prop->DefaultValue() << "\")\n";
+				file << name << " = " << vec3Prop->Value() << "\n\n";
 			}
 		}
 	}
@@ -156,16 +181,55 @@ public:
 			if (dynamic_cast<BoolProperty*>(prop)) {
 				std::transform(value.begin(), value.end(), value.begin(),
 					[](unsigned char c) { return std::tolower(c); });
-				static_cast<BoolProperty*>(prop)->value_ = value == "true";
+				BoolProperty* bProp = static_cast<BoolProperty*>(prop);
+				bProp->value_ = value == "true";
+				Logger::log << "[Config] " << name << " = " << (bProp->Value() ? "true" : "false") << ((bProp->Value() != bProp->DefaultValue()) ? "*" : "") << std::endl;
 			}
 			else if (dynamic_cast<IntProperty*>(prop)) {
-				static_cast<IntProperty*>(prop)->value_ = std::stoi(value);
+				IntProperty* iProp = static_cast<IntProperty*>(prop);
+				iProp->value_ = std::stoi(value);
+				Logger::log << "[Config] " << name << " = " << iProp->Value() << ((iProp->Value() != iProp->DefaultValue()) ? "*" : "") << std::endl;
 			}
 			else if (dynamic_cast<FloatProperty*>(prop)) {
-				static_cast<FloatProperty*>(prop)->value_ = std::stof(value);
+				FloatProperty* fProp = static_cast<FloatProperty*>(prop);
+				fProp->value_ = std::stof(value);
+				Logger::log << "[Config] " << name << " = " << fProp->Value() << ((std::abs(fProp->Value() - fProp->DefaultValue()) > 1e-8) ? "*" : "") << std::endl;
 			}
 			else if (dynamic_cast<StringProperty*>(prop)) {
-				static_cast<StringProperty*>(prop)->value_ = value;
+				StringProperty* sProp = static_cast<StringProperty*>(prop);
+				sProp->value_ = value;
+				Logger::log << "[Config] " << name << " = " << sProp->Value() << ((sProp->Value() != sProp->DefaultValue()) ? "*" : "") << std::endl;
+			}
+			else if (dynamic_cast<Vector3Property*>(prop)) {
+				Vector3Property* vProp = static_cast<Vector3Property*>(prop);
+				// Find X
+				value.erase(value.begin(), std::find_if(value.begin(), value.end(), [](char ch) {
+					return !std::isspace(ch) && ch != '(';
+				}));
+
+				std::size_t len;
+				float x = std::stof(value, &len);
+
+				value.erase(value.begin(), value.begin() + len);
+
+				// Find Y
+				value.erase(value.begin(), std::find_if(value.begin(), value.end(), [](char ch) {
+					return !std::isspace(ch) && ch != ',';
+				}));
+
+				float y = std::stof(value, &len);
+
+				value.erase(value.begin(), value.begin() + len);
+
+				// Find Z
+				value.erase(value.begin(), std::find_if(value.begin(), value.end(), [](char ch) {
+					return !std::isspace(ch) && ch != ',';
+				}));
+
+				float z = std::stof(value);
+
+				vProp->value_ = Vector3(x, y, z);
+				Logger::log << "[Config] " << name << " = " << vProp->Value() << ((vProp->Value() != vProp->DefaultValue()) ? "*" : "") << std::endl;
 			}
 		}
 	}

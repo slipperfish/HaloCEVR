@@ -1,4 +1,4 @@
-#define EMULATE_VR 0
+#define EMULATE_VR 1
 #include "Game.h"
 #include "Logger.h"
 #include "Hooking/Hooks.h"
@@ -535,8 +535,10 @@ void Game::SetupConfigs()
 	c_ControllerRotationY = config.RegisterFloat("ControllerRotation.Y", "Rotation added to the controller when calculating the in game hand rotation", 0.0f);
 	c_ControllerRotationZ = config.RegisterFloat("ControllerRotation.Z", "Rotation added to the controller when calculating the in game hand rotation", 0.0f);
 	c_ScopeRenderScale = config.RegisterFloat("ScopeRenderScale", "Size of the scope render target, expressed as a proportion of the headset's render scale (e.g. 0.5 = half resolution)", 0.75f);
-	// Do we want to expose this to users?
-	//c_ScopeScale = config.RegisterFloat("ScopeScale", "Width of the scope view in metres", 0.05f);
+	c_ScopeScale = config.RegisterFloat("ScopeScale", "Width of the scope view in metres", 0.2f);
+	c_ScopeOffsetPistol = config.RegisterVector3("ScopeOffsetPistol", "Offset of the scope view relative to the pistol's location", Vector3(-0.1f, 0.0f, 0.15f));
+	c_ScopeOffsetSniper = config.RegisterVector3("ScopeOffsetSniper", "Offset of the scope view relative to the pistol's location", Vector3(-0.15f, 0.0f, 0.15f));
+	c_ScopeOffsetRocket = config.RegisterVector3("ScopeOffsetRocket", "Offset of the scope view relative to the pistol's location", Vector3(0.1f, 0.2f, 0.1f));
 
 	config.LoadFromFile("VR/config.txt");
 	config.SaveToFile("VR/config.txt");

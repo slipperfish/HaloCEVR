@@ -359,8 +359,28 @@ void WeaponHandler::UpdateCache(HaloID& id, AssetData_ModelAnimations* animation
 		return;
 	}
 
-	Logger::log << "[UpdateCache] GBXModelTag = " << std::setw(4) << model->GroupID << std::endl;
+	std::string reversedGroup;
+	reversedGroup.assign(model->GroupID, 4);
+	std::reverse(reversedGroup.begin(), reversedGroup.end());
+	Logger::log << "[UpdateCache] GBXModelTag = " << reversedGroup << std::endl;
 	Logger::log << "[UpdateCache] GBXModelPath = " << model->ModelPath << std::endl;
+
+	if (strstr(model->ModelPath, "\\pistol\\"))
+	{
+		cachedViewModel.scopeType = ScopedWeaponType::Pistol;
+	}
+	else if (strstr(model->ModelPath, "\\sniper rifle\\"))
+	{
+		cachedViewModel.scopeType = ScopedWeaponType::Sniper;
+	}
+	else if (strstr(model->ModelPath, "\\rocket launcher\\"))
+	{
+		cachedViewModel.scopeType = ScopedWeaponType::Rocket;
+	}
+	else
+	{
+		cachedViewModel.scopeType = ScopedWeaponType::Unknown;
+	}
 
 	if (!model->ModelData)
 	{
@@ -394,6 +414,21 @@ void WeaponHandler::UpdateCache(HaloID& id, AssetData_ModelAnimations* animation
 			break;
 		}
 	}
+}
+
+Vector3 WeaponHandler::GetScopeLocation(ScopedWeaponType type) const
+{
+	switch (type)
+	{
+	case ScopedWeaponType::Rocket:
+		return Game::instance.c_ScopeOffsetRocket->Value();
+	case ScopedWeaponType::Sniper:
+		return Game::instance.c_ScopeOffsetSniper->Value();
+	case ScopedWeaponType::Unknown:
+	case ScopedWeaponType::Pistol:
+		return Game::instance.c_ScopeOffsetPistol->Value();
+	}
+	return Vector3(0.0f, 0.0f, 0.0f);
 }
 
 bool WeaponHandler::GetLocalWeaponAim(Vector3& outPosition, Vector3& outAim) const
@@ -482,7 +517,7 @@ bool WeaponHandler::GetLocalWeaponScope(Vector3& outPosition, Vector3& outAim, V
 
 	Matrix3 finalRot = cachedViewModel.fireRotation * handRotation3;
 
-	Vector3 scopeOffset = GetScopeLocation();
+	Vector3 scopeOffset = GetScopeLocation(cachedViewModel.scopeType);
 
 	Vector3 gunOffset = handPos + handRotation * cachedViewModel.gunOffset * Game::instance.WorldToMetres(1.0f);
 

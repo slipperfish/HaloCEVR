@@ -59,7 +59,7 @@ public:
 
 	ERenderState GetRenderState() const { return renderState; }
 
-	float GetScopeSize() const { return 0.2f; }
+	float GetScopeSize() const { return c_ScopeScale->Value(); }
 
 	static float MetresToWorld(float m);
 	static float WorldToMetres(float w);
@@ -150,5 +150,8 @@ public:
 	FloatProperty* c_ControllerRotationZ = nullptr;
 	FloatProperty* c_ScopeRenderScale = nullptr;
 	FloatProperty* c_ScopeScale = nullptr;
+	Vector3Property* c_ScopeOffsetPistol = nullptr;
+	Vector3Property* c_ScopeOffsetSniper = nullptr;
+	Vector3Property* c_ScopeOffsetRocket = nullptr;
 };
 

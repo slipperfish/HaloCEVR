@@ -193,8 +193,8 @@ void VREmulator::SetScopeTransform(Matrix4& newTransform, bool bIsVisible)
 
 	Vector3 pos = (newTransform * Vector3(0.0f, 0.0f, 0.0f)) * Game::instance.MetresToWorld(1.0f) + Helpers::GetCamera().position;
 	Matrix3 rot;
-	Vector2 size(1.33f, 1.0f);
-	size *= Game::instance.MetresToWorld(Game::instance.GetScopeSize()) / size.x;
+	Vector2 size(1.0f, 0.75f);
+	size *= Game::instance.MetresToWorld(Game::instance.GetScopeSize());
 
 	newTransform.translate(-pos);
 	newTransform.rotate(90.0f, newTransform.getLeftAxis());

@@ -4,6 +4,14 @@
 #include "Helpers/Objects.h"
 #define DRAW_DEBUG_AIM 0
 
+enum class ScopedWeaponType
+{
+	Unknown,
+	Pistol,
+	Rocket,
+	Sniper
+};
+
 class WeaponHandler
 {
 public:
@@ -24,7 +32,7 @@ protected:
 	inline void MoveBoneToTransform(int boneIndex, const class Matrix4& newTransform, struct Transform* realTransforms, struct Transform* outBoneTransforms);
 	inline void UpdateCache(struct HaloID& id, struct AssetData_ModelAnimations* animationData);
 
-	inline Vector3 GetScopeLocation() const { return Vector3(-0.1f, 0.0f, 0.15f); } // TODO: per gun overrides
+	inline Vector3 GetScopeLocation(ScopedWeaponType Type) const;
 
 	struct ViewModelCache
 	{
@@ -37,6 +45,7 @@ protected:
 		Vector3 fireOffset;
 		Vector3 gunOffset;
 		Matrix3 fireRotation;
+		ScopedWeaponType scopeType = ScopedWeaponType::Unknown;
 	} cachedViewModel;
 
 	UnitDynamicObject* weaponFiredPlayer = nullptr;
