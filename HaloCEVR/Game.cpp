@@ -143,6 +143,20 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 		vr->Recentre();
 	}
 
+	UnitDynamicObject* Player = static_cast<UnitDynamicObject*>(Helpers::GetLocalPlayer());
+	if (Player)
+	{
+		bool bNewShowViewmodel = Player->parentSeatIndex == 255;
+
+		if (bNewShowViewmodel != bShowViewmodel)
+		{
+			// Self modifying code is the best code
+			Hooks::P_KeepViewModelVisible(bNewShowViewmodel);
+
+			bShowViewmodel = bNewShowViewmodel;
+		}
+	}
+
 	vr->PreDrawFrame(renderer, deltaTime);
 }
 

@@ -40,7 +40,7 @@ public:
 	// All direct patches go here:
 	static void P_FixTabOut();
 	static void P_RemoveCutsceneFPSCap();
-	static void P_KeepViewModelVisible();
+	static void P_KeepViewModelVisible(bool bAlwaysShow);
 	static void P_DontStealMouse();
 
 	static void SetCameraMatrices(struct Viewport* viewport, struct CameraFrustum* frustum, struct CameraRenderMatrices* crm, bool bDoProjection);

@@ -77,7 +77,7 @@ void Hooks::EnableAllHooks()
 	Freeze();
 
 	P_RemoveCutsceneFPSCap();
-	P_KeepViewModelVisible();
+	P_KeepViewModelVisible(false);
 	P_DontStealMouse();
 
 	// If we think the user has chimera installed, don't try to patch their patches
@@ -704,10 +704,10 @@ void Hooks::P_RemoveCutsceneFPSCap()
 	SetBytes(o.CutsceneFPSCap.Address, 2, bytes);
 }
 
-void Hooks::P_KeepViewModelVisible()
+void Hooks::P_KeepViewModelVisible(bool bAlwaysShow)
 {
 	// Replace "bShowViewModel = false" with "bShowViewModel = true"
-	SetByte(o.SetViewModelVisible.Address + 0x55, 0x1);
+	SetByte(o.SetViewModelVisible.Address + 0x55, bAlwaysShow ? 0x1 : 0x0);
 }
 
 void Hooks::P_DontStealMouse()

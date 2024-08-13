@@ -127,6 +127,8 @@ protected:
 
 	short realZoom = -1;
 
+	bool bShowViewmodel = true;
+
 	//======Configs======//
 public:
 
