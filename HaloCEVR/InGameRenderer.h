@@ -18,6 +18,8 @@ public:
 	void ExtractMatrices(struct Renderer* playerRenderer);
 	void Render(struct IDirect3DDevice9* pDevice);
 	void PostRender();
+
+	void ClearRenderTargets();
 protected:
 
 	void Draw2DLines(struct IDirect3DDevice9* pDevice);

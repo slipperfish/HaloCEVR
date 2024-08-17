@@ -72,5 +72,6 @@ struct CameraRenderMatrices
 namespace Helpers
 {
 	sRect* GetWindowRect();
+	sRect* GetCurrentRect();
 	CameraRenderMatrices* GetActiveCameraMatrices();
 }

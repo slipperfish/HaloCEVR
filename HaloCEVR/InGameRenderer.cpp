@@ -179,6 +179,11 @@ void InGameRenderer::PostRender()
 	renderTargets.clear();
 }
 
+void InGameRenderer::ClearRenderTargets()
+{
+	renderTargets.clear();
+}
+
 //================================//Internal Functions//================================//
 
 void InGameRenderer::Draw2DLines(IDirect3DDevice9* pDevice)

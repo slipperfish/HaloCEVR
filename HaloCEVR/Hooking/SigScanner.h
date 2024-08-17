@@ -35,6 +35,7 @@ public:
 	INDIRECT(RenderTargets,       0x12ccc0, 0x1E, "83 ec 38 56 57 66 8b f0 33 ff 66 83 fe 09 ?? ?? 66 85 f6");
 	INDIRECT(CameraMatrices,      0x10bfb0, 0x5A, "81 ec a0 02 00 00 53 55 8b ac 24 ac 02 00 00 56");
 	INDIRECT(InputData,           0x0735b0, 0xAD, "51 53 56 6a 10 68 ?? ?? ?? ?? bb 00 02 00 00 e8 ?? ?? ?? ?? 6a 10");
+	INDIRECT(CurrentRect,         0x12ccc0, 0x51, "83 ec 38 56 57 66 8b f0 33 ff 66 83 fe 09 ?? ?? 66 85 f6");
 
 	OFFSET(TabOutVideo,           0x0c7b74, "38 1D ?? ?? ?? ?? 74 0E 83 FD 01 74 09 83 FD 02 0F 85");
 	OFFSET(TabOutVideo2,          0x0c801c, "75 11 38 1D ?? ?? ?? ?? 75 04 3A C3 74 05 C6 44 24 17 01");

@@ -28,6 +28,7 @@ void Hooks::InitHooks()
 	RESOLVEINDIRECT(RenderTargets);
 	RESOLVEINDIRECT(CameraMatrices);
 	RESOLVEINDIRECT(InputData);
+	RESOLVEINDIRECT(CurrentRect);
 
 	CREATEHOOK(InitDirectX);
 	CREATEHOOK(DrawFrame);

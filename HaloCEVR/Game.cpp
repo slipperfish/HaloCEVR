@@ -280,6 +280,8 @@ void Game::PreDrawMirror(struct Renderer* renderer, float deltaTime)
 void Game::PostDrawMirror(struct Renderer* renderer, float deltaTime)
 {
 	// Do something here to copy the image into the backbuffer correctly
+
+	inGameRenderer.ClearRenderTargets();
 	inGameRenderer.Render(Helpers::GetDirect3DDevice9());
 }
 
@@ -315,6 +317,18 @@ bool Game::PreDrawHUD()
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, uiSurface);
 	uiRealSurface = Helpers::GetRenderTargets()[1].renderSurface;
 	Helpers::GetRenderTargets()[1].renderSurface = uiSurface;
+	realUIWidth = Helpers::GetRenderTargets()[1].width;
+	realUIHeight = Helpers::GetRenderTargets()[1].height;
+	Helpers::GetRenderTargets()[1].width = c_UIOverlayWidth->Value();
+	Helpers::GetRenderTargets()[1].height = c_UIOverlayHeight->Value();
+
+	sRect* windowMain = Helpers::GetCurrentRect();
+	realRect = *windowMain;
+
+	windowMain->top = 0;
+	windowMain->left = 0;
+	windowMain->right = c_UIOverlayWidth->Value();
+	windowMain->bottom = c_UIOverlayHeight->Value();
 
 	return true;
 }
@@ -337,9 +351,16 @@ void Game::PostDrawHUD()
 	short* zoom = &Helpers::GetInputData().zoomLevel;
 	*zoom = realZoom;
 
+	sRect* windowMain = Helpers::GetCurrentRect();
+	*windowMain = realRect;
+
+	Helpers::GetRenderTargets()[1].width = realUIWidth;
+	Helpers::GetRenderTargets()[1].height = realUIHeight;
+
 	Helpers::GetRenderTargets()[1].renderSurface = uiRealSurface;
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, uiRealSurface);
 	uiRealSurface->Release();
+
 }
 
 bool Game::PreDrawMenu()

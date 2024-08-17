@@ -128,6 +128,9 @@ protected:
 	CameraFrustum frustum2;
 
 	short realZoom = -1;
+	sRect realRect;
+	UINT realUIWidth;
+	UINT realUIHeight;
 
 	bool bShowViewmodel = true;
 
