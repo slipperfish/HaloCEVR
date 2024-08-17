@@ -548,6 +548,52 @@ bool WeaponHandler::GetWorldWeaponScope(Vector3& outPosition, Vector3& outAim, V
 	return bSuccess;
 }
 
+void WeaponHandler::RelocatePlayer(HaloID& PlayerID)
+{
+	// Teleport the player to the controller position so the bullet comes from there instead
+	weaponFiredPlayer = static_cast<UnitDynamicObject*>(Helpers::GetDynamicObject(PlayerID));
+	if (weaponFiredPlayer)
+	{
+		// TODO: Handedness
+		Matrix4 controllerPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Right, false);
+
+		// Apply scale only to translation portion
+		Vector3 translation = controllerPos * Vector3(0.0f, 0.0f, 0.0f);
+		controllerPos.translate(-translation);
+		translation *= Game::instance.MetresToWorld(1.0f);
+		translation += weaponFiredPlayer->position;
+
+		controllerPos.translate(translation);
+
+		Vector3 handPos = controllerPos * Vector3(0.0f, 0.0f, 0.0f);
+		Matrix4 handRotation = controllerPos.translate(-handPos);
+
+		Matrix3 handRotation3;
+
+		for (int i = 0; i < 3; i++)
+		{
+			handRotation3.setColumn(i, &handRotation.get()[i * 4]);
+		}
+
+		// Cache the real values so we can restore them after running the original fire function
+		realPlayerPosition = weaponFiredPlayer->position;
+		// What are the other aims for??
+		realPlayerAim = weaponFiredPlayer->aim;
+
+		weaponFiredPlayer->position = handPos + handRotation * cachedViewModel.fireOffset;
+		weaponFiredPlayer->aim = (cachedViewModel.fireRotation * handRotation3) * Vector3(1.0f, 0.0f, 0.0f);
+
+#if DRAW_DEBUG_AIM
+		Vector3 internalFireOffset = Helpers::GetCamera().position - realPlayerPosition;
+		lastFireLocation = weaponFiredPlayer->position + internalFireOffset;
+		lastFireAim = lastFireLocation + weaponFiredPlayer->aim * 1.0f;
+		Logger::log << "FireOffset: " << cachedViewModel.fireOffset << std::endl;
+		Logger::log << "Player Position: " << realPlayerPosition << std::endl;
+		Logger::log << "Last fire location: " << lastFireLocation << std::endl;
+#endif
+	}
+}
+
 void WeaponHandler::PreFireWeapon(HaloID& WeaponID, short param2)
 {
 	BaseDynamicObject* Object = Helpers::GetDynamicObject(WeaponID);
@@ -558,54 +604,37 @@ void WeaponHandler::PreFireWeapon(HaloID& WeaponID, short param2)
 	HaloID PlayerID;
 	if (Object && Helpers::GetLocalPlayerID(PlayerID) && PlayerID == Object->parent)
 	{
-		// Teleport the player to the controller position so the bullet comes from there instead
-		weaponFiredPlayer = static_cast<UnitDynamicObject*>(Helpers::GetDynamicObject(PlayerID));
-		if (weaponFiredPlayer)
-		{
-			// TODO: Handedness
-			Matrix4 controllerPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Right, false);
-
-			// Apply scale only to translation portion
-			Vector3 translation = controllerPos * Vector3(0.0f, 0.0f, 0.0f);
-			controllerPos.translate(-translation);
-			translation *= Game::instance.MetresToWorld(1.0f);
-			translation += weaponFiredPlayer->position;
-
-			controllerPos.translate(translation);
-
-			Vector3 handPos = controllerPos * Vector3(0.0f, 0.0f, 0.0f);
-			Matrix4 handRotation = controllerPos.translate(-handPos);
-
-			Matrix3 handRotation3;
-
-			for (int i = 0; i < 3; i++)
-			{
-				handRotation3.setColumn(i, &handRotation.get()[i * 4]);
-			}
-
-			// Cache the real values so we can restore them after running the original fire function
-			realPlayerPosition = weaponFiredPlayer->position;
-			// What are the other aims for??
-			realPlayerAim = weaponFiredPlayer->aim;
-
-			weaponFiredPlayer->position = handPos + handRotation * cachedViewModel.fireOffset;
-			weaponFiredPlayer->aim = (cachedViewModel.fireRotation * handRotation3) * Vector3(1.0f, 0.0f, 0.0f);
-
-#if DRAW_DEBUG_AIM
-			Vector3 internalFireOffset = Helpers::GetCamera().position - realPlayerPosition;
-			lastFireLocation = weaponFiredPlayer->position + internalFireOffset;
-			lastFireAim = lastFireLocation + weaponFiredPlayer->aim * 1.0f;
-			Logger::log << "FireOffset: " << cachedViewModel.fireOffset << std::endl;
-			Logger::log << "Player Position: " << realPlayerPosition << std::endl;
-			Logger::log << "Last fire location: " << lastFireLocation << std::endl;
-#endif
-		}
+		RelocatePlayer(PlayerID);
 	}
 }
 
 void WeaponHandler::PostFireWeapon(HaloID& weaponID, short param2)
 {
 	// Restore state after firing the weapon
+	if (weaponFiredPlayer)
+	{
+		weaponFiredPlayer->position = realPlayerPosition;
+		weaponFiredPlayer->aim = realPlayerAim;
+		weaponFiredPlayer = nullptr;
+	}
+}
+
+void WeaponHandler::PreThrowGrenade(HaloID& playerID)
+{
+	// TODO: Breakpoint on the thrown grenade HaloID, when that changes BACK to (-1, -1) the grenade has been launched + set to eye pos (presumably)
+
+	weaponFiredPlayer = nullptr;
+
+	// Check if the weapon is being used by the player
+	HaloID PlayerID;
+	if (Helpers::GetLocalPlayerID(PlayerID) && PlayerID == playerID)
+	{
+		RelocatePlayer(PlayerID);
+	}
+}
+
+void WeaponHandler::PostThrowGrenade(HaloID& playerID)
+{
 	if (weaponFiredPlayer)
 	{
 		weaponFiredPlayer->position = realPlayerPosition;

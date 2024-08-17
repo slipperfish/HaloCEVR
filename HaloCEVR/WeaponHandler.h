@@ -18,6 +18,8 @@ public:
 	void UpdateViewModel(struct HaloID& id, struct Vector3* pos, struct Vector3* facing, struct Vector3* up, struct TransformQuat* boneTransforms, struct Transform* outBoneTransforms);
 	void PreFireWeapon(HaloID& weaponID, short param2);
 	void PostFireWeapon(HaloID& weaponID, short param2);
+	void PreThrowGrenade(HaloID& playerID);
+	void PostThrowGrenade(HaloID& playerID);
 
 	bool GetLocalWeaponAim(Vector3& outPosition, Vector3& outAim) const;
 	bool GetWorldWeaponAim(Vector3& outPosition, Vector3& outAim) const;
@@ -28,6 +30,8 @@ public:
 	Vector3 localRotation;
 
 protected:
+	void RelocatePlayer(HaloID& PlayerID);
+
 	inline void CreateEndCap(int boneIndex, const struct Bone& currentBone, struct Transform* outBoneTransforms);
 	inline void MoveBoneToTransform(int boneIndex, const class Matrix4& newTransform, struct Transform* realTransforms, struct Transform* outBoneTransforms);
 	inline void UpdateCache(struct HaloID& id, struct AssetData_ModelAnimations* animationData);

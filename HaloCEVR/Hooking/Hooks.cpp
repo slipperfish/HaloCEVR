@@ -42,6 +42,7 @@ void Hooks::InitHooks()
 	CREATEHOOK(SetMousePosition);
 	CREATEHOOK(UpdateMouseInfo);
 	CREATEHOOK(FireWeapon);
+	CREATEHOOK(ThrowGrenade);
 
 	// These are handled with a direct patch, so manually scan them
 	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo) < 0;
@@ -73,6 +74,7 @@ void Hooks::EnableAllHooks()
 	SetMousePosition.EnableHook();
 	UpdateMouseInfo.EnableHook();
 	FireWeapon.EnableHook();
+	ThrowGrenade.EnableHook();
 
 	Freeze();
 
@@ -678,6 +680,16 @@ void Hooks::H_FireWeapon(HaloID param1, short param2)
 
 	Game::instance.PostFireWeapon(param1, param2);
 
+}
+
+
+void Hooks::H_ThrowGrenade(HaloID param1, bool param2)
+{
+	Game::instance.PreThrowGrenade(param1);
+
+	ThrowGrenade.Original(param1, param2);
+
+	Game::instance.PostThrowGrenade(param1);
 }
 
 //================================//Patches//================================//

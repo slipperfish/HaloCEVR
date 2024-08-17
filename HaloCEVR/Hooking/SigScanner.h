@@ -57,6 +57,7 @@ public:
 	OFFSET(SetMousePosition,      0x097250, "56 8b 35 ?? ?? ?? ?? 33 d2 3b f0 75 ?? 39 0d");
 	OFFSET(UpdateMouseInfo,       0x091bc0, "8b 01 53 55 8b 6c 24 0c 89 45 00 8b 51 04 f7 da 56");
 	OFFSET(FireWeapon,            0x0c3f10, "81 ec 94 00 00 00 8b 84 24 98 00 00 00 8b 0d ?? ?? ?? ?? 8b 51 34 53");
+	OFFSET(ThrowGrenade,          0x16e440, "8b 44 24 04 8b 0d ?? ?? ?? ?? 8b 51 34 8b 0d ?? ?? ?? ?? 83 ec 3c");
 	
 	OFFSET(SetViewportSize,       0x0c8da0, "83 ec 10 53 55 56 57 8b f8 33 c0 83 ff 01 0f 9e c0");
 	OFFSET(SetViewportScale,      0x10ca90, "51 0f bf 50 2e 56 0f bf 70 30 57 0f bf 78 2c 2b f7");
