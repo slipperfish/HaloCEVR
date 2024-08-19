@@ -28,8 +28,9 @@ public:
 	DEFINE_HOOK(DrawHUD);
 	DEFINE_HOOK(DrawMenu);
 	DEFINE_HOOK(DrawLoadingScreen);
-	DEFINE_HOOK(SetViewModelPosition);
 	DEFINE_HOOK(DrawCrosshair);
+	DEFINE_HOOK(DrawImage);
+	DEFINE_HOOK(SetViewModelPosition);
 	DEFINE_HOOK(HandleInputs);
 	DEFINE_HOOK(UpdatePitchYaw);
 	DEFINE_HOOK(SetViewportScale);
@@ -42,6 +43,7 @@ public:
 	static void P_FixTabOut();
 	static void P_RemoveCutsceneFPSCap();
 	static void P_KeepViewModelVisible(bool bAlwaysShow);
+	static void P_EnableUIAlphaWrite();
 	static void P_DontStealMouse();
 
 	static void SetCameraMatrices(struct Viewport* viewport, struct CameraFrustum* frustum, struct CameraRenderMatrices* crm, bool bDoProjection);

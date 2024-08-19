@@ -36,6 +36,7 @@ void Hooks::InitHooks()
 	CREATEHOOK(DrawMenu);
 	CREATEHOOK(DrawLoadingScreen);
 	CREATEHOOK(DrawCrosshair);
+	CREATEHOOK(DrawImage);
 	CREATEHOOK(SetViewModelPosition);
 	CREATEHOOK(HandleInputs);
 	CREATEHOOK(UpdatePitchYaw);
@@ -52,6 +53,8 @@ void Hooks::InitHooks()
 	SigScanner::UpdateOffset(o.CutsceneFPSCap);
 	SigScanner::UpdateOffset(o.CreateMouseDevice);
 	SigScanner::UpdateOffset(o.SetViewModelVisible);
+	SigScanner::UpdateOffset(o.TextureAlphaWrite);
+	SigScanner::UpdateOffset(o.TextAlphaWrite);
 
 	SigScanner::UpdateOffset(o.SetCameraMatrices);
 	oSetCameraMatrices = reinterpret_cast<Func_SetCameraMatrices>(o.SetCameraMatrices.Address);
@@ -68,6 +71,7 @@ void Hooks::EnableAllHooks()
 	DrawMenu.EnableHook();
 	DrawLoadingScreen.EnableHook();
 	DrawCrosshair.EnableHook();
+	//DrawImage.EnableHook();
 	SetViewModelPosition.EnableHook();
 	HandleInputs.EnableHook();
 	UpdatePitchYaw.EnableHook();
@@ -81,6 +85,7 @@ void Hooks::EnableAllHooks()
 
 	P_RemoveCutsceneFPSCap();
 	P_KeepViewModelVisible(false);
+	P_EnableUIAlphaWrite();
 	P_DontStealMouse();
 
 	// If we think the user has chimera installed, don't try to patch their patches
@@ -460,6 +465,46 @@ void __declspec(naked) Hooks::H_DrawCrosshair()
 	}
 }
 
+void __declspec(naked) Hooks::H_DrawImage()
+{
+	static void* param1;
+	static void* param2;
+
+	_asm
+	{
+		mov param1, eax
+		mov eax, [esp + 0x4]
+		mov param2, eax
+		pushad
+	}
+
+	Game::instance.PreDrawImage(param1, param2);
+
+	_asm
+	{
+		popad
+		mov eax, param2
+		push eax
+		mov eax, param1
+	}
+
+	DrawImage.Original();
+
+	_asm
+	{
+		pushad
+	}
+
+	Game::instance.PostDrawImage(param1, param2);
+
+	_asm
+	{
+		popad
+		add esp, 0x4
+		ret
+	}
+}
+
 void __declspec(naked) Hooks::H_SetViewModelPosition()
 {
 	static Vector3* pos;
@@ -721,6 +766,14 @@ void Hooks::P_KeepViewModelVisible(bool bAlwaysShow)
 {
 	// Replace "bShowViewModel = false" with "bShowViewModel = true"
 	SetByte(o.SetViewModelVisible.Address + 0x55, bAlwaysShow ? 0x1 : 0x0);
+}
+
+void Hooks::P_EnableUIAlphaWrite()
+{
+	// By default the UI doesn't write to the alpha channel (since its being drawn last + straight onto the main image)
+	// We need the alpha value in order to have transparency in floating UI elements
+	SetByte(o.TextureAlphaWrite.Address + 0x4a, 0xf);
+	SetByte(o.TextAlphaWrite.Address + 0x72, 0xf);
 }
 
 void Hooks::P_DontStealMouse()

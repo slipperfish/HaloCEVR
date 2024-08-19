@@ -313,6 +313,8 @@ bool Game::PreDrawHUD()
 	realZoom = *zoom;
 	*zoom = -1;
 
+	//Helpers::GetDirect3DDevice9()->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, TRUE);
+
 	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &uiRealSurface);
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, uiSurface);
 	uiRealSurface = Helpers::GetRenderTargets()[1].renderSurface;
@@ -446,6 +448,35 @@ void Game::PostDrawCrosshair()
 
 	Helpers::GetRenderTargets()[1].renderSurface = crosshairRealSurface;
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, crosshairRealSurface);
+}
+
+void Game::PreDrawImage(void* param1, void* param2)
+{
+	Helpers::GetDirect3DDevice9()->GetRenderState(D3DRS_ALPHAFUNC, &realAlphaFunc);
+	Helpers::GetDirect3DDevice9()->GetRenderState(D3DRS_SRCBLENDALPHA, &realAlphaSrc);
+	Helpers::GetDirect3DDevice9()->GetRenderState(D3DRS_DESTBLENDALPHA, &realAlphaDest);
+
+	//Logger::log << realAlphaFunc << ", " << realAlphaSrc << ", " << realAlphaDest << std::endl;
+
+	Helpers::GetDirect3DDevice9()->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+	Helpers::GetDirect3DDevice9()->SetRenderState(D3DRS_ALPHAFUNC, D3DBLENDOP_ADD);
+	Helpers::GetDirect3DDevice9()->SetRenderState(D3DRS_SRCBLENDALPHA, D3DBLEND_SRCALPHA);
+	Helpers::GetDirect3DDevice9()->SetRenderState(D3DRS_DESTBLENDALPHA, D3DBLEND_INVSRCALPHA);
+}
+
+void Game::PostDrawImage(void* param1, void* param2)
+{
+	DWORD tmp1, tmp2, tmp3;
+
+	Helpers::GetDirect3DDevice9()->GetRenderState(D3DRS_ALPHAFUNC, &tmp1);
+	Helpers::GetDirect3DDevice9()->GetRenderState(D3DRS_SRCBLENDALPHA, &tmp2);
+	Helpers::GetDirect3DDevice9()->GetRenderState(D3DRS_DESTBLENDALPHA, &tmp3);
+
+	//Logger::log << tmp1 << ", " << tmp2 << ", " << tmp3 << std::endl;
+
+	Helpers::GetDirect3DDevice9()->SetRenderState(D3DRS_ALPHAFUNC, realAlphaFunc);
+	Helpers::GetDirect3DDevice9()->SetRenderState(D3DRS_SRCBLENDALPHA, realAlphaSrc);
+	Helpers::GetDirect3DDevice9()->SetRenderState(D3DRS_DESTBLENDALPHA, realAlphaDest);
 }
 
 void Game::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, Vector3* up, TransformQuat* BoneTransforms, Transform* OutBoneTransforms)

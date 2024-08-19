@@ -247,10 +247,27 @@ void InGameRenderer::Draw3DLines(IDirect3DDevice9* pDevice)
 
 void InGameRenderer::DrawRenderTargets(IDirect3DDevice9* pDevice)
 {
+	// Normal blending, assumes texture actually has an alpha value
+	//*
 	pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 	pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE); // Intercepted UI layers are premultiplied
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+	//*/
+
+	// Greyscale alpha
+	/*
+	pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+
+	pDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+	pDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE | D3DTA_ALPHAREPLICATE);
+
+	// Disable further stages
+	pDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+	//*/
+
 	pDevice->SetFVF(D3DFVF_XYZ | D3DFVF_TEX1);
 	pDevice->SetTransform(D3DTS_WORLD, &world);
 	pDevice->SetTransform(D3DTS_VIEW, &view);
@@ -278,6 +295,7 @@ void InGameRenderer::DrawRenderTargets(IDirect3DDevice9* pDevice)
 		pDevice->SetRenderState(D3DRS_ZENABLE, renderTargets[i].bRespectDepth);
 
 		pDevice->SetTexture(0, renderTargets[i].texture);
+
 		pDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0, 4, 2, indices, D3DFMT_INDEX16, vertices, sizeof(VertexDataTex));
 	}
 }

@@ -43,6 +43,8 @@ public:
 	OFFSET(CutsceneFPSCap,        0x0c9fb5, "b3 01 eb ?? 32 db 8b 2d ?? ?? ?? ?? 8d 4c");
 	OFFSET(CreateMouseDevice,     0x0919c0, "6a 17 ff 15 ?? ?? ?? ?? 85 c0 74 ?? 66 c7 05 ?? ?? ?? ?? 02 00");
 	OFFSET(SetViewModelVisible,   0x092430, "51 8b 0d ?? ?? ?? ?? 66 83 f9 ff 74 ?? 8b 15 ?? ?? ?? ?? 56 0f bf f1");
+	OFFSET(TextureAlphaWrite,     0x11c9a0, "81 ec 4c 01 00 00 56 8b f0 a0 ?? ?? ?? ?? 84 c0 c6 44 24 07 01");
+	OFFSET(TextAlphaWrite,        0x131b80, "a0 ?? ?? ?? ?? 84 c0 0f 84 ?? ?? ?? ?? 66 83 ?? ?? ?? ?? 00 01 0f 85 ?? ?? ?? ?? 53 55 56");
 
 	OFFSET(InitDirectX,           0x1169c0, "83 ec 60 8b 15 ?? ?? ?? ?? 8b 0d ?? ?? ?? ?? 53 33 db");
 	OFFSET(DrawFrame,             0x10bea0, "83 ec 14 8b 15 ?? ?? ?? ?? 8b 44 24 24 8b 4c 24 28 42");
@@ -51,6 +53,7 @@ public:
 	OFFSET(DrawLoadingScreen,     0x10bdc0, "55 8b ec 83 e4 f8 81 ec 5c 02 00 00 53 56 8b 75 08");
 	OFFSET(DrawFrameMPLoading,    0x10c590, "8b 15 ?? ?? ?? ?? 81 ec 70 02 00 00 53 56 42 57");
 	OFFSET(DrawCrosshair,         0x0acad0, "83 ec 28 84 db 55 8b 6c 24 38 56 8b 74 24 38 57 8b f8");
+	OFFSET(DrawImage,             0x11c9a0, "81 ec 4c 01 00 00 56 8b f0 a0 ?? ?? ?? ?? 84 c0 c6 44 24 07 01");
 
 	OFFSET(SetViewModelPosition,  0x0d6880, "81 ec f0 00 00 00 53 55 25 ff ff 00 00 56 8b f1 8b 0d 14");
 	OFFSET(HandleInputs,          0x08b4b0, "83 ec 08 56 57 8d 44 24 08 50 ff 15 ?? ?? ?? ?? 8b 4c 24 0c");

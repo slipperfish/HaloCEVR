@@ -44,6 +44,9 @@ public:
 	void PreDrawCrosshair(short* anchorLocation);
 	void PostDrawCrosshair();
 
+	void PreDrawImage(void* param1, void* param2);
+	void PostDrawImage(void* param1, void* param2);
+
 	void UpdateViewModel(HaloID& id, struct Vector3* pos, struct Vector3* facing, struct Vector3* up, struct TransformQuat* BoneTransforms, struct Transform* OutBoneTransforms);
 	void PreFireWeapon(HaloID& WeaponID, short param2);
 	void PostFireWeapon(HaloID& WeaponID, short param2);
@@ -131,6 +134,10 @@ protected:
 	sRect realRect;
 	UINT realUIWidth;
 	UINT realUIHeight;
+
+	DWORD realAlphaFunc;
+	DWORD realAlphaSrc;
+	DWORD realAlphaDest;
 
 	bool bShowViewmodel = true;
 
