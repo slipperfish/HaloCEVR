@@ -332,18 +332,21 @@ void VREmulator::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 		Logger::log << "Failed to call mirror begin scene: " << result << std::endl;
 	}
 
+	Vector3 camPos = Helpers::GetCamera().position;
+
 	Vector3 pos = Helpers::GetCamera().position + Helpers::GetCamera().lookDir * Game::instance.MetresToWorld(3.0f);
+
 	Matrix3 rot;
 	Vector2 size(1.33f, 1.0f);
 	size *= Game::instance.MetresToWorld(2.0f);
 
 	Matrix4 overlayTransform;
 	overlayTransform.translate(pos);
-	overlayTransform.lookAt(Helpers::GetCamera().position, Vector3(0.0f, 0.0f, 1.0f));
+	overlayTransform.lookAt(camPos, Vector3(0.0f, 0.0f, 1.0f));
 
 	overlayTransform.translate(-pos);
 	overlayTransform.rotate(-90.0f, overlayTransform.getLeftAxis());
-	overlayTransform.translate(Helpers::GetCamera().position);
+	overlayTransform.translate(camPos);
 
 	for (int i = 0; i < 3; i++)
 	{

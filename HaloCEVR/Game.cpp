@@ -612,6 +612,7 @@ void Game::SetupConfigs()
 	c_ScopeOffsetSniper = config.RegisterVector3("ScopeOffsetSniper", "Offset of the scope view relative to the pistol's location", Vector3(-0.15f, 0.0f, 0.15f));
 	c_ScopeOffsetRocket = config.RegisterVector3("ScopeOffsetRocket", "Offset of the scope view relative to the pistol's location", Vector3(0.1f, 0.2f, 0.1f));
 	c_MeleeSwingSpeed = config.RegisterFloat("MeleeSwingSpeed", "Minimum vertical velocity of the main hand required to initiate a melee attack in m/s", 2.5f);
+	c_CrouchHeight = config.RegisterFloat("CrouchHeight", "Minimum height to duck by in metres to automatically trigger the crouch input in game (<0 to disable)", 0.15f);
 
 	config.LoadFromFile("VR/config.txt");
 	config.SaveToFile("VR/config.txt");

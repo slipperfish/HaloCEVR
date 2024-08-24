@@ -58,16 +58,6 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/default/in/Melee"
-                        }
-                    },
-                    "mode": "button",
-                    "path": "/user/hand/left/input/x",
-                    "parameters": {}
-                },
-                {
-                    "inputs": {
-                        "click": {
                             "output": "/actions/default/in/Grenade"
                         }
                     },
@@ -132,7 +122,7 @@
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/left/input/thumbrest",
+                    "path": "/user/hand/left/input/x",
                     "parameters": {}
                 }
             ],

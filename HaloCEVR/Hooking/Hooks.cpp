@@ -57,6 +57,7 @@ void Hooks::InitHooks()
 	SigScanner::UpdateOffset(o.SetViewModelVisible);
 	SigScanner::UpdateOffset(o.TextureAlphaWrite);
 	SigScanner::UpdateOffset(o.TextAlphaWrite);
+	SigScanner::UpdateOffset(o.CrouchHeight);
 
 	SigScanner::UpdateOffset(o.SetCameraMatrices);
 	oSetCameraMatrices = reinterpret_cast<Func_SetCameraMatrices>(o.SetCameraMatrices.Address);
@@ -89,6 +90,7 @@ void Hooks::EnableAllHooks()
 	P_RemoveCutsceneFPSCap();
 	P_KeepViewModelVisible(false);
 	P_EnableUIAlphaWrite();
+	P_DisableCrouchCamera();
 	P_DontStealMouse();
 
 	// If we think the user has chimera installed, don't try to patch their patches
@@ -798,6 +800,23 @@ void Hooks::P_EnableUIAlphaWrite()
 	// We need the alpha value in order to have transparency in floating UI elements
 	SetByte(o.TextureAlphaWrite.Address + 0x4a, 0xf);
 	SetByte(o.TextAlphaWrite.Address + 0x72, 0xf);
+}
+
+void Hooks::P_DisableCrouchCamera()
+{
+	// When not playing in seated mode (i.e. motion controlled crouching is disabled) patch out the behaviour that
+	// lowers the camera position when crouching. In theory this could be worked around in the mod's game code,
+	// but the game ticks at a fixed rate and interpolates the camera, which is harder to account for than just disabling crouch
+	if (Game::instance.c_CrouchHeight->Value() >= 0.0f)
+	{
+		// Replace "crouchAlpha = player->crouchProgress" with "crouchAlpha = 0.0"
+		// Uses a "0.0" constant from later in the function
+		byte bytes[6] = { 0xd9, 0x05, 0x0, 0x0, 0x0, 0x0 };
+
+		*(uint32_t*)(&bytes[2]) = *reinterpret_cast<uint32_t*>(o.CrouchHeight.Address + 0x11);
+
+		SetBytes(o.CrouchHeight.Address, 6, bytes);
+	}
 }
 
 void Hooks::P_DontStealMouse()

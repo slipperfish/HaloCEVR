@@ -14,6 +14,7 @@ protected:
 
 	unsigned char UpdateFlashlight();
 	unsigned char UpdateMelee();
+	unsigned char UpdateCrouch();
 
 	char lastSnapState = 0;
 	unsigned char mouseDownState = 0;

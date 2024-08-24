@@ -32,8 +32,8 @@ public:
 protected:
 	void RelocatePlayer(HaloID& PlayerID);
 
-	inline void CreateEndCap(int boneIndex, const struct Bone& currentBone, struct Transform* outBoneTransforms);
-	inline void MoveBoneToTransform(int boneIndex, const class Matrix4& newTransform, struct Transform* realTransforms, struct Transform* outBoneTransforms);
+	inline void CreateEndCap(int boneIndex, const struct Bone& currentBone, struct Transform* outBoneTransforms) const;
+	inline void MoveBoneToTransform(int boneIndex, const class Matrix4& newTransform, struct Transform* realTransforms, struct Transform* outBoneTransforms) const;
 	inline void UpdateCache(struct HaloID& id, struct AssetData_ModelAnimations* animationData);
 
 	inline Vector3 GetScopeLocation(ScopedWeaponType Type) const;

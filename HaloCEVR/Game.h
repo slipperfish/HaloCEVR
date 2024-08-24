@@ -165,5 +165,6 @@ public:
 	Vector3Property* c_ScopeOffsetSniper = nullptr;
 	Vector3Property* c_ScopeOffsetRocket = nullptr;
 	FloatProperty* c_MeleeSwingSpeed = nullptr;
+	FloatProperty* c_CrouchHeight = nullptr;
 };
 

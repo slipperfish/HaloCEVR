@@ -245,7 +245,7 @@ void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, V
 	}
 }
 
-void WeaponHandler::CreateEndCap(int boneIndex, const Bone& currentBone, Transform* outBoneTransforms)
+void WeaponHandler::CreateEndCap(int boneIndex, const Bone& currentBone, Transform* outBoneTransforms) const
 {
 	// Parent bone to the position of the current bone with 0 scale to act as an end cap
 	int idx = currentBone.Parent;
@@ -257,7 +257,7 @@ void WeaponHandler::CreateEndCap(int boneIndex, const Bone& currentBone, Transfo
 	outBoneTransforms[idx].scale = 0.0f;
 }
 
-void WeaponHandler::MoveBoneToTransform(int boneIndex, const Matrix4& newTransform, Transform* realTransforms, Transform* outBoneTransforms)
+void WeaponHandler::MoveBoneToTransform(int boneIndex, const Matrix4& newTransform, Transform* realTransforms, Transform* outBoneTransforms) const
 {
 	// Move hands to match controllers
 	Vector3 newTranslation = newTransform * Vector3(0.0f, 0.0f, 0.0f);

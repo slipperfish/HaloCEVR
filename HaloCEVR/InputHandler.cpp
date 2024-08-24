@@ -70,6 +70,12 @@ void InputHandler::UpdateInputs()
 		controls.Melee = MotionControlMelee;
 	}
 
+	unsigned char MotionControlCrouch = UpdateCrouch();
+	if (MotionControlCrouch > 0)
+	{
+		controls.Crouch = MotionControlCrouch;
+	}
+
 	if (vr->GetBoolInput(Recentre))
 	{
 		Game::instance.bNeedsRecentre = true;
@@ -201,8 +207,28 @@ unsigned char InputHandler::UpdateMelee()
 		return 127;
 	}
 
-
     return 0;
+}
+
+unsigned char InputHandler::UpdateCrouch()
+{
+	IVR* vr = Game::instance.GetVR();
+
+	Vector3 headPos = vr->GetHMDTransform() * Vector3(0.0f, 0.0f, 0.0f);
+
+	float crouchHeight = Game::instance.c_CrouchHeight->Value();
+
+	if (crouchHeight < 0)
+	{
+		return 0;
+	}
+
+	if (headPos.z < -crouchHeight)
+	{
+		return 127;
+	}
+
+	return 0;
 }
 
 void InputHandler::SetMousePosition(int& x, int& y)
