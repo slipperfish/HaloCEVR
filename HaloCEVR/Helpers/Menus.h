@@ -12,4 +12,5 @@ struct MouseInfo
 namespace Helpers
 {
 	bool IsMouseVisible();
+	bool IsLoading();
 }

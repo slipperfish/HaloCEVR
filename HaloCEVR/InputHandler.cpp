@@ -64,6 +64,12 @@ void InputHandler::UpdateInputs()
 		controls.Flashlight = MotionControlFlashlight;
 	}
 
+	unsigned char MotionControlMelee = UpdateMelee();
+	if (MotionControlMelee > 0)
+	{
+		controls.Melee = MotionControlMelee;
+	}
+
 	if (vr->GetBoolInput(Recentre))
 	{
 		Game::instance.bNeedsRecentre = true;
@@ -180,6 +186,23 @@ unsigned char InputHandler::UpdateFlashlight()
 	}
 
 	return 0;
+}
+
+unsigned char InputHandler::UpdateMelee()
+{
+	IVR* vr = Game::instance.GetVR();
+
+	Vector3 handVel = vr->GetControllerVelocity(ControllerRole::Right);
+
+	handVel *= Game::WorldToMetres(1.0f);
+
+	if (abs(handVel.z) > Game::instance.c_MeleeSwingSpeed->Value())
+	{
+		return 127;
+	}
+
+
+    return 0;
 }
 
 void InputHandler::SetMousePosition(int& x, int& y)

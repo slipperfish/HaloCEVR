@@ -1,4 +1,4 @@
-#define EMULATE_VR 1
+#define EMULATE_VR 0
 #include "Game.h"
 #include "Logger.h"
 #include "Hooking/Hooks.h"
@@ -6,18 +6,15 @@
 #include "Helpers/RenderTarget.h"
 #include "Helpers/Renderer.h"
 #include "Helpers/Camera.h"
-#include "Helpers/Controls.h"
 #include "Helpers/Menus.h"
 #include "Helpers/Objects.h"
 #include "Helpers/Maths.h"
-#include "Helpers/Assets.h"
 
 #if EMULATE_VR
 #include "VR/VREmulator.h"
 #else
 #include "VR/OpenVR.h"
 #endif
-#include "DirectXWrappers/IDirect3DDevice9ExWrapper.h"
 
 
 void Game::Init()
@@ -146,14 +143,14 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 	UnitDynamicObject* Player = static_cast<UnitDynamicObject*>(Helpers::GetLocalPlayer());
 	if (Player)
 	{
-		bool bNewShowViewmodel = Player->parentSeatIndex == 255;
+		bool bNewShowViewModel = Player->parentSeatIndex != 255;
 
-		if (bNewShowViewmodel != bShowViewmodel)
+		if (bNewShowViewModel != bShowViewModel)
 		{
 			// Self modifying code is the best code
-			Hooks::P_KeepViewModelVisible(bNewShowViewmodel);
+			Hooks::P_KeepViewModelVisible(bNewShowViewModel);
 
-			bShowViewmodel = bNewShowViewmodel;
+			bShowViewModel = bNewShowViewModel;
 		}
 	}
 
@@ -183,6 +180,11 @@ void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
 
 void Game::PostDrawEye(struct Renderer* renderer, float deltaTime, int eye)
 {
+	if (Helpers::IsLoading())
+	{
+		Helpers::GetDirect3DDevice9()->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(0, 0, 0, 0), 1.0f, 0);
+	}
+
 	inGameRenderer.Render(Helpers::GetDirect3DDevice9());
 }
 
@@ -312,8 +314,6 @@ bool Game::PreDrawHUD()
 	short* zoom = &Helpers::GetInputData().zoomLevel;
 	realZoom = *zoom;
 	*zoom = -1;
-
-	//Helpers::GetDirect3DDevice9()->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, TRUE);
 
 	Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &uiRealSurface);
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, uiSurface);
@@ -605,12 +605,13 @@ void Game::SetupConfigs()
 	c_LeftHandFlashlightDistance = config.RegisterFloat("LeftHandFlashlight", "Bringing the left hand within this distance of the head will toggle the flashlight (<0 to disable)", 0.2f);
 	c_RightHandFlashlightDistance = config.RegisterFloat("RightHandFlashlight", "Bringing the right hand within this distance of the head will toggle the flashlight (<0 to disable)", -1.0f);
 	c_ControllerOffset = config.RegisterVector3("ControllerOffset", "Offset from the controller's position used when calculating the in game hand position", Vector3(-0.045f, 0.01f, 0.0f));
-	c_ControllerRotation = config.RegisterVector3("ControllerRotation", "Rotation added to the controller when calculating the in game hand rotation", Vector3(10.0f, 0.0f, 0.0f));
+	c_ControllerRotation = config.RegisterVector3("ControllerRotation", "Rotation added to the controller when calculating the in game hand rotation", Vector3(0.0f, 0.0f, 0.0f));
 	c_ScopeRenderScale = config.RegisterFloat("ScopeRenderScale", "Size of the scope render target, expressed as a proportion of the headset's render scale (e.g. 0.5 = half resolution)", 0.75f);
-	c_ScopeScale = config.RegisterFloat("ScopeScale", "Width of the scope view in metres", 0.2f);
+	c_ScopeScale = config.RegisterFloat("ScopeScale", "Width of the scope view in metres", 0.1f);
 	c_ScopeOffsetPistol = config.RegisterVector3("ScopeOffsetPistol", "Offset of the scope view relative to the pistol's location", Vector3(-0.1f, 0.0f, 0.15f));
 	c_ScopeOffsetSniper = config.RegisterVector3("ScopeOffsetSniper", "Offset of the scope view relative to the pistol's location", Vector3(-0.15f, 0.0f, 0.15f));
 	c_ScopeOffsetRocket = config.RegisterVector3("ScopeOffsetRocket", "Offset of the scope view relative to the pistol's location", Vector3(0.1f, 0.2f, 0.1f));
+	c_MeleeSwingSpeed = config.RegisterFloat("MeleeSwingSpeed", "Minimum vertical velocity of the main hand required to initiate a melee attack in m/s", 2.5f);
 
 	config.LoadFromFile("VR/config.txt");
 	config.SaveToFile("VR/config.txt");

@@ -29,6 +29,7 @@ void Hooks::InitHooks()
 	RESOLVEINDIRECT(CameraMatrices);
 	RESOLVEINDIRECT(InputData);
 	RESOLVEINDIRECT(CurrentRect);
+	RESOLVEINDIRECT(LoadingState);
 
 	CREATEHOOK(InitDirectX);
 	CREATEHOOK(DrawFrame);
@@ -45,6 +46,7 @@ void Hooks::InitHooks()
 	CREATEHOOK(UpdateMouseInfo);
 	CREATEHOOK(FireWeapon);
 	CREATEHOOK(ThrowGrenade);
+	CREATEHOOK(DrawLoadingScreen2);
 
 	// These are handled with a direct patch, so manually scan them
 	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo) < 0;
@@ -80,6 +82,7 @@ void Hooks::EnableAllHooks()
 	UpdateMouseInfo.EnableHook();
 	FireWeapon.EnableHook();
 	ThrowGrenade.EnableHook();
+	DrawLoadingScreen2.EnableHook();
 
 	Freeze();
 
@@ -738,6 +741,27 @@ void Hooks::H_ThrowGrenade(HaloID param1, bool param2)
 	Game::instance.PostThrowGrenade(param1);
 }
 
+void Hooks::H_DrawLoadingScreen2(void* param1)
+{
+	D3DVIEWPORT9 currentViewport;
+	D3DVIEWPORT9 desiredViewport
+	{
+		0,
+		0,
+		static_cast<DWORD>(Game::instance.c_UIOverlayWidth->Value()),
+		static_cast<DWORD>(Game::instance.c_UIOverlayHeight->Value()),
+		0.0f,
+		1.0f
+	};
+
+	Helpers::GetDirect3DDevice9()->GetViewport(&currentViewport);
+	Helpers::GetDirect3DDevice9()->SetViewport(&desiredViewport);
+
+	DrawLoadingScreen2.Original(param1);
+
+	Helpers::GetDirect3DDevice9()->SetViewport(&currentViewport);
+}
+
 //================================//Patches//================================//
 
 void Hooks::P_FixTabOut()
@@ -765,7 +789,7 @@ void Hooks::P_RemoveCutsceneFPSCap()
 void Hooks::P_KeepViewModelVisible(bool bAlwaysShow)
 {
 	// Replace "bShowViewModel = false" with "bShowViewModel = true"
-	SetByte(o.SetViewModelVisible.Address + 0x55, bAlwaysShow ? 0x1 : 0x0);
+	SetByte(o.SetViewModelVisible.Address + 0x55, bAlwaysShow ? 0x0 : 0x1);
 }
 
 void Hooks::P_EnableUIAlphaWrite()

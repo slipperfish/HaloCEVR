@@ -134,6 +134,11 @@ Matrix4 VREmulator::GetControllerTransform(ControllerRole role, bool bRenderPose
 	}
 }
 
+Vector3 VREmulator::GetControllerVelocity(ControllerRole Role, bool bRenderPose)
+{
+	return Vector3();
+}
+
 IDirect3DSurface9* VREmulator::GetRenderSurface(int eye)
 {
 	return eyeSurface_Game[eye][0];

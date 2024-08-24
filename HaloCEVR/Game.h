@@ -132,6 +132,7 @@ protected:
 
 	short realZoom = -1;
 	sRect realRect;
+	sRect realLoadRect;
 	UINT realUIWidth;
 	UINT realUIHeight;
 
@@ -139,7 +140,7 @@ protected:
 	DWORD realAlphaSrc;
 	DWORD realAlphaDest;
 
-	bool bShowViewmodel = true;
+	bool bShowViewModel = false;
 
 	//======Configs======//
 public:
@@ -163,5 +164,6 @@ public:
 	Vector3Property* c_ScopeOffsetPistol = nullptr;
 	Vector3Property* c_ScopeOffsetSniper = nullptr;
 	Vector3Property* c_ScopeOffsetRocket = nullptr;
+	FloatProperty* c_MeleeSwingSpeed = nullptr;
 };
 

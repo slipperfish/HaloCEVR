@@ -433,23 +433,49 @@ Matrix4 OpenVR::GetHMDTransform(bool bRenderPose)
 	}
 }
 
-Matrix4 OpenVR::GetControllerTransform(ControllerRole Role, bool bRenderPose)
+Matrix4 OpenVR::GetControllerTransform(ControllerRole role, bool bRenderPose)
 {
 	if (!vrSystem)
 	{
 		return Matrix4();
 	}
 
-	vr::TrackedDeviceIndex_t ControllerIndex = vrSystem->GetTrackedDeviceIndexForControllerRole(Role == ControllerRole::Left ? vr::TrackedControllerRole_LeftHand : vr::TrackedControllerRole_RightHand);
+	vr::TrackedDeviceIndex_t controllerIndex = vrSystem->GetTrackedDeviceIndexForControllerRole(role == ControllerRole::Left ? vr::TrackedControllerRole_LeftHand : vr::TrackedControllerRole_RightHand);
 
 	if (bRenderPose)
 	{
-		return ConvertSteamVRMatrixToMatrix4(renderPoses[ControllerIndex].mDeviceToAbsoluteTracking).translate(-positionOffset).rotateZ(-yawOffset);
+		return ConvertSteamVRMatrixToMatrix4(renderPoses[controllerIndex].mDeviceToAbsoluteTracking).translate(-positionOffset).rotateZ(-yawOffset);
 	}
 	else
 	{
-		return ConvertSteamVRMatrixToMatrix4(gamePoses[ControllerIndex].mDeviceToAbsoluteTracking).translate(-positionOffset).rotateZ(-yawOffset);
+		return ConvertSteamVRMatrixToMatrix4(gamePoses[controllerIndex].mDeviceToAbsoluteTracking).translate(-positionOffset).rotateZ(-yawOffset);
 	}
+}
+
+Vector3 OpenVR::GetControllerVelocity(ControllerRole role, bool bRenderPose)
+{
+	if (!vrSystem)
+	{
+		return Vector3();
+	}
+	
+	vr::TrackedDeviceIndex_t controllerIndex = vrSystem->GetTrackedDeviceIndexForControllerRole(role == ControllerRole::Left ? vr::TrackedControllerRole_LeftHand : vr::TrackedControllerRole_RightHand);
+
+	vr::HmdVector3_t velocity;
+
+	if (bRenderPose)
+	{
+		velocity = renderPoses[controllerIndex].vVelocity;
+	}
+	else
+	{
+		velocity = gamePoses[controllerIndex].vVelocity;
+	}
+
+	Matrix4 rotMat;
+	rotMat.rotateZ(-yawOffset);
+
+	return rotMat * Vector3(-velocity.v[2], -velocity.v[0], velocity.v[1]) * Game::instance.MetresToWorld(1.0f);
 }
 
 IDirect3DSurface9* OpenVR::GetRenderSurface(int eye)

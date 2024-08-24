@@ -38,6 +38,7 @@ public:
 	DEFINE_HOOK(UpdateMouseInfo);
 	DEFINE_HOOK_FULL(FireWeapon, void __cdecl, HaloID param1, short param2);
 	DEFINE_HOOK_FULL(ThrowGrenade, void __cdecl, HaloID param1, bool param2);
+	DEFINE_HOOK_FULL(DrawLoadingScreen2, void __fastcall, void* param1);
 
 	// All direct patches go here:
 	static void P_FixTabOut();

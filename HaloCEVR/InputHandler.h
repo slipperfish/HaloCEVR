@@ -13,6 +13,7 @@ public:
 protected:
 
 	unsigned char UpdateFlashlight();
+	unsigned char UpdateMelee();
 
 	char lastSnapState = 0;
 	unsigned char mouseDownState = 0;

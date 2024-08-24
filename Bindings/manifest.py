@@ -11,7 +11,7 @@ bindings = {
     "SwitchWeapons" : {"h" : "right", "b" : "grip"},
     #"Interact" : {"h" : "left", "b" : "y"}, #Moved to right hand
     "MenuBack" : {"h" : "left", "b" : "y"},
-    "Melee" : {"h" : "left", "b" : "x"},
+    #"Melee" : {"h" : "left", "b" : "x"}, #Handled by gesture
     #"Flashlight" : {"h" : "right", "b" : "a"}, #Handled by gesture
     #"Reload" : {"h" : "right", "b" : "b"}, #Handled by interact
     "Grenade" : {"h" : "right", "b" : "a"},
@@ -23,7 +23,8 @@ bindings = {
     "Look" : {"h" : "right", "b" : "joystick"},
     "Move" : {"h" : "left", "b" : "joystick"},
     #"Zoom" : {"h" : "right", "b" : "thumbrest"},
-    "Recentre" : {"h" : "left", "b" : "thumbrest"},
+    #"Recentre" : {"h" : "left", "b" : "thumbrest"}, # Moved to left hand x
+    "Recentre" : {"h" : "left", "b" : "x"}
 }
 
 manifest = {

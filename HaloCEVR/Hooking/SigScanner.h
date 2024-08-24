@@ -36,6 +36,7 @@ public:
 	INDIRECT(CameraMatrices,      0x10bfb0, 0x5A, "81 ec a0 02 00 00 53 55 8b ac 24 ac 02 00 00 56");
 	INDIRECT(InputData,           0x0735b0, 0xAD, "51 53 56 6a 10 68 ?? ?? ?? ?? bb 00 02 00 00 e8 ?? ?? ?? ?? 6a 10");
 	INDIRECT(CurrentRect,         0x12ccc0, 0x51, "83 ec 38 56 57 66 8b f0 33 ff 66 83 fe 09 ?? ?? 66 85 f6");
+	INDIRECT(LoadingState,        0x097410, 0x01, "a1 ?? ?? ?? ?? 81 ec 18 04 00 00 57 33 ff 3b c7 0f 84 ?? ?? ?? ?? a1 ?? ?? ?? ?? 56 83 ce ff");
 
 	OFFSET(TabOutVideo,           0x0c7b74, "38 1D ?? ?? ?? ?? 74 0E 83 FD 01 74 09 83 FD 02 0F 85");
 	OFFSET(TabOutVideo2,          0x0c801c, "75 11 38 1D ?? ?? ?? ?? 75 04 3A C3 74 05 C6 44 24 17 01");
@@ -54,6 +55,7 @@ public:
 	OFFSET(DrawFrameMPLoading,    0x10c590, "8b 15 ?? ?? ?? ?? 81 ec 70 02 00 00 53 56 42 57");
 	OFFSET(DrawCrosshair,         0x0acad0, "83 ec 28 84 db 55 8b 6c 24 38 56 8b 74 24 38 57 8b f8");
 	OFFSET(DrawImage,             0x11c9a0, "81 ec 4c 01 00 00 56 8b f0 a0 ?? ?? ?? ?? 84 c0 c6 44 24 07 01");
+	OFFSET(DrawLoadingScreen2,    0x097410, "a1 ?? ?? ?? ?? 81 ec 18 04 00 00 57 33 ff 3b c7 0f 84 ?? ?? ?? ?? a1 ?? ?? ?? ?? 56 83 ce ff");
 
 	OFFSET(SetViewModelPosition,  0x0d6880, "81 ec f0 00 00 00 53 55 25 ff ff 00 00 56 8b f1 8b 0d 14");
 	OFFSET(HandleInputs,          0x08b4b0, "83 ec 08 56 57 8d 44 24 08 50 ff 15 ?? ?? ?? ?? 8b 4c 24 0c");
