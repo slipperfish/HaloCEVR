@@ -11,7 +11,7 @@ public:
 	// Debug API functions
 	void DrawLine2D(struct Vector2& start, struct Vector2& end, D3DCOLOR color);
 	void DrawLine3D(struct Vector3& start, struct Vector3& end, D3DCOLOR color, bool bRespectDepth = true, float thickness = 0.05f);
-	void DrawPolygon(struct Vector3& centre, struct Vector3& facing, struct Vector3& upVector, int sides, float radius, D3DCOLOR color, bool bRespectDepth = true);
+	void DrawPolygon(struct Vector3& centre, struct Vector3& facing, struct Vector3& upVector, int sides, float radius, D3DCOLOR color, bool bRespectDepth = true, float angleAmount = 1.0f);
 	void DrawCoordinate(struct Vector3& pos, class Matrix3& rot, float size = 0.05f, bool bRespectDepth = true);
 	void DrawRenderTarget(struct IDirect3DTexture9* renderTarget, struct Vector3& pos, class Matrix3& rot, struct Vector2& size, bool bRespectDepth = true);
 

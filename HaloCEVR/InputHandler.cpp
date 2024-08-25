@@ -30,8 +30,6 @@ void InputHandler::RegisterInputs()
 
 	RegisterVector2Input(Move);
 	RegisterVector2Input(Look);
-
-	RegisterBoolInput(Recentre);
 }
 
 void InputHandler::UpdateInputs()
@@ -76,25 +74,63 @@ void InputHandler::UpdateInputs()
 		controls.Crouch = MotionControlCrouch;
 	}
 
-	if (vr->GetBoolInput(Recentre))
-	{
-		Game::instance.bNeedsRecentre = true;
-	}
+	const float holdToRecentreTime = 1000.0f;
 
 	bool bMenuChanged;
 	bool bMenuPressed = vr->GetBoolInput(MenuBack, bMenuChanged);
 
-	// Opening the menu is seemingly hardcoded to the escape key
-	if (bMenuChanged)
+	if (bMenuPressed)
 	{
+		if (bMenuChanged)
+		{
+			menuHeldTime = std::chrono::high_resolution_clock::now();
+		}
+
+		float heldTime = std::chrono::duration<float, std::milli>(std::chrono::high_resolution_clock::now() - menuHeldTime).count();
+
+		if (heldTime > 100.0f)
+		{
+			float progress = std::min(heldTime, holdToRecentreTime) / holdToRecentreTime;
+
+			Matrix4 handTrans = vr->GetControllerTransform(ControllerRole::Left, true);
+
+			Vector3 handPos = (handTrans * Vector3(0.0f, 0.0f, 0.0f)) * Game::MetresToWorld(1.0f) + Helpers::GetCamera().position;
+
+			Vector3 centre = handPos + Vector3(0.0f, 0.0f, Game::MetresToWorld(0.1f));
+			Vector3 facing = -handTrans.getLeftAxis();
+			Vector3 upVector = handTrans.getForwardAxis();
+
+			Game::instance.inGameRenderer.DrawPolygon(centre, facing, upVector, 16, Game::MetresToWorld(0.01f), D3DCOLOR_XRGB(255, 0, 0), false, progress);
+		}
+	}
+	else if (bMenuChanged)
+	{
+		float heldTime = std::chrono::duration<float, std::milli>(std::chrono::high_resolution_clock::now() - menuHeldTime).count();
+
+		if (heldTime > holdToRecentreTime)
+		{
+			Game::instance.bNeedsRecentre = true;
+		}
+		else
+		{
+			INPUT input{};
+			input.type = INPUT_KEYBOARD;
+			input.ki.dwFlags = KEYEVENTF_SCANCODE; // DirectInput only detects scancodes
+			input.ki.wScan = 01; // Escape
+			SendInput(1, &input, sizeof(INPUT));
+
+			bHoldingMenu = true;
+		}
+	}
+	else if (bHoldingMenu)
+	{
+		bHoldingMenu = false;
+
 		INPUT input{};
 		input.type = INPUT_KEYBOARD;
 		input.ki.dwFlags = KEYEVENTF_SCANCODE; // DirectInput only detects scancodes
 		input.ki.wScan = 01; // Escape
-		if (!bMenuPressed)
-		{
-			input.ki.dwFlags |= KEYEVENTF_KEYUP;
-		}
+		input.ki.dwFlags |= KEYEVENTF_KEYUP;
 		SendInput(1, &input, sizeof(INPUT));
 	}
 

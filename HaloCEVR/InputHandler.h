@@ -1,5 +1,6 @@
 #pragma once
 #include "VR/IVR.h"
+#include <chrono>
 
 class InputHandler
 {
@@ -18,6 +19,9 @@ protected:
 
 	char lastSnapState = 0;
 	unsigned char mouseDownState = 0;
+
+	bool bHoldingMenu = false;
+	std::chrono::time_point<std::chrono::high_resolution_clock> menuHeldTime;
 
 	InputBindingID Jump = 0;
 	InputBindingID SwitchGrenades = 0;

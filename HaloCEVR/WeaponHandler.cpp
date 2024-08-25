@@ -57,8 +57,6 @@ static void ReferenceUpdateViewModelImpl(HaloID& id, Vector3* pos, Vector3* faci
 
 void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, Vector3* up, TransformQuat* BoneTransforms, Transform* outBoneTransforms)
 {
-	// Just to keep things consistent in each eye, move the root to the camera position.
-	// This shouldn't matter since we move all the bones to be relative to the vr controllers anyway
 	Vector3& camPos = Helpers::GetCamera().position;
 
 	pos->x = camPos.x;

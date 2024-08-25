@@ -70,7 +70,7 @@ void InGameRenderer::DrawLine3D(Vector3& start, Vector3& end, D3DCOLOR color, bo
 	}
 }
 
-void InGameRenderer::DrawPolygon(Vector3& centre, Vector3& facing, Vector3& upVector, int sides, float radius, D3DCOLOR color, bool bRespectDepth)
+void InGameRenderer::DrawPolygon(Vector3& centre, Vector3& facing, Vector3& upVector, int sides, float radius, D3DCOLOR color, bool bRespectDepth, float angleAmount)
 {
 	Polygon newPoly;
 
@@ -92,7 +92,7 @@ void InGameRenderer::DrawPolygon(Vector3& centre, Vector3& facing, Vector3& upVe
 	vertex.z = firstPoint.z;
 	newPoly.vertices.push_back(vertex);
 
-	const float increment = -6.28318530718f / sides;
+	const float increment = angleAmount * -6.28318530718f / sides;
 
 	for (int i = 1; i < sides; i++)
 	{
@@ -105,10 +105,23 @@ void InGameRenderer::DrawPolygon(Vector3& centre, Vector3& facing, Vector3& upVe
 		newPoly.vertices.push_back(vertex);
 	}
 
-	vertex.x = firstPoint.x;
-	vertex.y = firstPoint.y;
-	vertex.z = firstPoint.z;
-	newPoly.vertices.push_back(vertex);
+	if ((1.0f - angleAmount) < 1e-8f)
+	{
+		vertex.x = firstPoint.x;
+		vertex.y = firstPoint.y;
+		vertex.z = firstPoint.z;
+		newPoly.vertices.push_back(vertex);
+	}
+	else
+	{
+		float angle = increment * sides;
+		Vector3 newPoint = centre + (sin(angle) * rightVector + cos(angle) * upVector) * radius;
+
+		vertex.x = newPoint.x;
+		vertex.y = newPoint.y;
+		vertex.z = newPoint.z;
+		newPoly.vertices.push_back(vertex);
+	}
 
 	if (bRespectDepth)
 	{

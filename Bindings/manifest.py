@@ -24,7 +24,7 @@ bindings = {
     "Move" : {"h" : "left", "b" : "joystick"},
     #"Zoom" : {"h" : "right", "b" : "thumbrest"},
     #"Recentre" : {"h" : "left", "b" : "thumbrest"}, # Moved to left hand x
-    "Recentre" : {"h" : "left", "b" : "x"}
+    #"Recentre" : {"h" : "left", "b" : "x"} # Merged with menu
 }
 
 manifest = {
