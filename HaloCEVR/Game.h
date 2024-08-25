@@ -166,5 +166,6 @@ public:
 	Vector3Property* c_ScopeOffsetRocket = nullptr;
 	FloatProperty* c_MeleeSwingSpeed = nullptr;
 	FloatProperty* c_CrouchHeight = nullptr;
+	BoolProperty* c_ShowRoomCentre = nullptr;
 };
 

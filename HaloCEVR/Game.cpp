@@ -154,6 +154,16 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 		}
 	}
 
+	if (c_ShowRoomCentre->Value())
+	{
+		Vector3 position = Helpers::GetCamera().position;
+		position.z -= 0.62f;
+		Vector3 upVector(0.0f, 0.0f, 1.0f);
+		Vector3 forwardVector(1.0f, 0.0f, 0.0f);
+
+		inGameRenderer.DrawPolygon(position, upVector, forwardVector, 8, MetresToWorld(0.25f), D3DCOLOR_ARGB(50, 85, 250, 239), false);
+	}
+
 	vr->PreDrawFrame(renderer, deltaTime);
 }
 
@@ -613,6 +623,7 @@ void Game::SetupConfigs()
 	c_ScopeOffsetRocket = config.RegisterVector3("ScopeOffsetRocket", "Offset of the scope view relative to the pistol's location", Vector3(0.1f, 0.2f, 0.1f));
 	c_MeleeSwingSpeed = config.RegisterFloat("MeleeSwingSpeed", "Minimum vertical velocity of the main hand required to initiate a melee attack in m/s", 2.5f);
 	c_CrouchHeight = config.RegisterFloat("CrouchHeight", "Minimum height to duck by in metres to automatically trigger the crouch input in game (<0 to disable)", 0.15f);
+	c_ShowRoomCentre = config.RegisterBool("ShowRoomCentre", "Draw an indicator at your feet to show where the player character is actually positioned", true);
 
 	config.LoadFromFile("VR/config.txt");
 	config.SaveToFile("VR/config.txt");

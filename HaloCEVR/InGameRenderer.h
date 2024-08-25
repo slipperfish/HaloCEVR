@@ -11,6 +11,7 @@ public:
 	// Debug API functions
 	void DrawLine2D(struct Vector2& start, struct Vector2& end, D3DCOLOR color);
 	void DrawLine3D(struct Vector3& start, struct Vector3& end, D3DCOLOR color, bool bRespectDepth = true, float thickness = 0.05f);
+	void DrawPolygon(struct Vector3& centre, struct Vector3& facing, struct Vector3& upVector, int sides, float radius, D3DCOLOR color, bool bRespectDepth = true);
 	void DrawCoordinate(struct Vector3& pos, class Matrix3& rot, float size = 0.05f, bool bRespectDepth = true);
 	void DrawRenderTarget(struct IDirect3DTexture9* renderTarget, struct Vector3& pos, class Matrix3& rot, struct Vector2& size, bool bRespectDepth = true);
 
@@ -25,6 +26,7 @@ protected:
 	void Draw2DLines(struct IDirect3DDevice9* pDevice);
 	void Draw3DLines(struct IDirect3DDevice9* pDevice);
 	void DrawRenderTargets(struct IDirect3DDevice9* pDevice);
+	void DrawPolygons(struct IDirect3DDevice9* pDevice);
 
 	static constexpr int MAX_LINES = 32;
 
@@ -55,6 +57,11 @@ protected:
 		bool bRespectDepth;
 	};
 
+	struct Polygon
+	{
+		std::vector<VertexData3D> vertices;
+	};
+
 	VertexData2D vertices2D[MAX_LINES];
 	VertexData3D vertices3D[MAX_LINES];
 	int vertex2DCount = 0;
@@ -64,6 +71,8 @@ protected:
 	std::vector<VertexData3D> lines3D;
 	std::vector<VertexData3D> depthLines3D;
 	std::vector<RenderTarget> renderTargets;
+	std::vector<Polygon> polygons;
+	std::vector<Polygon> depthPolygons;
 
 	// MVP matrices the current camera is using, must match exactly or 3D elements will be misaligned
 	D3DMATRIX world;
