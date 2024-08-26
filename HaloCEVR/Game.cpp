@@ -1,4 +1,4 @@
-#define EMULATE_VR 0
+#define EMULATE_VR 1
 #include "Game.h"
 #include "Logger.h"
 #include "Hooking/Hooks.h"
@@ -143,7 +143,7 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 	UnitDynamicObject* Player = static_cast<UnitDynamicObject*>(Helpers::GetLocalPlayer());
 	if (Player)
 	{
-		bool bNewShowViewModel = Player->parentSeatIndex != 255;
+		bool bNewShowViewModel = Player->parent.id != 0xffff;
 
 		if (bNewShowViewModel != bShowViewModel)
 		{
@@ -152,6 +152,7 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 
 			bShowViewModel = bNewShowViewModel;
 		}
+		bInVehicle = bNewShowViewModel;
 	}
 
 	if (c_ShowRoomCentre->Value())
@@ -650,20 +651,29 @@ void Game::CalcFPS(float deltaTime)
 
 void Game::UpdateCrosshairAndScope()
 {
-	Vector3 aimPos, aimDir;
-	bool bHasCrosshair = weaponHandler.GetLocalWeaponAim(aimPos, aimDir);
-
-	if (!bHasCrosshair)
-	{
-		return;
-	}
-
 	auto fixupRotation = [](Matrix4& m, Vector3& pos) {
 		m.translate(-pos);
 		m.rotate(90.0f, m.getUpAxis());
 		m.rotate(-90.0f, m.getLeftAxis());
 		m.translate(pos);
 	};
+
+	Vector3 aimPos, aimDir;
+
+	if (bInVehicle)
+	{
+		aimPos = Vector3();
+		aimDir = Helpers::GetCamera().lookDir;
+	}
+	else
+	{
+		bool bHasCrosshair = weaponHandler.GetLocalWeaponAim(aimPos, aimDir);
+
+		if (!bHasCrosshair)
+		{
+			return;
+		}
+	}
 
 	Matrix4 overlayTransform;
 

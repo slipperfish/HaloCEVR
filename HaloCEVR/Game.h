@@ -143,6 +143,8 @@ protected:
 
 	bool bShowViewModel = false;
 
+	bool bInVehicle = false;
+
 	//======Configs======//
 public:
 
