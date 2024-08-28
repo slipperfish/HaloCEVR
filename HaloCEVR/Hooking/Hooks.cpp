@@ -47,6 +47,7 @@ void Hooks::InitHooks()
 	CREATEHOOK(FireWeapon);
 	CREATEHOOK(ThrowGrenade);
 	CREATEHOOK(DrawLoadingScreen2);
+	CREATEHOOK(DrawCinematicBars);
 
 	// These are handled with a direct patch, so manually scan them
 	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo) < 0;
@@ -84,6 +85,7 @@ void Hooks::EnableAllHooks()
 	FireWeapon.EnableHook();
 	ThrowGrenade.EnableHook();
 	DrawLoadingScreen2.EnableHook();
+	DrawCinematicBars.EnableHook();
 
 	Freeze();
 
@@ -92,6 +94,8 @@ void Hooks::EnableAllHooks()
 	P_EnableUIAlphaWrite();
 	P_DisableCrouchCamera();
 	P_DontStealMouse();
+
+	//NOPInstructions(0x50be6a, 5);
 
 	// If we think the user has chimera installed, don't try to patch their patches
 	if (!bPotentiallyFoundChimera)
@@ -760,6 +764,27 @@ void Hooks::H_DrawLoadingScreen2(void* param1)
 	Helpers::GetDirect3DDevice9()->SetViewport(&desiredViewport);
 
 	DrawLoadingScreen2.Original(param1);
+
+	Helpers::GetDirect3DDevice9()->SetViewport(&currentViewport);
+}
+
+void Hooks::H_DrawCinematicBars()
+{
+	D3DVIEWPORT9 currentViewport;
+	D3DVIEWPORT9 desiredViewport
+	{
+		0,
+		0,
+		static_cast<DWORD>(Game::instance.c_UIOverlayWidth->Value()),
+		static_cast<DWORD>(Game::instance.c_UIOverlayHeight->Value()),
+		0.0f,
+		1.0f
+	};
+
+	Helpers::GetDirect3DDevice9()->GetViewport(&currentViewport);
+	Helpers::GetDirect3DDevice9()->SetViewport(&desiredViewport);
+
+	DrawCinematicBars.Original();
 
 	Helpers::GetDirect3DDevice9()->SetViewport(&currentViewport);
 }

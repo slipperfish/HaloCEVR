@@ -406,7 +406,7 @@ void Game::PostDrawMenu()
 	uiRealSurface->Release();
 }
 
-
+D3DVIEWPORT9 currentViewport;
 bool Game::PreDrawLoading(int param1, struct Renderer* renderer)
 {
 	// Only render UI once per frame
