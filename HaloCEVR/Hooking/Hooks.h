@@ -47,6 +47,8 @@ public:
 	static void P_KeepViewModelVisible(bool bAlwaysShow);
 	static void P_EnableUIAlphaWrite();
 	static void P_DisableCrouchCamera();
+	static void P_ForceCmdLineArgs();
+
 	static void P_DontStealMouse();
 
 	static void SetCameraMatrices(struct Viewport* viewport, struct CameraFrustum* frustum, struct CameraRenderMatrices* crm, bool bDoProjection);

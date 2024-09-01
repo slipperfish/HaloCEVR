@@ -8,6 +8,7 @@
 
 #include <tlhelp32.h>
 #include "../DirectXWrappers/IDirect3DDevice9ExWrapper.h"
+#include "../Helpers/CmdLineArgs.h"
 
 #define CREATEHOOK(Func) Func##.CreateHook(#Func, o.##Func##, &H_##Func##)
 #define RESOLVEINDIRECT(Name) ResolveIndirect(o.I_##Name, o.##Name)
@@ -30,6 +31,8 @@ void Hooks::InitHooks()
 	RESOLVEINDIRECT(InputData);
 	RESOLVEINDIRECT(CurrentRect);
 	RESOLVEINDIRECT(LoadingState);
+	RESOLVEINDIRECT(CmdLineArgs);
+	RESOLVEINDIRECT(IsWindowed);
 
 	CREATEHOOK(InitDirectX);
 	CREATEHOOK(DrawFrame);
@@ -93,9 +96,13 @@ void Hooks::EnableAllHooks()
 	P_KeepViewModelVisible(false);
 	P_EnableUIAlphaWrite();
 	P_DisableCrouchCamera();
+	P_ForceCmdLineArgs();
+
 	P_DontStealMouse();
 
-	//NOPInstructions(0x50be6a, 5);
+	//SetByte(0x52d8a0, 0xc3);
+	//NOPInstructions(0x494aa7, 5); // Removes blur effect
+
 
 	// If we think the user has chimera installed, don't try to patch their patches
 	if (!bPotentiallyFoundChimera)
@@ -842,6 +849,17 @@ void Hooks::P_DisableCrouchCamera()
 
 		SetBytes(o.CrouchHeight.Address, 6, bytes);
 	}
+}
+
+void Hooks::P_ForceCmdLineArgs()
+{
+	// While the game probably works fine in fullscreen or with bink videos, its easier to just force some known values
+	// and not have to debug issues that only occur on say a 4k fullscreen monitor during the splash screen
+	
+	CmdLineArgs& args = Helpers::GetCmdLineArgs();
+	args.NoVideo = 1;
+	args.Width640 = 1;
+	*reinterpret_cast<int*>(o.IsWindowed) = 1; // This isn't stored with the rest of the args for some reason
 }
 
 void Hooks::P_DontStealMouse()

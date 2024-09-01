@@ -163,6 +163,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Helpers\CmdLineArgs.cpp" />
     <ClCompile Include="InGameRenderer.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -188,6 +189,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config\Config.h" />
+    <ClInclude Include="Helpers\CmdLineArgs.h" />
     <ClInclude Include="InGameRenderer.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Helpers\Assets.h" />
