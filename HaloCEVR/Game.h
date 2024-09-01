@@ -61,7 +61,7 @@ public:
 
 	void SetViewportScale(struct Viewport* viewport);
 
-	bool GetDrawMirror() const { return c_DrawMirror->Value(); }
+	bool GetDrawMirror() const { return mirrorSource == ERenderState::GAME && c_DrawMirror->Value(); }
 
 	ERenderState GetRenderState() const { return renderState; }
 
@@ -145,11 +145,14 @@ protected:
 
 	bool bInVehicle = false;
 
+	ERenderState mirrorSource;
+
 	//======Configs======//
 public:
 
 	BoolProperty* c_ShowConsole = nullptr;
 	BoolProperty* c_DrawMirror = nullptr;
+	IntProperty* c_MirrorEye = nullptr;
 	FloatProperty* c_UIOverlayDistance = nullptr;
 	FloatProperty* c_UIOverlayScale = nullptr;
 	FloatProperty* c_UIOverlayCurvature = nullptr;

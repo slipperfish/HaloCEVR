@@ -303,6 +303,60 @@ void Game::PostDrawFrame(struct Renderer* renderer, float deltaTime)
 	RestoreRenderTargets();
 	vr->PostDrawFrame(renderer, deltaTime);
 	inGameRenderer.PostRender();
+
+	if (c_DrawMirror->Value() && mirrorSource != ERenderState::GAME)
+	{
+		int sWidth = vr->GetViewWidth();
+		int sHeight = vr->GetViewHeight();
+
+		float sourceAspect = static_cast<float>(sWidth) / static_cast<float>(sHeight);
+
+		int dWidth = Helpers::GetRenderTargets()[0].width;
+		int dHeight = Helpers::GetRenderTargets()[0].height;
+
+		int trueWidth = 640;
+		int trueHeight = 480;
+
+		float destAspect = static_cast<float>(trueWidth) / static_cast<float>(trueHeight);
+
+		RECT destRect{};
+
+		if (sourceAspect > destAspect)
+		{
+			destRect.left = 0;
+			destRect.right = dWidth;
+
+			float scale = destAspect / sourceAspect;
+
+			int scaledSize = static_cast<int>(0.5f * (1.0f - scale) * dHeight);
+
+			destRect.top = scaledSize;
+			destRect.bottom = dHeight - scaledSize;
+		}
+		else
+		{
+			destRect.top = 0;
+			destRect.bottom = dHeight;
+
+			float scale = sourceAspect / destAspect;
+
+			int scaledSize = static_cast<int>(0.5f * (1.0f - scale) * dWidth);
+
+			destRect.left = scaledSize;
+			destRect.right = dWidth - scaledSize;
+		}
+
+
+		int eye = mirrorSource == ERenderState::LEFT_EYE ? 0 : 1;
+
+		IDirect3DSurface9* currentSurface = nullptr;
+		Helpers::GetDirect3DDevice9()->GetRenderTarget(0, &currentSurface);
+		Helpers::GetDirect3DDevice9()->SetRenderTarget(0, Helpers::GetRenderTargets()[0].renderSurface);
+		Helpers::GetDirect3DDevice9()->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(0, 0, 0, 0), 1.0f, 0);
+		Helpers::GetDirect3DDevice9()->SetRenderTarget(0, currentSurface);
+		currentSurface->Release();
+		Helpers::GetDirect3DDevice9()->StretchRect(vr->GetRenderSurface(eye), nullptr, Helpers::GetRenderTargets()[0].renderSurface, &destRect, D3DTEXF_LINEAR);
+	}
 }
 
 bool Game::PreDrawHUD()
@@ -605,6 +659,7 @@ void Game::SetupConfigs()
 	// Put all mod configs here
 	c_ShowConsole = config.RegisterBool("ShowConsole", "Create a console window at launch for debugging purposes", false);
 	c_DrawMirror = config.RegisterBool("DrawMirror", "Update the desktop window display to show the current game view, rather than leaving it on the splash screen", true);
+	c_MirrorEye = config.RegisterInt("MirrorEye", "Index of the eye to use for the mirror view  (0 = left, 1 = right)", 0);
 	c_UIOverlayDistance = config.RegisterFloat("UIOverlayDistance", "Distance in metres in front of the HMD to display the UI", 15.0f);
 	c_UIOverlayScale = config.RegisterFloat("UIOverlayScale", "Width of the UI overlay in metres", 10.0f);
 	c_UIOverlayCurvature = config.RegisterFloat("UIOverlayCurvature", "Curvature of the UI Overlay, on a scale of 0 to 1", 0.1f);
@@ -632,7 +687,26 @@ void Game::SetupConfigs()
 	weaponHandler.localOffset = Vector3(c_ControllerOffset->Value().x, c_ControllerOffset->Value().y, c_ControllerOffset->Value().z);
 	weaponHandler.localRotation = Vector3(c_ControllerRotation->Value().x, c_ControllerRotation->Value().y, c_ControllerRotation->Value().z);
 
-	Logger::log << "Loaded configs" << std::endl;
+	if (c_MirrorEye->Value() == 0)
+	{
+		mirrorSource = ERenderState::LEFT_EYE;
+	}
+	else if (c_MirrorEye->Value() == 1)
+	{
+		mirrorSource = ERenderState::RIGHT_EYE;
+	}
+	else if (c_MirrorEye->Value() == 2)
+	{
+		Logger::log << "[Config] MirrorEye set to 'game'. This is intended for debugging, may not look correct, and will likely impact performance" << std::endl;
+		mirrorSource = ERenderState::GAME;
+	}
+	else
+	{
+		Logger::log << "[Config] Invalid value for MirrorEye, defaulting to left eye" << std::endl;
+		mirrorSource = ERenderState::LEFT_EYE;
+	}
+
+	Logger::log << "[Config] Loaded configs" << std::endl;
 }
 
 void Game::CalcFPS(float deltaTime)
