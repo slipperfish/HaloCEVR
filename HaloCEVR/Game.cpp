@@ -840,9 +840,10 @@ void Game::SetScopeTransform(Matrix4& newTransform, bool bIsVisible)
 
 	inGameRenderer.DrawPolygon(pos, scopeFacing, scopeUp, 32, MetresToWorld(GetScopeSize() * 0.5f), D3DCOLOR_ARGB(0, 0, 0, 0), false);
 
-	float SCOPE_DEPTH = 0.2f;
+	float SCOPE_DEPTH = 2.0f;
 	// 4x scales pistol scope to full size, 4/3 accounts for aspect ratio
-	float SCOPE_INNER_SCALE = 4.0f * 4.0f / 3.0f;//8.0f;
+	//float SCOPE_INNER_SCALE = 4.0f * 4.0f / 3.0f;//8.0f;
+	float SCOPE_INNER_SCALE = 80.0f;
 
 	pos = pos - scopeFacing * MetresToWorld(SCOPE_DEPTH);
 	size *= SCOPE_INNER_SCALE;
