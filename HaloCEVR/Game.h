@@ -42,7 +42,7 @@ public:
 	bool PreDrawLoading(int param1, struct Renderer* renderer);
 	void PostDrawLoading(int param1, struct Renderer* renderer);
 
-	void PreDrawCrosshair(short* anchorLocation);
+	bool PreDrawCrosshair(short* anchorLocation);
 	void PostDrawCrosshair();
 
 	void PreDrawImage(void* param1, void* param2);
@@ -82,6 +82,7 @@ public:
 	bool bNeedsRecentre = true;
 
 	InGameRenderer inGameRenderer;
+	InGameRenderer scopeRenderer;
 protected:
 
 	void CreateConsole();
@@ -93,6 +94,7 @@ protected:
 	void CalcFPS(float deltaTime);
 
 	void UpdateCrosshairAndScope();
+	void SetScopeTransform(Matrix4& newTransform, bool bIsVisible);
 
 	void StoreRenderTargets();
 	void RestoreRenderTargets();

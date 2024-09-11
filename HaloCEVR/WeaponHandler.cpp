@@ -281,7 +281,9 @@ void WeaponHandler::MoveBoneToTransform(int boneIndex, const Matrix4& newTransfo
 
 void WeaponHandler::UpdateCache(HaloID& id, AssetData_ModelAnimations* animationData)
 {
+#if DRAW_DEBUG_AIM
 	Logger::log << "[UpdateCache] Swapped weapons, recaching " << id << std::endl;
+#endif
 	cachedViewModel.currentAsset = id;
 	cachedViewModel.leftWristIndex = -1;
 	cachedViewModel.rightWristIndex = -1;
@@ -293,21 +295,40 @@ void WeaponHandler::UpdateCache(HaloID& id, AssetData_ModelAnimations* animation
 	{
 		Bone& CurrentBone = boneArray[i];
 
-		if (strstr(CurrentBone.BoneName, "l wrist"))
+		if (cachedViewModel.leftWristIndex == -1 && strstr(CurrentBone.BoneName, "l wrist"))
 		{
+#if DRAW_DEBUG_AIM
 			Logger::log << "[UpdateCache] Found Left Wrist @ " << i << std::endl;
+#endif
 			cachedViewModel.leftWristIndex = i;
 		}
-		else if (strstr(CurrentBone.BoneName, "r wrist"))
+		else if (cachedViewModel.rightWristIndex == -1 && strstr(CurrentBone.BoneName, "r wrist"))
 		{
+#if DRAW_DEBUG_AIM
 			Logger::log << "[UpdateCache] Found Right Wrist @ " << i << std::endl;
+#endif
 			cachedViewModel.rightWristIndex = i;
 		}
-		else if (strstr(CurrentBone.BoneName, "gun"))
+		else if (cachedViewModel.gunIndex == -1 && strstr(CurrentBone.BoneName, "gun"))
 		{
+#if DRAW_DEBUG_AIM
 			Logger::log << "[UpdateCache] Found Gun @ " << i << std::endl;
+#endif
 			cachedViewModel.gunIndex = i;
 		}
+		else if (cachedViewModel.gunIndex == -1 && strstr(CurrentBone.BoneName, "body"))
+		{
+#if DRAW_DEBUG_AIM
+			Logger::log << "[UpdateCache] Found Gun @ " << i << std::endl;
+#endif
+			cachedViewModel.gunIndex = i;
+		}
+#if DRAW_DEBUG_AIM
+		else
+		{
+			Logger::log << "[UpdateCache] Skipped Bone " << CurrentBone.BoneName << std::endl;
+		}
+#endif
 	}
 
 	cachedViewModel.fireOffset = Vector3();
@@ -357,11 +378,13 @@ void WeaponHandler::UpdateCache(HaloID& id, AssetData_ModelAnimations* animation
 		return;
 	}
 
+#if DRAW_DEBUG_AIM
 	std::string reversedGroup;
 	reversedGroup.assign(model->GroupID, 4);
 	std::reverse(reversedGroup.begin(), reversedGroup.end());
 	Logger::log << "[UpdateCache] GBXModelTag = " << reversedGroup << std::endl;
 	Logger::log << "[UpdateCache] GBXModelPath = " << model->ModelPath << std::endl;
+#endif
 
 	if (strstr(model->ModelPath, "\\pistol\\"))
 	{
@@ -385,20 +408,26 @@ void WeaponHandler::UpdateCache(HaloID& id, AssetData_ModelAnimations* animation
 		return;
 	}
 
+#if DRAW_DEBUG_AIM
 	Logger::log << "[UpdateCache] NumSockets = " << model->ModelData->NumSockets << std::endl;
+#endif
 
 	for (int i = 0; i < model->ModelData->NumSockets; i++)
 	{
 		GBXSocket& socket = model->ModelData->Sockets[i];
+#if DRAW_DEBUG_AIM
 		Logger::log << "[UpdateCache] Socket = " << socket.SocketName << std::endl;
+#endif
 
 		if (strstr(socket.SocketName, "primary trigger"))
 		{
+#if DRAW_DEBUG_AIM
 			Logger::log << "[UpdateCache] Found Effects location, Num Transforms = " << socket.NumTransforms << std::endl;
+#endif
 
 			if (socket.NumTransforms == 0)
 			{
-				Logger::log << "[VM_UpdateCache] " << socket.SocketName << " has no transforms" << std::endl;
+				Logger::log << "[UpdateCache] " << socket.SocketName << " has no transforms" << std::endl;
 				break;
 			}
 
@@ -407,8 +436,10 @@ void WeaponHandler::UpdateCache(HaloID& id, AssetData_ModelAnimations* animation
 			Helpers::MakeTransformFromQuat(&socket.Transforms[0].QRotation, &rotation);
 			cachedViewModel.cookedFireRotation = rotation.rotation;
 
+#if DRAW_DEBUG_AIM
 			Logger::log << "[UpdateCache] Position = " << socket.Transforms[0].Position << std::endl;
 			Logger::log << "[UpdateCache] Quaternion = " << socket.Transforms[0].QRotation << std::endl;
+#endif
 			break;
 		}
 	}
@@ -486,6 +517,7 @@ bool WeaponHandler::GetWorldWeaponAim(Vector3& outPosition, Vector3& outAim) con
 	return bSuccess;
 }
 
+
 bool WeaponHandler::GetLocalWeaponScope(Vector3& outPosition, Vector3& outAim, Vector3& upDir) const
 {
 	HaloID playerID;
@@ -546,6 +578,11 @@ bool WeaponHandler::GetWorldWeaponScope(Vector3& outPosition, Vector3& outAim, V
 	return bSuccess;
 }
 
+bool WeaponHandler::IsSniperScope() const
+{
+	return cachedViewModel.scopeType == ScopedWeaponType::Sniper;
+}
+
 void WeaponHandler::RelocatePlayer(HaloID& PlayerID)
 {
 	// Teleport the player to the controller position so the bullet comes from there instead
@@ -586,6 +623,7 @@ void WeaponHandler::RelocatePlayer(HaloID& PlayerID)
 		lastFireLocation = weaponFiredPlayer->position + internalFireOffset;
 		lastFireAim = lastFireLocation + weaponFiredPlayer->aim * 1.0f;
 		Logger::log << "FireOffset: " << cachedViewModel.fireOffset << std::endl;
+		Logger::log << "FireAim: " << cachedViewModel.fireRotation << std::endl;
 		Logger::log << "Player Position: " << realPlayerPosition << std::endl;
 		Logger::log << "Last fire location: " << lastFireLocation << std::endl;
 #endif

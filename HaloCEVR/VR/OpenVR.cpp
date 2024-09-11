@@ -537,32 +537,6 @@ void OpenVR::SetCrosshairTransform(Matrix4& newTransform)
 	vrOverlay->SetOverlayTransformAbsolute(crosshairOverlay, vr::TrackingUniverseStanding, &overlayMatrix);
 }
 
-void OpenVR::SetScopeTransform(Matrix4& newTransform, bool bIsVisible)
-{
-	// Use the dx9 renderer to draw this directly in game, since we can't adjust the near clip plane of steamvr overlays
-	if (!bIsVisible)
-	{
-		return;
-	}
-
-	Vector3 pos = (newTransform * Vector3(0.0f, 0.0f, 0.0f)) * Game::instance.MetresToWorld(1.0f) + Helpers::GetCamera().position;
-	Matrix3 rot;
-	Vector2 size(1.0f, 0.75f);
-	size *= Game::instance.MetresToWorld(Game::instance.GetScopeSize());
-
-	newTransform.translate(-pos);
-	newTransform.rotate(90.0f, newTransform.getLeftAxis());
-	newTransform.rotate(-90.0f, newTransform.getUpAxis());
-	newTransform.rotate(-90.0f, newTransform.getLeftAxis());
-
-	for (int i = 0; i < 3; i++)
-	{
-		rot.setColumn(i, &newTransform.get()[i * 4]);
-	}
-
-	Game::instance.inGameRenderer.DrawRenderTarget(GetScopeTexture(), pos, rot, size, false);
-}
-
 void OpenVR::UpdateInputs()
 {
 	vr::EVRInputError error = vrInput->UpdateActionState(actionSets, sizeof(vr::VRActiveActionSet_t), 1);

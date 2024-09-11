@@ -457,22 +457,24 @@ void __declspec(naked) Hooks::H_DrawCrosshair()
 		pushad
 	}
 
-	Game::instance.PreDrawCrosshair(param6);
-
-	_asm
+	if (Game::instance.PreDrawCrosshair(param6))
 	{
-		popad
+
+		_asm
+		{
+			popad
+		}
+
+		DrawCrosshair.Original();
+
+		_asm
+		{
+			pushad
+		}
+
+		Game::instance.PostDrawCrosshair();
+
 	}
-
-	DrawCrosshair.Original();
-
-	_asm
-	{
-		pushad
-	}
-
-	Game::instance.PostDrawCrosshair();
-
 	_asm
 	{
 		popad

@@ -44,7 +44,6 @@ public:
 
 	virtual void SetMouseVisibility(bool bIsVisible) = 0;
 	virtual void SetCrosshairTransform(class Matrix4& newTransform) = 0;
-	virtual void SetScopeTransform(class Matrix4& newTransform, bool bIsVisible) = 0;
 	virtual void UpdateInputs() = 0;
 	virtual InputBindingID RegisterBoolInput(std::string set, std::string action) = 0;
 	virtual InputBindingID RegisterVector2Input(std::string set, std::string action) = 0;

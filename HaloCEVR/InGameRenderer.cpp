@@ -31,6 +31,106 @@ void InGameRenderer::DrawLine2D(Vector2& start, Vector2& end, D3DCOLOR color)
 	lines2D.push_back(endData);
 }
 
+void InGameRenderer::DrawInvertedShape2D(Vector2& centre, Vector2& innerSize, Vector2& size, int sides, float radius, D3DCOLOR color)
+{
+	// Draw quarter shape for each corner
+	int qSides = sides / 4;
+	const float increment = -6.28318530718f / sides;
+	constexpr float quarterCircle = 3.14159265359f / 2;
+
+	VertexData2D vertex{
+		0.0f,
+		0.0f,
+		0.0f,
+		1.0f,
+		color
+	};
+
+	auto DrawQuadrantInner = [&](Polygon2D& polygon, float offset = 0.0f)
+		{
+			for (int i = 0; i <= qSides; i++)
+			{
+				float angle = increment * i - offset;
+				Vector2 newPoint = centre + Vector2(sin(angle), -cos(angle)) * radius;
+
+				vertex.x = newPoint.x;
+				vertex.y = newPoint.y;
+				polygon.vertices.push_back(vertex);
+			}
+		};
+
+	auto DrawQuadrant = [&](Vector2 corner, Vector2 startEdge, Vector2 endEdge, int i)
+		{
+			Polygon2D polygon;
+			// Corner vertex
+			vertex.x = corner.x;
+			vertex.y = corner.y;
+			polygon.vertices.push_back(vertex);
+			// Vertex on edge, near quadrant start
+			vertex.x = startEdge.x;
+			vertex.y = startEdge.y;
+			polygon.vertices.push_back(vertex);
+
+			// Quadrant
+			DrawQuadrantInner(polygon, quarterCircle * i);
+
+			// Vertex on edge, near quadrant end
+			vertex.x = endEdge.x;
+			vertex.y = endEdge.y;
+			polygon.vertices.push_back(vertex);
+
+			// Submit quarter
+			polygons2D.push_back(polygon);
+		};
+
+	auto DrawConnector = [&](Vector2 topLeft, Vector2 bottomRight)
+		{
+			Polygon2D polygon;
+
+			vertex.x = topLeft.x;
+			vertex.y = topLeft.y;
+			polygon.vertices.push_back(vertex);
+
+			vertex.x = bottomRight.x;
+			vertex.y = topLeft.y;
+			polygon.vertices.push_back(vertex);
+
+			vertex.x = bottomRight.x;
+			vertex.y = bottomRight.y;
+			polygon.vertices.push_back(vertex);
+
+			vertex.x = topLeft.x;
+			vertex.y = bottomRight.y;
+			polygon.vertices.push_back(vertex);
+
+			polygons2D.push_back(polygon);
+		};
+
+	Vector2 trueCentre = centre;
+	Vector2 halfInner = innerSize / 2;
+	Vector2 topLeft, bottomRight;
+
+	centre = trueCentre + Vector2(-halfInner.x, -halfInner.y);
+	bottomRight = Vector2(centre.x, 0.0f);
+	DrawQuadrant(Vector2(0.0f, 0.0f), Vector2(centre.x, 0.0f), Vector2(0.0f, centre.y), 0);
+	topLeft = Vector2(0.0f, centre.y);
+
+	centre = trueCentre + Vector2(-halfInner.x, +halfInner.y);
+	DrawConnector(topLeft, Vector2(centre.x - radius, centre.y));
+	topLeft = Vector2(centre.x, centre.y + radius);
+	DrawQuadrant(Vector2(0.0f, size.y), Vector2(0.0f, centre.y), Vector2(centre.x, size.y), 1);
+
+	centre = trueCentre + Vector2(+halfInner.x, +halfInner.y);
+	DrawConnector(topLeft, Vector2(centre.x, size.y));
+	topLeft = Vector2(size.x, centre.y);
+	DrawQuadrant(size, Vector2(centre.x, size.y), Vector2(size.x, centre.y), 2);
+
+	centre = trueCentre + Vector2(+halfInner.x, -halfInner.y);
+	DrawQuadrant(Vector2(size.x, 0.0f), Vector2(size.x, centre.y), Vector2(centre.x, 0.0f), 3);
+	DrawConnector(topLeft, Vector2(centre.x + radius, centre.y));
+	DrawConnector(Vector2(centre.x, centre.y - radius), bottomRight);
+}
+
 void InGameRenderer::DrawLine3D(Vector3& start, Vector3& end, D3DCOLOR color, bool bRespectDepth, float thickness)
 {
 	VertexData3D startData
@@ -39,7 +139,6 @@ void InGameRenderer::DrawLine3D(Vector3& start, Vector3& end, D3DCOLOR color, bo
 		start.y,
 		start.z,
 		color
-
 	};
 
 	if (bRespectDepth)
@@ -57,7 +156,6 @@ void InGameRenderer::DrawLine3D(Vector3& start, Vector3& end, D3DCOLOR color, bo
 		end.y,
 		end.z,
 		color
-
 	};
 
 	if (bRespectDepth)
@@ -75,6 +173,14 @@ void InGameRenderer::DrawPolygon(Vector3& centre, Vector3& facing, Vector3& upVe
 	Polygon newPoly;
 
 	VertexData3D vertex{};
+
+	int alpha = ((color >> 24) & 255);
+
+	if (alpha == 0)
+	{
+		color |= D3DCOLOR_ARGB(255, 0, 0, 0);
+		newPoly.bIsStencil = true;
+	}
 
 	vertex.color = color;
 	vertex.x = centre.x;
@@ -144,7 +250,7 @@ void InGameRenderer::DrawCoordinate(Vector3& pos, Matrix3& rot, float size, bool
 	DrawLine3D(pos, left, D3DCOLOR_XRGB(255, 0, 0), bRespectDepth, 0.01f);
 }
 
-void InGameRenderer::DrawRenderTarget(IDirect3DTexture9* renderTarget, Vector3& pos, Matrix3& rot, Vector2& size, bool bRespectDepth)
+void InGameRenderer::DrawRenderTarget(IDirect3DTexture9* renderTarget, Vector3& pos, Matrix3& rot, Vector2& size, bool bRespectDepth, bool bRespectStencil)
 {
 	RenderTarget rtData
 	{
@@ -152,7 +258,8 @@ void InGameRenderer::DrawRenderTarget(IDirect3DTexture9* renderTarget, Vector3& 
 		rot,
 		size * 0.5f,
 		renderTarget,
-		bRespectDepth
+		bRespectDepth,
+		bRespectStencil
 	};
 
 	renderTargets.push_back(rtData);
@@ -220,7 +327,11 @@ void InGameRenderer::Render(IDirect3DDevice9* pDevice)
 	LPDIRECT3DSTATEBLOCK9 pStateBlock = NULL;
 	pDevice->CreateStateBlock(D3DSBT_ALL, &pStateBlock);
 
+	pDevice->Clear(0, NULL, D3DCLEAR_STENCIL, D3DCOLOR_XRGB(0, 0, 0), 0.0f, 0);
+
 	Draw2DLines(pDevice);
+
+	Draw2DPolygons(pDevice);
 
 	Draw3DLines(pDevice);
 
@@ -235,6 +346,7 @@ void InGameRenderer::Render(IDirect3DDevice9* pDevice)
 void InGameRenderer::PostRender()
 {
 	lines2D.clear();
+	polygons2D.clear();
 	lines3D.clear();
 	depthLines3D.clear();
 	renderTargets.clear();
@@ -255,7 +367,22 @@ void InGameRenderer::Draw2DLines(IDirect3DDevice9* pDevice)
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 	pDevice->SetRenderState(D3DRS_LIGHTING, false);
 	pDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+
 	pDevice->DrawPrimitiveUP(D3DPT_LINELIST, vertex2DCount / 2, vertices2D, sizeof(VertexData2D));
+
+}
+
+void InGameRenderer::Draw2DPolygons(IDirect3DDevice9* pDevice)
+{
+	pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
+	pDevice->SetRenderState(D3DRS_LIGHTING, false);
+	pDevice->SetRenderState(D3DRS_ZENABLE, false);
+	pDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+
+	for (Polygon2D& polygon : polygons2D)
+	{
+		pDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, polygon.vertices.size() - 2, polygon.vertices.data(), sizeof(VertexData2D));
+	}
 }
 
 void InGameRenderer::Draw3DLines(IDirect3DDevice9* pDevice)
@@ -304,9 +431,18 @@ void InGameRenderer::DrawRenderTargets(IDirect3DDevice9* pDevice)
 	pDevice->SetTransform(D3DTS_VIEW, &view);
 	pDevice->SetTransform(D3DTS_PROJECTION, &projection);
 
+
+	pDevice->SetRenderState(D3DRS_STENCILREF, 1);
+	pDevice->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_EQUAL);
+	pDevice->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_KEEP);
+	pDevice->SetRenderState(D3DRS_STENCILFAIL, D3DSTENCILOP_KEEP);
+	pDevice->SetRenderState(D3DRS_STENCILZFAIL, D3DSTENCILOP_KEEP);
+
 	static WORD indices[] = {
 		0, 1, 3, 2, 3, 1
 	};
+
+	pDevice->SetRenderState(D3DRS_STENCILENABLE, 1);
 
 	for (size_t i = 0; i < renderTargets.size(); i++)
 	{
@@ -325,6 +461,8 @@ void InGameRenderer::DrawRenderTargets(IDirect3DDevice9* pDevice)
 
 		pDevice->SetRenderState(D3DRS_ZENABLE, renderTargets[i].bRespectDepth);
 
+		pDevice->SetRenderState(D3DRS_STENCILFUNC, renderTargets[i].bRespectStencil ? D3DCMP_EQUAL : D3DCMP_NOTEQUAL);
+
 		pDevice->SetTexture(0, renderTargets[i].texture);
 
 		pDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0, 4, 2, indices, D3DFMT_INDEX16, vertices, sizeof(VertexDataTex));
@@ -339,6 +477,7 @@ void InGameRenderer::DrawPolygons(IDirect3DDevice9* pDevice)
 	}
 
 	pDevice->SetRenderState(D3DRS_ZENABLE, true);
+	pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
 	pDevice->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
 	pDevice->SetTransform(D3DTS_WORLD, &world);
 	pDevice->SetTransform(D3DTS_VIEW, &view);
@@ -350,8 +489,19 @@ void InGameRenderer::DrawPolygons(IDirect3DDevice9* pDevice)
 	}
 	pDevice->SetRenderState(D3DRS_ZENABLE, false);
 
+	pDevice->SetRenderState(D3DRS_STENCILREF, 1);
+	pDevice->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
+	pDevice->SetRenderState(D3DRS_STENCILMASK, 0xFFFFFFFF);
+	pDevice->SetRenderState(D3DRS_STENCILWRITEMASK, 0XFFFFFFFF);
+	pDevice->SetRenderState(D3DRS_STENCILFAIL, D3DSTENCILOP_KEEP);
+	pDevice->SetRenderState(D3DRS_STENCILZFAIL, D3DSTENCILOP_KEEP);
+	pDevice->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_REPLACE);
+
 	for (Polygon polygon : polygons)
 	{
+
+		pDevice->SetRenderState(D3DRS_STENCILENABLE, polygon.bIsStencil);
+
 		pDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, polygon.vertices.size() - 2, polygon.vertices.data(), sizeof(VertexData3D));
 	}
 }

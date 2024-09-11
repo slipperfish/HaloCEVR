@@ -38,7 +38,6 @@ public:
 	struct IDirect3DTexture9* GetScopeTexture();
 	void SetMouseVisibility(bool bIsVisible) {}
 	void SetCrosshairTransform(class Matrix4& newTransform);
-	void SetScopeTransform(class Matrix4& newTransform, bool bIsVisible);
 	void UpdateInputs();
 	InputBindingID RegisterBoolInput(std::string set, std::string action);
 	InputBindingID RegisterVector2Input(std::string set, std::string action);

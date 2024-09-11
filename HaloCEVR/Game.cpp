@@ -1,4 +1,4 @@
-#define EMULATE_VR 1
+#define EMULATE_VR 0
 #include "Game.h"
 #include "Logger.h"
 #include "Hooking/Hooks.h"
@@ -270,6 +270,30 @@ bool Game::PreDrawScope(Renderer* renderer, float deltaTime)
 void Game::PostDrawScope(Renderer* renderer, float deltaTime)
 {
 	RestoreRenderTargets();
+
+	Vector2 innerSize = Vector2(0.0f, 0.0f);
+	Vector2 size = Vector2(static_cast<float>(vr->GetScopeWidth()), static_cast<float>(vr->GetScopeHeight()));
+	Vector2 centre = size / 2;
+	int sides = 32;
+	float radius = size.y * 0.25f;
+	D3DCOLOR color = D3DCOLOR_ARGB(255, 0, 0, 0);
+
+	scopeRenderer.ExtractMatrices(renderer);
+
+	// Sniper scope is a rounded square, so we need to separate the quadrants and change the radius
+	if (weaponHandler.IsSniperScope())
+	{
+		radius = size.y * 0.03125f;
+		const float scopeWidth = 0.605f * size.x - radius * 2.0f;
+		const float scopeHeight = 0.505f * size.y - radius * 2.0f;
+		innerSize = Vector2(scopeWidth, scopeHeight);
+	}
+
+	scopeRenderer.DrawInvertedShape2D(centre, innerSize, size, sides, radius, color);
+
+	scopeRenderer.Render(Helpers::GetDirect3DDevice9());
+	scopeRenderer.PostRender();
+
 }
 
 void Game::PreDrawMirror(struct Renderer* renderer, float deltaTime)
@@ -487,20 +511,26 @@ void Game::PostDrawLoading(int param1, struct Renderer* renderer)
 	Helpers::GetRenderTargets()[1].renderSurface = uiRealSurface;
 }
 
-void Game::PreDrawCrosshair(short* anchorLocation)
+bool Game::PreDrawCrosshair(short* anchorLocation)
 {
 	// Draw things normally for the scope
 	if (GetRenderState() == ERenderState::SCOPE)
 	{
-		return;
+		return true;
 	}
 
 	crosshairRealSurface = Helpers::GetRenderTargets()[1].renderSurface;
 	if (anchorLocation && *anchorLocation == 4) // Centre = 4
 	{
+		if (realZoom != -1)
+		{
+			return false;
+		}
 		Helpers::GetRenderTargets()[1].renderSurface = crosshairSurface;
 		Helpers::GetDirect3DDevice9()->SetRenderTarget(0, crosshairSurface);
 	}
+
+	return true;
 }
 
 void Game::PostDrawCrosshair()
@@ -668,12 +698,12 @@ void Game::SetupConfigs()
 	c_SnapTurn = config.RegisterBool("SnapTurn", "The look input will instantly rotate the view by a fixed amount, rather than smoothly rotating", true);
 	c_SnapTurnAmount = config.RegisterFloat("SnapTurnAmount", "Rotation in degrees a single snap turn will rotate the view by", 45.0f);
 	c_SmoothTurnAmount = config.RegisterFloat("SmoothTurnAmount", "Rotation in degrees per second the view will turn at when not using snap turning", 90.0f);
-	c_LeftHandFlashlightDistance = config.RegisterFloat("LeftHandFlashlight", "Bringing the left hand within this distance of the head will toggle the flashlight (<0 to disable)", 0.2f);
+	c_LeftHandFlashlightDistance = config.RegisterFloat("LeftHandFlashlight", "Bringing the left hand within this distance of the head will toggle the flashlight (<0 to disable)", 0.3f);
 	c_RightHandFlashlightDistance = config.RegisterFloat("RightHandFlashlight", "Bringing the right hand within this distance of the head will toggle the flashlight (<0 to disable)", -1.0f);
 	c_ControllerOffset = config.RegisterVector3("ControllerOffset", "Offset from the controller's position used when calculating the in game hand position", Vector3(-0.045f, 0.01f, 0.0f));
 	c_ControllerRotation = config.RegisterVector3("ControllerRotation", "Rotation added to the controller when calculating the in game hand rotation", Vector3(0.0f, 0.0f, 0.0f));
 	c_ScopeRenderScale = config.RegisterFloat("ScopeRenderScale", "Size of the scope render target, expressed as a proportion of the headset's render scale (e.g. 0.5 = half resolution)", 0.75f);
-	c_ScopeScale = config.RegisterFloat("ScopeScale", "Width of the scope view in metres", 0.1f);
+	c_ScopeScale = config.RegisterFloat("ScopeScale", "Width of the scope view in metres", 0.05f);
 	c_ScopeOffsetPistol = config.RegisterVector3("ScopeOffsetPistol", "Offset of the scope view relative to the pistol's location", Vector3(-0.1f, 0.0f, 0.15f));
 	c_ScopeOffsetSniper = config.RegisterVector3("ScopeOffsetSniper", "Offset of the scope view relative to the pistol's location", Vector3(-0.15f, 0.0f, 0.15f));
 	c_ScopeOffsetRocket = config.RegisterVector3("ScopeOffsetRocket", "Offset of the scope view relative to the pistol's location", Vector3(0.1f, 0.2f, 0.1f));
@@ -706,7 +736,7 @@ void Game::SetupConfigs()
 		mirrorSource = ERenderState::LEFT_EYE;
 	}
 
-	Logger::log << "[Config] Loaded configs" << std::endl;
+	//Logger::log << "[Config] Loaded configs" << std::endl;
 }
 
 void Game::CalcFPS(float deltaTime)
@@ -771,7 +801,7 @@ void Game::UpdateCrosshairAndScope()
 
 	if (!bHasScope)
 	{
-		vr->SetScopeTransform(overlayTransform, false);
+		SetScopeTransform(overlayTransform, false);
 		return;
 	}
 
@@ -780,7 +810,44 @@ void Game::UpdateCrosshairAndScope()
 
 	fixupRotation(overlayTransform, aimPos);
 
-	vr->SetScopeTransform(overlayTransform, true);
+	SetScopeTransform(overlayTransform, true);
+}
+
+void Game::SetScopeTransform(Matrix4& newTransform, bool bIsVisible)
+{
+	if (!bIsVisible)
+	{
+		return;
+	}
+
+	Vector3 scopeUp = newTransform.getForwardAxis();
+	Vector3 scopeFacing = -newTransform.getLeftAxis();
+
+	Vector3 pos = (newTransform * Vector3(0.0f, 0.0f, 0.0f)) * MetresToWorld(1.0f) + Helpers::GetCamera().position;
+	Matrix3 rot;
+	Vector2 size(1.0f, 0.75f);
+	size *= MetresToWorld(GetScopeSize());
+
+	newTransform.translate(-pos);
+	newTransform.rotate(90.0f, newTransform.getLeftAxis());
+	newTransform.rotate(-90.0f, newTransform.getUpAxis());
+	newTransform.rotate(-90.0f, newTransform.getLeftAxis());
+
+	for (int i = 0; i < 3; i++)
+	{
+		rot.setColumn(i, &newTransform.get()[i * 4]);
+	}
+
+	inGameRenderer.DrawPolygon(pos, scopeFacing, scopeUp, 32, MetresToWorld(GetScopeSize() * 0.5f), D3DCOLOR_ARGB(0, 0, 0, 0), false);
+
+	float SCOPE_DEPTH = 0.2f;
+	// 4x scales pistol scope to full size, 4/3 accounts for aspect ratio
+	float SCOPE_INNER_SCALE = 4.0f * 4.0f / 3.0f;//8.0f;
+
+	pos = pos - scopeFacing * MetresToWorld(SCOPE_DEPTH);
+	size *= SCOPE_INNER_SCALE;
+
+	inGameRenderer.DrawRenderTarget(vr->GetScopeTexture(), pos, rot, size, false, true);
 }
 
 void Game::StoreRenderTargets()

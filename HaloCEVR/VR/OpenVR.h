@@ -38,7 +38,6 @@ public:
 	IDirect3DTexture9* GetScopeTexture() override;
 	void SetMouseVisibility(bool bIsVisible) override;
 	void SetCrosshairTransform(class Matrix4& newTransform) override;
-	void SetScopeTransform(class Matrix4& newTransform, bool bIsVisible) override;
 	void UpdateInputs() override;
 	InputBindingID RegisterBoolInput(std::string set, std::string action) override;
 	InputBindingID RegisterVector2Input(std::string set, std::string action) override;

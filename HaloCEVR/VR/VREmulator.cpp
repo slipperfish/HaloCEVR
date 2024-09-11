@@ -189,31 +189,6 @@ void VREmulator::SetCrosshairTransform(Matrix4& newTransform)
 	Game::instance.inGameRenderer.DrawRenderTarget(crosshairTexture, pos, rot, size, false);
 }
 
-void VREmulator::SetScopeTransform(Matrix4& newTransform, bool bIsVisible)
-{
-	if (!bIsVisible)
-	{
-		return;
-	}
-
-	Vector3 pos = (newTransform * Vector3(0.0f, 0.0f, 0.0f)) * Game::instance.MetresToWorld(1.0f) + Helpers::GetCamera().position;
-	Matrix3 rot;
-	Vector2 size(1.0f, 0.75f);
-	size *= Game::instance.MetresToWorld(Game::instance.GetScopeSize());
-
-	newTransform.translate(-pos);
-	newTransform.rotate(90.0f, newTransform.getLeftAxis());
-	newTransform.rotate(-90.0f, newTransform.getUpAxis());
-	newTransform.rotate(-90.0f, newTransform.getLeftAxis());
-
-	for (int i = 0; i < 3; i++)
-	{
-		rot.setColumn(i, &newTransform.get()[i * 4]);
-	}
-
-	Game::instance.inGameRenderer.DrawRenderTarget(scopeTexture, pos, rot, size, false);
-}
-
 void VREmulator::UpdateInputs()
 {
 	for (size_t i = 0; i < arraySize(bindings); i++)

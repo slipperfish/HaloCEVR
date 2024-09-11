@@ -26,6 +26,8 @@ public:
 	bool GetLocalWeaponScope(Vector3& outPosition, Vector3& outAim, Vector3& upDir) const;
 	bool GetWorldWeaponScope(Vector3& outPosition, Vector3& outAim, Vector3& upDir) const;
 
+	bool IsSniperScope() const;
+
 	Vector3 localOffset;
 	Vector3 localRotation;
 

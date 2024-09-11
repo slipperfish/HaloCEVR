@@ -10,10 +10,11 @@ class InGameRenderer
 public:
 	// Debug API functions
 	void DrawLine2D(struct Vector2& start, struct Vector2& end, D3DCOLOR color);
+	void DrawInvertedShape2D(struct Vector2& centre, struct Vector2& innerSize, struct Vector2& size, int sides, float radius, D3DCOLOR color);
 	void DrawLine3D(struct Vector3& start, struct Vector3& end, D3DCOLOR color, bool bRespectDepth = true, float thickness = 0.05f);
 	void DrawPolygon(struct Vector3& centre, struct Vector3& facing, struct Vector3& upVector, int sides, float radius, D3DCOLOR color, bool bRespectDepth = true, float angleAmount = 1.0f);
 	void DrawCoordinate(struct Vector3& pos, class Matrix3& rot, float size = 0.05f, bool bRespectDepth = true);
-	void DrawRenderTarget(struct IDirect3DTexture9* renderTarget, struct Vector3& pos, class Matrix3& rot, struct Vector2& size, bool bRespectDepth = true);
+	void DrawRenderTarget(struct IDirect3DTexture9* renderTarget, struct Vector3& pos, class Matrix3& rot, struct Vector2& size, bool bRespectDepth = true, bool bRespectStencil = false);
 
 	// Core functions
 	void ExtractMatrices(struct Renderer* playerRenderer);
@@ -24,6 +25,7 @@ public:
 protected:
 
 	void Draw2DLines(struct IDirect3DDevice9* pDevice);
+	void Draw2DPolygons(struct IDirect3DDevice9* pDevice);
 	void Draw3DLines(struct IDirect3DDevice9* pDevice);
 	void DrawRenderTargets(struct IDirect3DDevice9* pDevice);
 	void DrawPolygons(struct IDirect3DDevice9* pDevice);
@@ -55,11 +57,18 @@ protected:
 		Vector2 size;
 		struct IDirect3DTexture9* texture;
 		bool bRespectDepth;
+		bool bRespectStencil;
 	};
 
 	struct Polygon
 	{
+		bool bIsStencil;
 		std::vector<VertexData3D> vertices;
+	};
+
+	struct Polygon2D
+	{
+		std::vector<VertexData2D> vertices;
 	};
 
 	VertexData2D vertices2D[MAX_LINES];
@@ -68,6 +77,7 @@ protected:
 	int vertex3DCount = 0;
 
 	std::vector<VertexData2D> lines2D;
+	std::vector<Polygon2D> polygons2D;
 	std::vector<VertexData3D> lines3D;
 	std::vector<VertexData3D> depthLines3D;
 	std::vector<RenderTarget> renderTargets;
