@@ -6,7 +6,7 @@
 
 //================================//Debug API//================================//
 
-void InGameRenderer::DrawLine2D(Vector2& start, Vector2& end, D3DCOLOR color)
+void InGameRenderer::DrawLine2D(const Vector2& start, const Vector2& end, D3DCOLOR color)
 {
 	VertexData2D startData
 	{
@@ -31,7 +31,7 @@ void InGameRenderer::DrawLine2D(Vector2& start, Vector2& end, D3DCOLOR color)
 	lines2D.push_back(endData);
 }
 
-void InGameRenderer::DrawInvertedShape2D(Vector2& centre, Vector2& innerSize, Vector2& size, int sides, float radius, D3DCOLOR color)
+void InGameRenderer::DrawInvertedShape2D(const Vector2& centre, const Vector2& innerSize, const Vector2& size, int sides, float radius, D3DCOLOR color)
 {
 	// Draw quarter shape for each corner
 	int qSides = sides / 4;
@@ -46,12 +46,12 @@ void InGameRenderer::DrawInvertedShape2D(Vector2& centre, Vector2& innerSize, Ve
 		color
 	};
 
-	auto DrawQuadrantInner = [&](Polygon2D& polygon, float offset = 0.0f)
+	auto DrawQuadrantInner = [&](Polygon2D& polygon, Vector2 quadCentre, float offset = 0.0f)
 		{
 			for (int i = 0; i <= qSides; i++)
 			{
 				float angle = increment * i - offset;
-				Vector2 newPoint = centre + Vector2(sin(angle), -cos(angle)) * radius;
+				Vector2 newPoint = quadCentre + Vector2(sin(angle), -cos(angle)) * radius;
 
 				vertex.x = newPoint.x;
 				vertex.y = newPoint.y;
@@ -59,7 +59,7 @@ void InGameRenderer::DrawInvertedShape2D(Vector2& centre, Vector2& innerSize, Ve
 			}
 		};
 
-	auto DrawQuadrant = [&](Vector2 corner, Vector2 startEdge, Vector2 endEdge, int i)
+	auto DrawQuadrant = [&](Vector2 corner, Vector2 quadCentre, Vector2 startEdge, Vector2 endEdge, int i)
 		{
 			Polygon2D polygon;
 			// Corner vertex
@@ -72,7 +72,7 @@ void InGameRenderer::DrawInvertedShape2D(Vector2& centre, Vector2& innerSize, Ve
 			polygon.vertices.push_back(vertex);
 
 			// Quadrant
-			DrawQuadrantInner(polygon, quarterCircle * i);
+			DrawQuadrantInner(polygon, quadCentre, quarterCircle * i);
 
 			// Vertex on edge, near quadrant end
 			vertex.x = endEdge.x;
@@ -106,32 +106,32 @@ void InGameRenderer::DrawInvertedShape2D(Vector2& centre, Vector2& innerSize, Ve
 			polygons2D.push_back(polygon);
 		};
 
-	Vector2 trueCentre = centre;
+	Vector2 tempCentre = centre;
 	Vector2 halfInner = innerSize / 2;
 	Vector2 topLeft, bottomRight;
 
-	centre = trueCentre + Vector2(-halfInner.x, -halfInner.y);
-	bottomRight = Vector2(centre.x, 0.0f);
-	DrawQuadrant(Vector2(0.0f, 0.0f), Vector2(centre.x, 0.0f), Vector2(0.0f, centre.y), 0);
-	topLeft = Vector2(0.0f, centre.y);
+	tempCentre = centre + Vector2(-halfInner.x, -halfInner.y);
+	bottomRight = Vector2(tempCentre.x, 0.0f);
+	DrawQuadrant(Vector2(0.0f, 0.0f), centre, Vector2(tempCentre.x, 0.0f), Vector2(0.0f, tempCentre.y), 0);
+	topLeft = Vector2(0.0f, tempCentre.y);
 
-	centre = trueCentre + Vector2(-halfInner.x, +halfInner.y);
-	DrawConnector(topLeft, Vector2(centre.x - radius, centre.y));
-	topLeft = Vector2(centre.x, centre.y + radius);
-	DrawQuadrant(Vector2(0.0f, size.y), Vector2(0.0f, centre.y), Vector2(centre.x, size.y), 1);
+	tempCentre = centre + Vector2(-halfInner.x, +halfInner.y);
+	DrawConnector(topLeft, Vector2(tempCentre.x - radius, tempCentre.y));
+	topLeft = Vector2(tempCentre.x, tempCentre.y + radius);
+	DrawQuadrant(Vector2(0.0f, size.y), centre, Vector2(0.0f, tempCentre.y), Vector2(tempCentre.x, size.y), 1);
 
-	centre = trueCentre + Vector2(+halfInner.x, +halfInner.y);
-	DrawConnector(topLeft, Vector2(centre.x, size.y));
-	topLeft = Vector2(size.x, centre.y);
-	DrawQuadrant(size, Vector2(centre.x, size.y), Vector2(size.x, centre.y), 2);
+	tempCentre = centre + Vector2(+halfInner.x, +halfInner.y);
+	DrawConnector(topLeft, Vector2(tempCentre.x, size.y));
+	topLeft = Vector2(size.x, tempCentre.y);
+	DrawQuadrant(size, centre, Vector2(tempCentre.x, size.y), Vector2(size.x, tempCentre.y), 2);
 
-	centre = trueCentre + Vector2(+halfInner.x, -halfInner.y);
-	DrawQuadrant(Vector2(size.x, 0.0f), Vector2(size.x, centre.y), Vector2(centre.x, 0.0f), 3);
-	DrawConnector(topLeft, Vector2(centre.x + radius, centre.y));
-	DrawConnector(Vector2(centre.x, centre.y - radius), bottomRight);
+	tempCentre = centre + Vector2(+halfInner.x, -halfInner.y);
+	DrawQuadrant(Vector2(size.x, 0.0f), centre, Vector2(size.x, tempCentre.y), Vector2(tempCentre.x, 0.0f), 3);
+	DrawConnector(topLeft, Vector2(tempCentre.x + radius, tempCentre.y));
+	DrawConnector(Vector2(tempCentre.x, tempCentre.y - radius), bottomRight);
 }
 
-void InGameRenderer::DrawLine3D(Vector3& start, Vector3& end, D3DCOLOR color, bool bRespectDepth, float thickness)
+void InGameRenderer::DrawLine3D(const Vector3& start, const Vector3& end, D3DCOLOR color, bool bRespectDepth, float thickness)
 {
 	VertexData3D startData
 	{
@@ -168,7 +168,7 @@ void InGameRenderer::DrawLine3D(Vector3& start, Vector3& end, D3DCOLOR color, bo
 	}
 }
 
-void InGameRenderer::DrawPolygon(Vector3& centre, Vector3& facing, Vector3& upVector, int sides, float radius, D3DCOLOR color, bool bRespectDepth, float angleAmount)
+void InGameRenderer::DrawPolygon(const Vector3& centre, const Vector3& facing, const Vector3& upVector, int sides, float radius, D3DCOLOR color, bool bRespectDepth, float angleAmount)
 {
 	Polygon newPoly;
 
@@ -239,7 +239,7 @@ void InGameRenderer::DrawPolygon(Vector3& centre, Vector3& facing, Vector3& upVe
 	}
 }
 
-void InGameRenderer::DrawCoordinate(Vector3& pos, Matrix3& rot, float size, bool bRespectDepth)
+void InGameRenderer::DrawCoordinate(const Vector3& pos, const Matrix3& rot, float size, bool bRespectDepth)
 {
 	Vector3 up = pos + rot * Vector3(0.0f, 0.0f, size);
 	Vector3 forward = pos + rot * Vector3(0.0f, size, 0.0f);
@@ -250,7 +250,7 @@ void InGameRenderer::DrawCoordinate(Vector3& pos, Matrix3& rot, float size, bool
 	DrawLine3D(pos, left, D3DCOLOR_XRGB(255, 0, 0), bRespectDepth, 0.01f);
 }
 
-void InGameRenderer::DrawRenderTarget(IDirect3DTexture9* renderTarget, Vector3& pos, Matrix3& rot, Vector2& size, bool bRespectDepth, bool bRespectStencil)
+void InGameRenderer::DrawRenderTarget(IDirect3DTexture9* renderTarget, const Vector3& pos, const Matrix3& rot, const Vector2& size, bool bRespectDepth, bool bRespectStencil)
 {
 	RenderTarget rtData
 	{

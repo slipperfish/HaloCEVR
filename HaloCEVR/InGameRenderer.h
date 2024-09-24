@@ -9,12 +9,12 @@ class InGameRenderer
 {
 public:
 	// Debug API functions
-	void DrawLine2D(struct Vector2& start, struct Vector2& end, D3DCOLOR color);
-	void DrawInvertedShape2D(struct Vector2& centre, struct Vector2& innerSize, struct Vector2& size, int sides, float radius, D3DCOLOR color);
-	void DrawLine3D(struct Vector3& start, struct Vector3& end, D3DCOLOR color, bool bRespectDepth = true, float thickness = 0.05f);
-	void DrawPolygon(struct Vector3& centre, struct Vector3& facing, struct Vector3& upVector, int sides, float radius, D3DCOLOR color, bool bRespectDepth = true, float angleAmount = 1.0f);
-	void DrawCoordinate(struct Vector3& pos, class Matrix3& rot, float size = 0.05f, bool bRespectDepth = true);
-	void DrawRenderTarget(struct IDirect3DTexture9* renderTarget, struct Vector3& pos, class Matrix3& rot, struct Vector2& size, bool bRespectDepth = true, bool bRespectStencil = false);
+	void DrawLine2D(const struct Vector2& start, const struct Vector2& end, D3DCOLOR color);
+	void DrawInvertedShape2D (const struct Vector2& centre, const struct Vector2& innerSize, const struct Vector2& size, int sides, float radius, D3DCOLOR color);
+	void DrawLine3D(const struct Vector3& start, const struct Vector3& end, D3DCOLOR color, bool bRespectDepth = true, float thickness = 0.05f);
+	void DrawPolygon(const struct Vector3& centre, const struct Vector3& facing, const struct Vector3& upVector, int sides, float radius, D3DCOLOR color, bool bRespectDepth = true, float angleAmount = 1.0f);
+	void DrawCoordinate(const struct Vector3& pos, const class Matrix3& rot, float size = 0.05f, bool bRespectDepth = true);
+	void DrawRenderTarget(struct IDirect3DTexture9* renderTarget, const struct Vector3& pos, const class Matrix3& rot, const struct Vector2& size, bool bRespectDepth = true, bool bRespectStencil = false);
 
 	// Core functions
 	void ExtractMatrices(struct Renderer* playerRenderer);
