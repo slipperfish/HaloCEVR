@@ -98,6 +98,7 @@ void Game::OnInitDirectX()
 	CreateTextureAndSurface(desc.Width / 2, desc.Height / 2, desc.Usage, desc.Format, &scopeSurfaces[2], &scopeTextures[2]);
 }
 
+#pragma optimize("", off)
 void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 {
 	lastDeltaTime = deltaTime;
@@ -165,8 +166,46 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 		inGameRenderer.DrawPolygon(position, upVector, forwardVector, 8, MetresToWorld(0.25f), D3DCOLOR_ARGB(50, 85, 250, 239), false);
 	}
 
+#if 0
+	// Debug draw controller position (why, oh why, does steamvr make getting a consistent controller position/orientation so hard?)
+	Matrix4 controller = vr->GetControllerTransform(ControllerRole::Right);
+
+	Matrix3 handRotation3;
+
+	for (int i = 0; i < 3; i++)
+	{
+		handRotation3.setColumn(i, &controller.get()[i * 4]);
+	}
+
+	Vector3 worldPos = Helpers::GetCamera().position;
+
+	inGameRenderer.DrawCoordinate(controller * Vector3(0.0f, 0.0f, 0.0f) * MetresToWorld(1.0f) + worldPos, handRotation3, 0.05f, false);
+
+	for (int i = 0; i < 31; i++)
+	{
+		Matrix4 bone = vr->GetControllerBoneTransform(ControllerRole::Right, i);
+
+		for (int i = 0; i < 3; i++)
+		{
+			handRotation3.setColumn(i, &bone.get()[i * 4]);
+		}
+
+		inGameRenderer.DrawCoordinate(bone * Vector3(0.0f, 0.0f, 0.0f) * MetresToWorld(1.0f) + worldPos, handRotation3, i == 1 ? 0.05f : 0.005f, false);
+	}
+
+	controller = vr->GetControllerTransform(ControllerRole::Right);
+
+	for (int i = 0; i < 3; i++)
+	{
+		handRotation3.setColumn(i, &controller.get()[i * 4]);
+	}
+
+	inGameRenderer.DrawCoordinate(controller * Vector3(0.0f, 0.0f, 0.0f) * MetresToWorld(1.0f) + worldPos, handRotation3, 0.05f, false);
+#endif
+
 	vr->PreDrawFrame(renderer, deltaTime);
 }
+#pragma optimize("", on)
 
 void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
 {

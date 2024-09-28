@@ -89,6 +89,16 @@
             "name": "/actions/default/in/Move",
             "requirement": "suggested",
             "type": "vector2"
+        },
+        {
+            "name": "/actions/default/in/LeftHand",
+            "type": "skeleton",
+            "skeleton": "/skeleton/hand/left"
+        },
+        {
+            "name": "/actions/default/in/RightHand",
+            "type": "skeleton",
+            "skeleton": "/skeleton/hand/right"
         }
     ],
     "action_sets": [

@@ -29,6 +29,7 @@ public:
 	float GetYawOffset() override;
 	Matrix4 GetHMDTransform(bool bRenderPose = false) override;
 	Matrix4 GetControllerTransform(ControllerRole Role, bool bRenderPose = false) override;
+	Matrix4 GetControllerBoneTransform(ControllerRole Role, int bone, bool bRenderPose = false) override;
 	Vector3 GetControllerVelocity(ControllerRole Role, bool bRenderPose = false) override;
 	IDirect3DSurface9* GetRenderSurface(int eye) override;
 	IDirect3DTexture9* GetRenderTexture(int eye) override;
@@ -51,6 +52,7 @@ public:
 protected:
 	void CreateTexAndSurface(int index, UINT Width, UINT Height, DWORD Usage, D3DFORMAT Format);
 	void PositionOverlay();
+	void UpdateSkeleton(ControllerRole hand);
 
 	vr::IVRSystem* vrSystem;
 	vr::IVRCompositor* vrCompositor;
@@ -82,6 +84,12 @@ protected:
 	vr::TrackedDevicePose_t gamePoses[vr::k_unMaxTrackedDeviceCount];
 	vr::TrackedDevicePose_t renderPoses[vr::k_unMaxTrackedDeviceCount];
 
+	// Most recent skeletal data for hand pose
+	vr::VRBoneTransform_t bones[2][31];
+	// Cached wrist offset for automatic hand offset calculation (known good location)
+	vr::VRBoneTransform_t cachedWrists[2];
+	bool bHasCachedWrists[2] = { false, false };
+
 	static constexpr int uiSurface = 2;
 	static constexpr int crosshairSurface = 3;
 	static constexpr int scopeSurface = 4;
@@ -93,6 +101,8 @@ protected:
 
 	ID3D11Texture2D* vrRenderTexture[5];
 
+	vr::VRActionHandle_t leftHandSkeleton;
+	vr::VRActionHandle_t rightHandSkeleton;
 
 	Matrix4 ConvertSteamVRMatrixToMatrix4(const vr::HmdMatrix34_t& matPose)
 	{

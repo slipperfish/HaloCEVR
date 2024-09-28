@@ -50,6 +50,9 @@ for v in vec1Actions:
 for v in vec2Actions:
     manifest["actions"].append({"name" : "/actions/default/in/" + v, "requirement" : "suggested", "type" : "vector2"})
 
+manifest["actions"].append({"name" : "/actions/default/in/LeftHand", "type" : "skeleton", "skeleton": "/skeleton/hand/left"})
+manifest["actions"].append({"name" : "/actions/default/in/RightHand", "type" : "skeleton", "skeleton": "/skeleton/hand/right"})
+
 try:
     with open("actions.json", "w") as f:
         f.write(json.dumps(manifest, indent=4))
@@ -74,6 +77,9 @@ for c in controllers:
         "app_key" : "system.generated.halo.exe",
         "name" : c
     }
+    
+    controller["bindings"]["/actions/default"]["skeleton"].append({"output" : "/actions/default/in/LeftHand", "path" : "/user/hand/left/input/skeleton/left"})
+    controller["bindings"]["/actions/default"]["skeleton"].append({"output" : "/actions/default/in/RightHand", "path" : "/user/hand/right/input/skeleton/right"})
     
     for binding in bindings:
         b = bindings[binding]

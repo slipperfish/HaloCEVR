@@ -116,7 +116,16 @@
                     "parameters": {}
                 }
             ],
-            "skeleton": []
+            "skeleton": [
+                {
+                    "output": "/actions/default/in/LeftHand",
+                    "path": "/user/hand/left/input/skeleton/left"
+                },
+                {
+                    "output": "/actions/default/in/RightHand",
+                    "path": "/user/hand/right/input/skeleton/right"
+                }
+            ]
         }
     },
     "controller_type": "knuckles",

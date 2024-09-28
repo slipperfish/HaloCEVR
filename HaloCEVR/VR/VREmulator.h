@@ -29,6 +29,7 @@ public:
 	float GetYawOffset() { return 0.0f; }
 	Matrix4 GetHMDTransform(bool bRenderPose = false) { return Matrix4(); }
 	Matrix4 GetControllerTransform(ControllerRole Role, bool bRenderPose = false);
+	Matrix4 GetControllerBoneTransform(ControllerRole Role, int bone, bool bRenderPose = false);
 	Vector3 GetControllerVelocity(ControllerRole Role, bool bRenderPose = false);
 	struct IDirect3DSurface9* GetRenderSurface(int eye);
 	struct IDirect3DTexture9* GetRenderTexture(int eye);

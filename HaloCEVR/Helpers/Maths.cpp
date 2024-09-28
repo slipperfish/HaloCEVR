@@ -19,14 +19,15 @@ void Helpers::MakeTransformFromXZ(const Vector3* facingVector, const Vector3* up
 
 void Helpers::MakeTransformFromQuat(const Vector4* quaternion, Transform* outTransform)
 {
-	float fVar1;
-	float fVar2;
-	float fVar3;
-	float fVar4;
-	float fVar5;
-	float fVar6;
-	float fVar7;
-	float fVar8;
+	float twoZZ;
+	float twoXW;
+	float twoYW;
+	float twoZW;
+	float twoXX;
+	float twoXY;
+	float twoXZ;
+	float twoYY;
+	float twoYZ;
 	float twoOverLength;
 
 	float len = quaternion->w * quaternion->w + quaternion->z * quaternion->z + quaternion->y * quaternion->y + quaternion->x * quaternion->x;
@@ -39,28 +40,28 @@ void Helpers::MakeTransformFromQuat(const Vector4* quaternion, Transform* outTra
 	float twoX = twoOverLength * quaternion->x;
 	float twoY = twoOverLength * quaternion->y;
 	float twoZ = twoOverLength * quaternion->z;
-	fVar2 = twoX * quaternion->w;
-	fVar3 = twoY * quaternion->w;
-	fVar4 = twoZ * quaternion->w;
-	len = twoX * quaternion->x;
-	fVar5 = twoY * quaternion->x;
-	fVar6 = twoZ * quaternion->x;
-	fVar7 = twoY * quaternion->y;
-	fVar8 = twoZ * quaternion->y;
-	fVar1 = twoZ * quaternion->z;
+	twoXW = twoX * quaternion->w;
+	twoYW = twoY * quaternion->w;
+	twoZW = twoZ * quaternion->w;
+	twoXX = twoX * quaternion->x;
+	twoXY = twoY * quaternion->x;
+	twoXZ = twoZ * quaternion->x;
+	twoYY = twoY * quaternion->y;
+	twoYZ = twoZ * quaternion->y;
+	twoZZ = twoZ * quaternion->z;
 	outTransform->scale = 1.0f;
 	(outTransform->translation).x = 0.0f;
 	(outTransform->translation).y = 0.0f;
 	(outTransform->translation).z = 0.0f;
-	outTransform->rotation[0] = 1.0f - (fVar7 + fVar1);
-	outTransform->rotation[1] = fVar5 - fVar4;
-	outTransform->rotation[2] = fVar6 + fVar3;
-	outTransform->rotation[3] = fVar5 + fVar4;
-	outTransform->rotation[4] = 1.0f - (fVar1 + len);
-	outTransform->rotation[5] = fVar8 - fVar2;
-	outTransform->rotation[6] = fVar6 - fVar3;
-	outTransform->rotation[7] = fVar8 + fVar2;
-	outTransform->rotation[8] = 1.0f - (fVar7 + len);
+	outTransform->rotation[0] = 1.0f - (twoYY + twoZZ);
+	outTransform->rotation[1] = twoXY - twoZW;
+	outTransform->rotation[2] = twoXZ + twoYW;
+	outTransform->rotation[3] = twoXY + twoZW;
+	outTransform->rotation[4] = 1.0f - (twoZZ + twoXX);
+	outTransform->rotation[5] = twoYZ - twoXW;
+	outTransform->rotation[6] = twoXZ - twoYW;
+	outTransform->rotation[7] = twoYZ + twoXW;
+	outTransform->rotation[8] = 1.0f - (twoYY + twoXX);
 }
 
 void Helpers::CombineTransforms(const Transform* transformA, const Transform* transformB, Transform* outTransform)
