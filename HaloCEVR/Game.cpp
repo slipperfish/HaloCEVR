@@ -98,7 +98,6 @@ void Game::OnInitDirectX()
 	CreateTextureAndSurface(desc.Width / 2, desc.Height / 2, desc.Usage, desc.Format, &scopeSurfaces[2], &scopeTextures[2]);
 }
 
-#pragma optimize("", off)
 void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 {
 	lastDeltaTime = deltaTime;
@@ -205,7 +204,6 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 
 	vr->PreDrawFrame(renderer, deltaTime);
 }
-#pragma optimize("", on)
 
 void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
 {
@@ -725,29 +723,34 @@ void Game::SetupConfigs()
 {
 	Config config;
 
-	// Put all mod configs here
+	// Window settings
 	c_ShowConsole = config.RegisterBool("ShowConsole", "Create a console window at launch for debugging purposes", false);
 	c_DrawMirror = config.RegisterBool("DrawMirror", "Update the desktop window display to show the current game view, rather than leaving it on the splash screen", true);
 	c_MirrorEye = config.RegisterInt("MirrorEye", "Index of the eye to use for the mirror view  (0 = left, 1 = right)", 0);
+	// UI settings
 	c_UIOverlayDistance = config.RegisterFloat("UIOverlayDistance", "Distance in metres in front of the HMD to display the UI", 15.0f);
 	c_UIOverlayScale = config.RegisterFloat("UIOverlayScale", "Width of the UI overlay in metres", 10.0f);
 	c_UIOverlayCurvature = config.RegisterFloat("UIOverlayCurvature", "Curvature of the UI Overlay, on a scale of 0 to 1", 0.1f);
 	c_UIOverlayWidth = config.RegisterInt("UIOverlayWidth", "Width of the UI overlay in pixels", 600);
 	c_UIOverlayHeight = config.RegisterInt("UIOverlayHeight", "Height of the UI overlay in pixels", 600);
+	// Control settings
 	c_SnapTurn = config.RegisterBool("SnapTurn", "The look input will instantly rotate the view by a fixed amount, rather than smoothly rotating", true);
 	c_SnapTurnAmount = config.RegisterFloat("SnapTurnAmount", "Rotation in degrees a single snap turn will rotate the view by", 45.0f);
 	c_SmoothTurnAmount = config.RegisterFloat("SmoothTurnAmount", "Rotation in degrees per second the view will turn at when not using snap turning", 90.0f);
+	c_ToggleGrip = config.RegisterBool("ToggleGrip", "When true releasing two handed weapons requires pressing the grip action again", false);
 	c_LeftHandFlashlightDistance = config.RegisterFloat("LeftHandFlashlight", "Bringing the left hand within this distance of the head will toggle the flashlight (<0 to disable)", 0.3f);
 	c_RightHandFlashlightDistance = config.RegisterFloat("RightHandFlashlight", "Bringing the right hand within this distance of the head will toggle the flashlight (<0 to disable)", -1.0f);
-	c_ControllerOffset = config.RegisterVector3("ControllerOffset", "Offset from the controller's position used when calculating the in game hand position", Vector3(-0.045f, 0.01f, 0.0f));
+	c_MeleeSwingSpeed = config.RegisterFloat("MeleeSwingSpeed", "Minimum vertical velocity of the main hand required to initiate a melee attack in m/s", 2.5f);
+	c_CrouchHeight = config.RegisterFloat("CrouchHeight", "Minimum height to duck by in metres to automatically trigger the crouch input in game (<0 to disable)", 0.15f);
+	// Hand settings
+	c_ControllerOffset = config.RegisterVector3("ControllerOffset", "Offset from the controller's position used when calculating the in game hand position", Vector3(0.0f, 0.0f, 0.0f));
 	c_ControllerRotation = config.RegisterVector3("ControllerRotation", "Rotation added to the controller when calculating the in game hand rotation", Vector3(0.0f, 0.0f, 0.0f));
 	c_ScopeRenderScale = config.RegisterFloat("ScopeRenderScale", "Size of the scope render target, expressed as a proportion of the headset's render scale (e.g. 0.5 = half resolution)", 0.75f);
 	c_ScopeScale = config.RegisterFloat("ScopeScale", "Width of the scope view in metres", 0.05f);
 	c_ScopeOffsetPistol = config.RegisterVector3("ScopeOffsetPistol", "Offset of the scope view relative to the pistol's location", Vector3(-0.1f, 0.0f, 0.15f));
 	c_ScopeOffsetSniper = config.RegisterVector3("ScopeOffsetSniper", "Offset of the scope view relative to the pistol's location", Vector3(-0.15f, 0.0f, 0.15f));
 	c_ScopeOffsetRocket = config.RegisterVector3("ScopeOffsetRocket", "Offset of the scope view relative to the pistol's location", Vector3(0.1f, 0.2f, 0.1f));
-	c_MeleeSwingSpeed = config.RegisterFloat("MeleeSwingSpeed", "Minimum vertical velocity of the main hand required to initiate a melee attack in m/s", 2.5f);
-	c_CrouchHeight = config.RegisterFloat("CrouchHeight", "Minimum height to duck by in metres to automatically trigger the crouch input in game (<0 to disable)", 0.15f);
+	// Misc settings
 	c_ShowRoomCentre = config.RegisterBool("ShowRoomCentre", "Draw an indicator at your feet to show where the player character is actually positioned", true);
 
 	config.LoadFromFile("VR/config.txt");

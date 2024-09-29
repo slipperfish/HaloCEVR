@@ -499,7 +499,23 @@ Matrix4 OpenVR::GetHMDTransform(bool bRenderPose)
 	}
 }
 
-Matrix4 OpenVR::GetControllerTransform(ControllerRole role, bool bRenderPose)
+Matrix4 OpenVR::GetRawControllerTransform(ControllerRole role, bool bRenderPose)
+{
+	vr::TrackedDeviceIndex_t controllerIndex = vrSystem->GetTrackedDeviceIndexForControllerRole(role == ControllerRole::Left ? vr::TrackedControllerRole_LeftHand : vr::TrackedControllerRole_RightHand);
+
+	Matrix4 outMatrix;
+
+	if (bRenderPose)
+	{
+		return ConvertSteamVRMatrixToMatrix4(renderPoses[controllerIndex].mDeviceToAbsoluteTracking).translate(-positionOffset).rotateZ(-yawOffset);
+	}
+	else
+	{
+		return ConvertSteamVRMatrixToMatrix4(gamePoses[controllerIndex].mDeviceToAbsoluteTracking).translate(-positionOffset).rotateZ(-yawOffset);
+	}
+}
+
+Matrix4 OpenVR::GetControllerTransformInternal(ControllerRole role, int bone, bool bRenderPose)
 {
 	if (!vrSystem)
 	{
@@ -508,21 +524,14 @@ Matrix4 OpenVR::GetControllerTransform(ControllerRole role, bool bRenderPose)
 
 	vr::TrackedDeviceIndex_t controllerIndex = vrSystem->GetTrackedDeviceIndexForControllerRole(role == ControllerRole::Left ? vr::TrackedControllerRole_LeftHand : vr::TrackedControllerRole_RightHand);
 
-	vr::VRBoneTransform_t wristBone = cachedWrists[role == ControllerRole::Left ? 0 : 1];
+	const int roleId = role == ControllerRole::Left ? 0 : 1;
 
-	Matrix4 outMatrix;
+	vr::VRBoneTransform_t boneTransform = bone < 0 ? cachedWrists[roleId] : bones[roleId][bone];
 
-	if (bRenderPose)
-	{
-		outMatrix = ConvertSteamVRMatrixToMatrix4(renderPoses[controllerIndex].mDeviceToAbsoluteTracking).translate(-positionOffset).rotateZ(-yawOffset);
-	}
-	else
-	{
-		outMatrix = ConvertSteamVRMatrixToMatrix4(gamePoses[controllerIndex].mDeviceToAbsoluteTracking).translate(-positionOffset).rotateZ(-yawOffset);
-	}
+	Matrix4 outMatrix = GetRawControllerTransform(role, bRenderPose);
 
-	Vector3 bonePos = Vector3(wristBone.position.v[0], wristBone.position.v[1], wristBone.position.v[2]);
-	Vector4 quat = Vector4(wristBone.orientation.x, wristBone.orientation.y, wristBone.orientation.z, wristBone.orientation.w);
+	Vector3 bonePos = Vector3(boneTransform.position.v[0], boneTransform.position.v[1], boneTransform.position.v[2]);
+	Vector4 quat = Vector4(boneTransform.orientation.x, boneTransform.orientation.y, boneTransform.orientation.z, boneTransform.orientation.w);
 
 	Matrix4 boneMatrix;
 	Transform tempTransform;
@@ -556,61 +565,14 @@ Matrix4 OpenVR::GetControllerTransform(ControllerRole role, bool bRenderPose)
 	return outMatrix;
 }
 
+Matrix4 OpenVR::GetControllerTransform(ControllerRole role, bool bRenderPose)
+{
+	return GetControllerTransformInternal(role, -1, bRenderPose);
+}
+
 Matrix4 OpenVR::GetControllerBoneTransform(ControllerRole role, int bone, bool bRenderPose)
 {
-	if (!vrSystem)
-	{
-		return Matrix4();
-	}
-
-	vr::TrackedDeviceIndex_t controllerIndex = vrSystem->GetTrackedDeviceIndexForControllerRole(role == ControllerRole::Left ? vr::TrackedControllerRole_LeftHand : vr::TrackedControllerRole_RightHand);
-
-	vr::VRBoneTransform_t wristBone = bones[role == ControllerRole::Left ? 0 : 1][bone];
-
-	Matrix4 outMatrix;
-
-	if (bRenderPose)
-	{
-		outMatrix = ConvertSteamVRMatrixToMatrix4(renderPoses[controllerIndex].mDeviceToAbsoluteTracking).translate(-positionOffset).rotateZ(-yawOffset);
-	}
-	else
-	{
-		outMatrix = ConvertSteamVRMatrixToMatrix4(gamePoses[controllerIndex].mDeviceToAbsoluteTracking).translate(-positionOffset).rotateZ(-yawOffset);
-	}
-
-	Vector3 bonePos = Vector3(wristBone.position.v[0], wristBone.position.v[1], wristBone.position.v[2]);
-	Vector4 quat = Vector4(wristBone.orientation.x, wristBone.orientation.y, wristBone.orientation.z, wristBone.orientation.w);
-
-	Matrix4 boneMatrix;
-	Transform tempTransform;
-	Helpers::MakeTransformFromQuat(&quat, &tempTransform);
-
-	for (int x = 0; x < 3; x++)
-	{
-		for (int y = 0; y < 3; y++)
-		{
-			// Not sure why get is const, you can directly set the values with setrow/setcolumn anyway
-			const_cast<float*>(boneMatrix.get())[x + y * 4] = tempTransform.rotation[x + y * 3];
-		}
-	}
-
-	boneMatrix.setColumn(3, bonePos);
-
-	Matrix4 boneMatrixGame(
-		boneMatrix.get()[2 + 2 * 4], boneMatrix.get()[0 + 2 * 4], -boneMatrix.get()[1 + 2 * 4], 0.0,
-		boneMatrix.get()[2 + 0 * 4], boneMatrix.get()[0 + 0 * 4], -boneMatrix.get()[1 + 0 * 4], 0.0,
-		-boneMatrix.get()[2 + 1 * 4], -boneMatrix.get()[0 + 1 * 4], boneMatrix.get()[1 + 1 * 4], 0.0,
-		-boneMatrix.get()[2 + 3 * 4], -boneMatrix.get()[0 + 3 * 4], boneMatrix.get()[1 + 3 * 4], 1.0f
-	);
-
-	Vector3 pos = boneMatrixGame * Vector3(0.0f, 0.0f, 0.0f);
-	boneMatrixGame.translate(-pos);
-	boneMatrixGame.rotate(180.0f, boneMatrixGame * Vector3(0.0f, 0.0f, 1.0f));
-	boneMatrixGame.translate(pos);
-
-	outMatrix = outMatrix * boneMatrixGame;
-
-	return outMatrix;
+	return GetControllerTransformInternal(role, bone, bRenderPose);
 }
 
 Vector3 OpenVR::GetControllerVelocity(ControllerRole role, bool bRenderPose)

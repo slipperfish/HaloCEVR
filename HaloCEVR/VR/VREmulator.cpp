@@ -134,9 +134,14 @@ Matrix4 VREmulator::GetControllerTransform(ControllerRole role, bool bRenderPose
 	}
 }
 
-Matrix4 VREmulator::GetControllerBoneTransform(ControllerRole Role, int bone, bool bRenderPose)
+Matrix4 VREmulator::GetRawControllerTransform(ControllerRole role, bool bRenderPose)
 {
-	return GetControllerTransform(Role, bRenderPose);
+    return GetControllerTransform(role, bRenderPose);
+}
+
+Matrix4 VREmulator::GetControllerBoneTransform(ControllerRole role, int bone, bool bRenderPose)
+{
+	return GetControllerTransform(role, bRenderPose);
 }
 
 Vector3 VREmulator::GetControllerVelocity(ControllerRole Role, bool bRenderPose)

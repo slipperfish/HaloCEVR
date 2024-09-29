@@ -22,7 +22,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/default/in/SwitchGrenades"
+                            "output": "/actions/default/in/TwoHandGrip"
                         }
                     },
                     "mode": "button",
@@ -53,6 +53,16 @@
                     },
                     "mode": "button",
                     "path": "/user/hand/left/input/y",
+                    "parameters": {}
+                },
+                {
+                    "inputs": {
+                        "click": {
+                            "output": "/actions/default/in/SwitchGrenades"
+                        }
+                    },
+                    "mode": "button",
+                    "path": "/user/hand/left/input/x",
                     "parameters": {}
                 },
                 {

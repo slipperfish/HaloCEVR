@@ -23,6 +23,8 @@ protected:
 	bool bHoldingMenu = false;
 	std::chrono::time_point<std::chrono::high_resolution_clock> menuHeldTime;
 
+	bool bWasGripping = false;
+
 	InputBindingID Jump = 0;
 	InputBindingID SwitchGrenades = 0;
 	InputBindingID Interact = 0;
@@ -40,5 +42,6 @@ protected:
 	InputBindingID Look = 0;
 	
 	InputBindingID Recentre = 0;
+	InputBindingID TwoHandGrip = 0;
 };
 

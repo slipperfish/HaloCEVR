@@ -33,6 +33,7 @@ public:
 	virtual void SetYawOffset(float newOffset) = 0;
 	virtual float GetYawOffset() = 0;
 	virtual Matrix4 GetHMDTransform(bool bRenderPose = false) = 0;
+	virtual Matrix4 GetRawControllerTransform(ControllerRole role, bool bRenderPose = false) = 0;
 	virtual Matrix4 GetControllerTransform(ControllerRole role, bool bRenderPose = false) = 0;
 	virtual Matrix4 GetControllerBoneTransform(ControllerRole role, int bone, bool bRenderPose = false) = 0;
 	virtual Vector3 GetControllerVelocity(ControllerRole Role, bool bRenderPose = false) = 0;

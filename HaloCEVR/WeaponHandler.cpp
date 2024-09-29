@@ -23,13 +23,13 @@ static void ReferenceUpdateViewModelImpl(HaloID& id, Vector3* pos, Vector3* faci
 	if (animationData->NumBones > 0)
 	{
 		int lastIndex = 1;
-		int16_t processedBones[64]{};
+		int16_t bonesToProcess[64]{};
 
-		processedBones[0] = 0;
+		bonesToProcess[0] = 0;
 
 		do
 		{
-			const int16_t boneIdx = processedBones[i];
+			const int16_t boneIdx = bonesToProcess[i];
 			i++;
 			const Bone& currentBone = boneArray[boneIdx];
 			const Transform* parentTransform = boneIdx == 0 ? &root : &outBoneTransforms[currentBone.Parent];
@@ -42,12 +42,12 @@ static void ReferenceUpdateViewModelImpl(HaloID& id, Vector3* pos, Vector3* faci
 
 			if (currentBone.LeftLeaf != -1)
 			{
-				processedBones[lastIndex] = currentBone.LeftLeaf;
+				bonesToProcess[lastIndex] = currentBone.LeftLeaf;
 				lastIndex++;
 			}
 			if (currentBone.RightLeaf != -1)
 			{
-				processedBones[lastIndex] = currentBone.RightLeaf;
+				bonesToProcess[lastIndex] = currentBone.RightLeaf;
 				lastIndex++;
 			}
 
@@ -55,7 +55,7 @@ static void ReferenceUpdateViewModelImpl(HaloID& id, Vector3* pos, Vector3* faci
 	}
 }
 
-void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, Vector3* up, TransformQuat* BoneTransforms, Transform* outBoneTransforms)
+void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, Vector3* up, TransformQuat* boneTransforms, Transform* outBoneTransforms)
 {
 	Vector3& camPos = Helpers::GetCamera().position;
 
@@ -92,24 +92,28 @@ void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, V
 	}
 
 	Matrix4 handTransform;
+	CalculateHandTransform(pos, handTransform);
+
+	Transform unmodifiedHandTransform;
+	CalculateBoneTransform(cachedViewModel.rightWristIndex, boneArray, root, boneTransforms, unmodifiedHandTransform);
 
 	Transform realTransforms[64]{};
 
 	if (animationData->NumBones > 0)
 	{
 		int lastIndex = 1;
-		int16_t processedBones[64]{};
+		int16_t bonesToProcess[64]{};
 
-		processedBones[0] = 0;
+		bonesToProcess[0] = 0;
 
 		int i = 0;
 		do
 		{
-			const int16_t boneIndex = processedBones[i];
+			const int16_t boneIndex = bonesToProcess[i];
 			i++;
 			const Bone& currentBone = boneArray[boneIndex];
 			Transform* parentTransform = boneIndex == 0 ? &root : &outBoneTransforms[currentBone.Parent];
-			const TransformQuat* currentQuat = &BoneTransforms[boneIndex];
+			const TransformQuat* currentQuat = &boneTransforms[boneIndex];
 			Transform tempTransform;
 			Transform modifiedTransform;
 			// For all bones but the root sub in the ACTUAL transform for the calculations (free from scaling/transform issues)
@@ -138,20 +142,11 @@ void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, V
 			}
 			else if (boneIndex == cachedViewModel.rightWristIndex)
 			{
-				Matrix4 newTransform = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Right, true);
-				// Apply scale only to translation portion
-				Vector3 translation = newTransform * Vector3(0.0f, 0.0f, 0.0f);
-				newTransform.translate(-translation);
-				translation *= Game::MetresToWorld(1.0f);
-				translation += *pos;
-
-				newTransform.translate(translation);
-
-				handTransform = newTransform;
 
 				// TODO: Check this works for other guns
 				// Not sure if I should keep this? Rotates the hand to make the gun face forwards when controller does
 				/*
+				Matrix4 newTransform = handTransform;
 				if (currentBone.RightLeaf != -1)
 				{
 					Bone& GunBone = boneArray[currentBone.RightLeaf];
@@ -177,22 +172,46 @@ void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, V
 					}
 
 				}
+				MoveBoneToTransform(boneIndex, newTransform, realTransforms, outBoneTransforms);
 				*/
 
-				MoveBoneToTransform(boneIndex, newTransform, realTransforms, outBoneTransforms);
+				MoveBoneToTransform(boneIndex, handTransform, realTransforms, outBoneTransforms);
 				CreateEndCap(boneIndex, currentBone, outBoneTransforms);
 			}
 			else if (boneIndex == cachedViewModel.leftWristIndex)
 			{
-				Matrix4 newTransform = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Left, true);
-				// Apply scale only to translation portion
-				Vector3 translation = newTransform * Vector3(0.0f, 0.0f, 0.0f);
-				newTransform.translate(-translation);
-				translation *= Game::MetresToWorld(1.0f);
-				translation += *pos;
-				newTransform.translate(translation);
+				//todo: find a way to get the correct offset when using 2h aiming
+				if (!Game::instance.bUseTwoHandAim)
+				{
+					Matrix4 newTransform = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Left, true);
+					// Apply scale only to translation portion
+					Vector3 translation = newTransform * Vector3(0.0f, 0.0f, 0.0f);
+					newTransform.translate(-translation);
+					translation *= Game::MetresToWorld(1.0f);
+					translation += *pos;
+					newTransform.translate(translation);
 
-				MoveBoneToTransform(boneIndex, newTransform, realTransforms, outBoneTransforms);
+					MoveBoneToTransform(boneIndex, newTransform, realTransforms, outBoneTransforms);
+				}
+				else
+				{
+					// Convert both hand transforms to matrix4
+					Matrix4 leftMatrix;
+					TransformToMatrix4(outBoneTransforms[boneIndex], leftMatrix);
+					Matrix4 rightMatrix;
+					TransformToMatrix4(unmodifiedHandTransform, rightMatrix);
+
+					// Get inverse of dominant hand, apply it to non-dominant to get delta
+					rightMatrix.invertAffine();
+					leftMatrix = rightMatrix * leftMatrix;
+
+					// Apply delta to controller transform
+					leftMatrix = handTransform * leftMatrix;
+
+					// Move non-dominant hand to new transform
+					MoveBoneToTransform(boneIndex, leftMatrix, realTransforms, outBoneTransforms);
+				}
+
 				CreateEndCap(boneIndex, currentBone, outBoneTransforms);
 			}
 			else if (boneIndex == cachedViewModel.gunIndex)
@@ -230,17 +249,74 @@ void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, V
 
 			if (currentBone.LeftLeaf != -1)
 			{
-				processedBones[lastIndex] = currentBone.LeftLeaf;
+				bonesToProcess[lastIndex] = currentBone.LeftLeaf;
 				lastIndex++;
 			}
 			if (currentBone.RightLeaf != -1)
 			{
-				processedBones[lastIndex] = currentBone.RightLeaf;
+				bonesToProcess[lastIndex] = currentBone.RightLeaf;
 				lastIndex++;
 			}
 
 		} while (i != lastIndex);
 	}
+}
+
+inline void WeaponHandler::CalculateBoneTransform(int boneIndex, Bone* boneArray, Transform& root, TransformQuat* boneTransforms, Transform& outTransform) const
+{
+	// Clear to identity
+	Vector3 xVec = Vector3(1.0f, 0.0f, 0.0f);
+	Vector3 zVec = Vector3(0.0f, 0.0f, 1.0f);
+	Helpers::MakeTransformFromXZ(&zVec, &xVec, &outTransform);
+
+	if (boneIndex < 0)
+	{
+		return;
+	}
+
+	int currentIndex = boneIndex;
+	
+	while (true)
+	{
+		Bone& currentBone = boneArray[currentIndex];
+
+		// Convert bone from TransformQuat to Transform
+		const TransformQuat* currentQuat = &boneTransforms[currentIndex];
+		Transform tempTransform;
+		Helpers::MakeTransformFromQuat(&currentQuat->rotation, &tempTransform);
+		tempTransform.scale = currentQuat->scale;
+		tempTransform.translation = currentQuat->translation;
+
+		// Apply current transform to child transform
+		Helpers::CombineTransforms(&tempTransform, &outTransform, &outTransform);
+
+		if (currentIndex == 0)
+		{
+			break;
+		}
+
+		// Get next bone
+		currentIndex = currentBone.Parent;
+	}
+
+	// Do root
+	Helpers::CombineTransforms(&root, &outTransform, &outTransform);
+}
+
+inline void WeaponHandler::CalculateHandTransform(Vector3* pos, Matrix4& handTransform) const
+{
+	Matrix4 newTransform = GetDominantHandTransform();
+
+	// Apply scale only to translation portion
+	{
+		Vector3 translation = newTransform * Vector3(0.0f, 0.0f, 0.0f);
+		newTransform.translate(-translation);
+		translation *= Game::MetresToWorld(1.0f);
+		translation += *pos;
+		newTransform.translate(translation);
+	}
+
+	handTransform = newTransform;
 }
 
 void WeaponHandler::CreateEndCap(int boneIndex, const Bone& currentBone, Transform* outBoneTransforms) const
@@ -445,6 +521,20 @@ void WeaponHandler::UpdateCache(HaloID& id, AssetData_ModelAnimations* animation
 	}
 }
 
+inline void WeaponHandler::TransformToMatrix4(Transform& inTransform, Matrix4& outMatrix) const
+{
+	// Assumes scale of 1!
+	for (int x = 0; x < 3; x++)
+	{
+		for (int y = 0; y < 3; y++)
+		{
+			// Not sure why get is const, you can directly set the values with setrow/setcolumn anyway
+			const_cast<float*>(outMatrix.get())[x + y * 4] = inTransform.rotation[x + y * 3];
+		}
+	}
+	outMatrix.setColumn(3, inTransform.translation);
+}
+
 Vector3 WeaponHandler::GetScopeLocation(ScopedWeaponType type) const
 {
 	switch (type)
@@ -458,6 +548,58 @@ Vector3 WeaponHandler::GetScopeLocation(ScopedWeaponType type) const
 		return Game::instance.c_ScopeOffsetPistol->Value();
 	}
 	return Vector3(0.0f, 0.0f, 0.0f);
+}
+
+Matrix4 WeaponHandler::GetDominantHandTransform() const
+{
+	Matrix4 controllerTransform = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Right, true);
+
+	// When 2h aiming point the main hand at the offhand 
+	if (Game::instance.bUseTwoHandAim)
+	{
+		Matrix4 aimingTransform = Game::instance.GetVR()->GetRawControllerTransform(ControllerRole::Right, true);
+		Matrix4 offHandTransform = Game::instance.GetVR()->GetRawControllerTransform(ControllerRole::Left, true);
+
+		const Vector3 actualControllerPos = controllerTransform * Vector3(0.0f, 0.0f, 0.0f);
+		const Vector3 mainHandPos = aimingTransform * Vector3(0.0f, 0.0f, 0.0f);
+		const Vector3 offHandPos = offHandTransform * Vector3(0.0f, 0.0f, 0.0f);
+		const Vector3 toOffHand = (offHandPos - mainHandPos).normalize();
+
+		Vector3 upVector = controllerTransform.getForwardAxis();
+
+		// In the unlikely event the player decides to put their hand directly above their other hand, avoid a DIV/0 error when doing the lookat
+		if (upVector.dot(toOffHand) == 1.0f)
+		{
+			upVector += controllerTransform.getUpAxis() * 0.001f;
+		}
+
+		Matrix3 rot;
+		for (int i = 0; i < 3; i++)
+		{
+			offHandTransform.setColumn(i, &rot.get()[i * 4]);
+		}
+
+		controllerTransform.lookAt(actualControllerPos + toOffHand, upVector);
+
+		controllerTransform.translate(-actualControllerPos);
+		controllerTransform.rotate(-90.0f, controllerTransform.getUpAxis());
+		controllerTransform.rotate(-90.0f, controllerTransform.getLeftAxis());
+		controllerTransform.translate(actualControllerPos);
+
+		// Apply offset from weapon aiming here
+
+		Matrix4 cachedRot4;
+
+		for (int i = 0; i < 3; i++)
+		{
+			cachedRot4.setColumn(i, cachedViewModel.fireRotation.getColumn(i));
+		}
+
+		controllerTransform *= cachedRot4;
+
+	}
+
+	return controllerTransform;
 }
 
 bool WeaponHandler::GetLocalWeaponAim(Vector3& outPosition, Vector3& outAim) const
@@ -475,7 +617,7 @@ bool WeaponHandler::GetLocalWeaponAim(Vector3& outPosition, Vector3& outAim) con
 	}
 
 	// TODO: Handedness
-	Matrix4 controllerPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Right, true);
+	Matrix4 controllerPos = GetDominantHandTransform();
 
 	Vector3 handPos = controllerPos * Vector3(0.0f, 0.0f, 0.0f);
 	Matrix4 handRotation = controllerPos.translate(-handPos);
@@ -533,7 +675,7 @@ bool WeaponHandler::GetLocalWeaponScope(Vector3& outPosition, Vector3& outAim, V
 	}
 
 	// TODO: Handedness
-	Matrix4 controllerPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Right, true);
+	Matrix4 controllerPos = GetDominantHandTransform();
 
 	Vector3 handPos = controllerPos * Vector3(0.0f, 0.0f, 0.0f);
 	Matrix4 handRotation = controllerPos.translate(-handPos);
@@ -590,7 +732,7 @@ void WeaponHandler::RelocatePlayer(HaloID& PlayerID)
 	if (weaponFiredPlayer)
 	{
 		// TODO: Handedness
-		Matrix4 controllerPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Right, false);
+		Matrix4 controllerPos = GetDominantHandTransform();
 
 		// Apply scale only to translation portion
 		Vector3 translation = controllerPos * Vector3(0.0f, 0.0f, 0.0f);
@@ -657,8 +799,6 @@ void WeaponHandler::PostFireWeapon(HaloID& weaponID, short param2)
 
 void WeaponHandler::PreThrowGrenade(HaloID& playerID)
 {
-	// TODO: Breakpoint on the thrown grenade HaloID, when that changes BACK to (-1, -1) the grenade has been launched + set to eye pos (presumably)
-
 	weaponFiredPlayer = nullptr;
 
 	// Check if the weapon is being used by the player

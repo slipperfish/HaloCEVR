@@ -28,6 +28,7 @@ public:
 	void SetYawOffset(float newOffset) override;
 	float GetYawOffset() override;
 	Matrix4 GetHMDTransform(bool bRenderPose = false) override;
+	Matrix4 GetRawControllerTransform(ControllerRole role, bool bRenderPose = false) override;
 	Matrix4 GetControllerTransform(ControllerRole Role, bool bRenderPose = false) override;
 	Matrix4 GetControllerBoneTransform(ControllerRole Role, int bone, bool bRenderPose = false) override;
 	Vector3 GetControllerVelocity(ControllerRole Role, bool bRenderPose = false) override;
@@ -53,6 +54,8 @@ protected:
 	void CreateTexAndSurface(int index, UINT Width, UINT Height, DWORD Usage, D3DFORMAT Format);
 	void PositionOverlay();
 	void UpdateSkeleton(ControllerRole hand);
+
+	Matrix4 GetControllerTransformInternal(ControllerRole role, int bone, bool bRenderPose);
 
 	vr::IVRSystem* vrSystem;
 	vr::IVRCompositor* vrCompositor;

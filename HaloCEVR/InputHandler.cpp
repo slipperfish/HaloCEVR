@@ -27,6 +27,7 @@ void InputHandler::RegisterInputs()
 	RegisterBoolInput(Crouch);
 	RegisterBoolInput(Zoom);
 	RegisterBoolInput(Reload);
+	RegisterBoolInput(TwoHandGrip);
 
 	RegisterVector2Input(Move);
 	RegisterVector2Input(Look);
@@ -133,6 +134,21 @@ void InputHandler::UpdateInputs()
 		input.ki.dwFlags |= KEYEVENTF_KEYUP;
 		SendInput(1, &input, sizeof(INPUT));
 	}
+
+	bool bGripChanged;
+	bool bIsGripping = vr->GetBoolInput(TwoHandGrip, bGripChanged);
+
+	if (Game::instance.c_ToggleGrip->Value())
+	{
+		if (bGripChanged && bIsGripping)
+		{
+			bWasGripping ^= true;
+		}
+
+		bIsGripping = bWasGripping;
+	}
+
+	Game::instance.bUseTwoHandAim = bIsGripping;
 
 	Vector2 MoveInput = vr->GetVector2Input(Move);
 

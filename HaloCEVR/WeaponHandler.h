@@ -34,11 +34,17 @@ public:
 protected:
 	void RelocatePlayer(HaloID& PlayerID);
 
+	inline void CalculateBoneTransform(int boneIndex, struct Bone* boneArray, struct Transform& root, struct TransformQuat* boneTransforms, struct Transform& outTransform) const;
+	inline void CalculateHandTransform(Vector3* pos, Matrix4& handTransform) const;
 	inline void CreateEndCap(int boneIndex, const struct Bone& currentBone, struct Transform* outBoneTransforms) const;
 	inline void MoveBoneToTransform(int boneIndex, const class Matrix4& newTransform, struct Transform* realTransforms, struct Transform* outBoneTransforms) const;
 	inline void UpdateCache(struct HaloID& id, struct AssetData_ModelAnimations* animationData);
 
+	inline void TransformToMatrix4(struct Transform& inTransform, class Matrix4& outMatrix) const;
+
 	inline Vector3 GetScopeLocation(ScopedWeaponType Type) const;
+
+	Matrix4 GetDominantHandTransform() const;
 
 	struct ViewModelCache
 	{

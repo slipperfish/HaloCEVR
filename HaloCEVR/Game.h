@@ -80,6 +80,7 @@ public:
 	float lastDeltaTime = 0.0f;
 
 	bool bNeedsRecentre = true;
+	bool bUseTwoHandAim = true;
 
 	InGameRenderer inGameRenderer;
 	InGameRenderer scopeRenderer;
@@ -175,5 +176,6 @@ public:
 	FloatProperty* c_MeleeSwingSpeed = nullptr;
 	FloatProperty* c_CrouchHeight = nullptr;
 	BoolProperty* c_ShowRoomCentre = nullptr;
+	BoolProperty* c_ToggleGrip = nullptr;
 };
 

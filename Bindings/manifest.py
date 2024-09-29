@@ -1,30 +1,23 @@
 import json
 
 controllers = ["oculus_touch", "knuckles"]
-boolActions = ["Jump","SwitchGrenades","Interact","SwitchWeapons","Melee","Flashlight","Grenade","Fire","MenuForward","MenuBack","Crouch","Zoom","Reload", "Recentre"]
+boolActions = ["Jump","SwitchGrenades","Interact","SwitchWeapons","Melee","Flashlight","Grenade","Fire","MenuForward","MenuBack","Crouch","Zoom","Reload", "Recentre", "TwoHandGrip"]
 vec1Actions = []
 vec2Actions = ["Look", "Move"]
 
 bindings = {
     "Jump" : { "h" : "right", "b" : "joystick|north"},
-    "SwitchGrenades" : {"h" : "left", "b" : "grip"},
+    "TwoHandGrip" : {"h" : "left", "b" : "grip"},
     "SwitchWeapons" : {"h" : "right", "b" : "grip"},
-    #"Interact" : {"h" : "left", "b" : "y"}, #Moved to right hand
     "MenuBack" : {"h" : "left", "b" : "y"},
-    #"Melee" : {"h" : "left", "b" : "x"}, #Handled by gesture
-    #"Flashlight" : {"h" : "right", "b" : "a"}, #Handled by gesture
-    #"Reload" : {"h" : "right", "b" : "b"}, #Handled by interact
+    "SwitchGrenades" : {"h" : "left", "b" : "x"}, 
     "Grenade" : {"h" : "right", "b" : "a"},
     "Interact" : {"h" : "right", "b" : "b"},
-    #"Grenade" : {"h" : "left", "b" : "trigger"}, #Moved to right hand
     "Zoom" : {"h" : "left", "b" : "trigger"},
     "Fire" : {"h" : "right", "b" : "trigger"},
     "Crouch" : {"h" : "right", "b" : "joystick|south"},
     "Look" : {"h" : "right", "b" : "joystick"},
-    "Move" : {"h" : "left", "b" : "joystick"},
-    #"Zoom" : {"h" : "right", "b" : "thumbrest"},
-    #"Recentre" : {"h" : "left", "b" : "thumbrest"}, # Moved to left hand x
-    #"Recentre" : {"h" : "left", "b" : "x"} # Merged with menu
+    "Move" : {"h" : "left", "b" : "joystick"}
 }
 
 manifest = {

@@ -98,7 +98,7 @@ void Hooks::EnableAllHooks()
 	P_DisableCrouchCamera();
 	P_ForceCmdLineArgs();
 
-	P_DontStealMouse();
+	//P_DontStealMouse();
 
 	//SetByte(0x52d8a0, 0xc3);
 	//NOPInstructions(0x494aa7, 5); // Removes blur effect

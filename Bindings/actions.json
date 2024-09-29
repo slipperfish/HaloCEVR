@@ -81,6 +81,11 @@
             "type": "boolean"
         },
         {
+            "name": "/actions/default/in/TwoHandGrip",
+            "requirement": "suggested",
+            "type": "boolean"
+        },
+        {
             "name": "/actions/default/in/Look",
             "requirement": "suggested",
             "type": "vector2"
