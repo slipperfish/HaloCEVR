@@ -151,8 +151,11 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 			Hooks::P_KeepViewModelVisible(bNewShowViewModel);
 
 			bShowViewModel = bNewShowViewModel;
+
+			Logger::log << Player->parentSeatIndex << std::endl;
 		}
 		bInVehicle = bNewShowViewModel;
+		bHasWeapon = Player->weapon.id != 0xffff;
 	}
 
 	if (c_ShowRoomCentre->Value())
@@ -806,7 +809,7 @@ void Game::UpdateCrosshairAndScope()
 
 	Vector3 aimPos, aimDir;
 
-	if (bInVehicle)
+	if (bInVehicle && !bHasWeapon)
 	{
 		aimPos = Vector3();
 		aimDir = Helpers::GetCamera().lookDir;

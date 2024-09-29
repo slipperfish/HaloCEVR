@@ -147,6 +147,7 @@ protected:
 	bool bShowViewModel = false;
 
 	bool bInVehicle = false;
+	bool bHasWeapon = true;
 
 	ERenderState mirrorSource;
 
