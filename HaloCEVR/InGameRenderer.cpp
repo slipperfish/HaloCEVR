@@ -112,21 +112,21 @@ void InGameRenderer::DrawInvertedShape2D(const Vector2& centre, const Vector2& i
 
 	tempCentre = centre + Vector2(-halfInner.x, -halfInner.y);
 	bottomRight = Vector2(tempCentre.x, 0.0f);
-	DrawQuadrant(Vector2(0.0f, 0.0f), centre, Vector2(tempCentre.x, 0.0f), Vector2(0.0f, tempCentre.y), 0);
+	DrawQuadrant(Vector2(0.0f, 0.0f), tempCentre, Vector2(tempCentre.x, 0.0f), Vector2(0.0f, tempCentre.y), 0);
 	topLeft = Vector2(0.0f, tempCentre.y);
 
 	tempCentre = centre + Vector2(-halfInner.x, +halfInner.y);
 	DrawConnector(topLeft, Vector2(tempCentre.x - radius, tempCentre.y));
 	topLeft = Vector2(tempCentre.x, tempCentre.y + radius);
-	DrawQuadrant(Vector2(0.0f, size.y), centre, Vector2(0.0f, tempCentre.y), Vector2(tempCentre.x, size.y), 1);
+	DrawQuadrant(Vector2(0.0f, size.y), tempCentre, Vector2(0.0f, tempCentre.y), Vector2(tempCentre.x, size.y), 1);
 
 	tempCentre = centre + Vector2(+halfInner.x, +halfInner.y);
 	DrawConnector(topLeft, Vector2(tempCentre.x, size.y));
 	topLeft = Vector2(size.x, tempCentre.y);
-	DrawQuadrant(size, centre, Vector2(tempCentre.x, size.y), Vector2(size.x, tempCentre.y), 2);
+	DrawQuadrant(size, tempCentre, Vector2(tempCentre.x, size.y), Vector2(size.x, tempCentre.y), 2);
 
 	tempCentre = centre + Vector2(+halfInner.x, -halfInner.y);
-	DrawQuadrant(Vector2(size.x, 0.0f), centre, Vector2(size.x, tempCentre.y), Vector2(tempCentre.x, 0.0f), 3);
+	DrawQuadrant(Vector2(size.x, 0.0f), tempCentre, Vector2(size.x, tempCentre.y), Vector2(tempCentre.x, 0.0f), 3);
 	DrawConnector(topLeft, Vector2(tempCentre.x + radius, tempCentre.y));
 	DrawConnector(Vector2(tempCentre.x, tempCentre.y - radius), bottomRight);
 }

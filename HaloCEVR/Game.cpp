@@ -1,4 +1,4 @@
-#define EMULATE_VR 0
+#define EMULATE_VR 1
 #include "Game.h"
 #include "Logger.h"
 #include "Hooking/Hooks.h"
@@ -745,7 +745,7 @@ void Game::SetupConfigs()
 	// Hand settings
 	c_ControllerOffset = config.RegisterVector3("ControllerOffset", "Offset from the controller's position used when calculating the in game hand position", Vector3(0.0f, 0.0f, 0.0f));
 	c_ControllerRotation = config.RegisterVector3("ControllerRotation", "Rotation added to the controller when calculating the in game hand rotation", Vector3(0.0f, 0.0f, 0.0f));
-	c_ScopeRenderScale = config.RegisterFloat("ScopeRenderScale", "Size of the scope render target, expressed as a proportion of the headset's render scale (e.g. 0.5 = half resolution)", 0.75f);
+	c_ScopeRenderScale = config.RegisterFloat("ScopeRenderScale", "Size of the scope render target, expressed as a proportion of the headset's render scale (e.g. 0.5 = half resolution)", 1.0f);
 	c_ScopeScale = config.RegisterFloat("ScopeScale", "Width of the scope view in metres", 0.05f);
 	c_ScopeOffsetPistol = config.RegisterVector3("ScopeOffsetPistol", "Offset of the scope view relative to the pistol's location", Vector3(-0.1f, 0.0f, 0.15f));
 	c_ScopeOffsetSniper = config.RegisterVector3("ScopeOffsetSniper", "Offset of the scope view relative to the pistol's location", Vector3(-0.15f, 0.0f, 0.15f));
@@ -883,8 +883,6 @@ void Game::SetScopeTransform(Matrix4& newTransform, bool bIsVisible)
 	inGameRenderer.DrawPolygon(pos, scopeFacing, scopeUp, 32, MetresToWorld(GetScopeSize() * 0.5f), D3DCOLOR_ARGB(0, 0, 0, 0), false);
 
 	float SCOPE_DEPTH = 2.0f;
-	// 4x scales pistol scope to full size, 4/3 accounts for aspect ratio
-	//float SCOPE_INNER_SCALE = 4.0f * 4.0f / 3.0f;//8.0f;
 	float SCOPE_INNER_SCALE = 80.0f;
 
 	pos = pos - scopeFacing * MetresToWorld(SCOPE_DEPTH);
