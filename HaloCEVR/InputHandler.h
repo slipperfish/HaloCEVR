@@ -8,10 +8,12 @@ public:
 	void RegisterInputs();
 	void UpdateInputs();
 	void UpdateCamera(float& yaw, float& pitch);
+	void UpdateCameraForVehicles(float& yaw, float& pitch);
 	void SetMousePosition(int& x, int& y);
 	void UpdateMouseInfo(struct MouseInfo* mouseInfo);
 
 protected:
+
 
 	unsigned char UpdateFlashlight();
 	unsigned char UpdateMelee();

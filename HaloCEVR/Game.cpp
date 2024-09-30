@@ -1,4 +1,4 @@
-#define EMULATE_VR 1
+#define EMULATE_VR 0
 #include "Game.h"
 #include "Logger.h"
 #include "Hooking/Hooks.h"
@@ -651,7 +651,15 @@ void Game::UpdateCamera(float& yaw, float& pitch)
 #if EMULATE_VR
 	return;
 #endif
-	inputHandler.UpdateCamera(yaw, pitch);
+
+	if (bInVehicle && !bHasWeapon)
+	{
+		inputHandler.UpdateCameraForVehicles(yaw, pitch);
+	}
+	else
+	{
+		inputHandler.UpdateCamera(yaw, pitch);
+	}
 }
 
 void Game::SetMousePosition(int& x, int& y)

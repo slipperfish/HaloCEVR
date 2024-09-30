@@ -104,6 +104,8 @@ void Hooks::EnableAllHooks()
 	//NOPInstructions(0x494aa7, 5); // Removes blur effect
 
 
+	//NOPInstructions(0x50e988, 5); // Draw viewmodel
+
 	// If we think the user has chimera installed, don't try to patch their patches
 	if (!bPotentiallyFoundChimera)
 	{
