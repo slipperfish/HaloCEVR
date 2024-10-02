@@ -595,7 +595,7 @@ Matrix4 WeaponHandler::GetDominantHandTransform() const
 			cachedRot4.setColumn(i, cachedViewModel.fireRotation.getColumn(i));
 		}
 
-		controllerTransform *= cachedRot4;
+		controllerTransform *= cachedRot4.invertAffine();
 
 	}
 
