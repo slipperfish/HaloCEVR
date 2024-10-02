@@ -59,8 +59,16 @@ void OpenVR::Init()
 	vrOverlay->SetOverlayFlag(crosshairOverlay, vr::VROverlayFlags_IsPremultiplied, true);
 	vrOverlay->ShowOverlay(crosshairOverlay);
 
-	std::filesystem::path cwd = std::filesystem::current_path() / "VR" / "OpenVR" / "actions.json";
-	vrInput->SetActionManifestPath(cwd.string().c_str());
+	std::filesystem::path manifest = std::filesystem::current_path() / "VR" / "OpenVR" / "haloce.vrmanifest";
+	vr::EVRApplicationError appErr = vr::VRApplications()->AddApplicationManifest(manifest.string().c_str());
+
+	if (appErr != vr::VRApplicationError_None)
+	{
+		Logger::log << "[OpenVR] Could not add application manifest: " << appErr << std::endl;
+	}
+
+	std::filesystem::path actions = std::filesystem::current_path() / "VR" / "OpenVR" / "actions.json";
+	vrInput->SetActionManifestPath(actions.string().c_str());
 
 	vr::EVRInputError ActionSetError = vrInput->GetActionSetHandle("/actions/default", &actionSets[0].ulActionSet);
 

@@ -1,0 +1,16 @@
+{
+	"source" : "builtin",
+	"applications": [{
+		"application_type": "vrgame",
+		"app_key": "livingfray.haloce",
+		"launch_type": "binary",
+		"binary_path_windows": "../../halo.exe",
+		"action_manifest_path": "actions.json",
+		"image_path": "icon.png",
+		"strings": {
+			"en_us": {
+				"name": "Halo: Combat Evolved"
+			}
+		}
+	}]
+}
