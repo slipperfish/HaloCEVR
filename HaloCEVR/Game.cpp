@@ -47,6 +47,8 @@ void Game::Shutdown()
 {
 	Logger::log << "HaloCEVR shutting down..." << std::endl;
 
+	vr->Shutdown();
+
 	MH_STATUS hookStatus = MH_DisableHook(MH_ALL_HOOKS);
 
 	if (hookStatus != MH_OK)

@@ -99,6 +99,10 @@ void VREmulator::OnGameFinishInit()
 	Logger::log << "Created Mirror D3D window" << std::endl;
 }
 
+void VREmulator::Shutdown()
+{
+}
+
 void VREmulator::UpdatePoses()
 {
 	// Pretend we're waiting for the poses

@@ -192,6 +192,14 @@ void OpenVR::OnGameFinishInit()
 	Logger::log << "[OpenVR] Finished Initialisation" << std::endl;
 }
 
+void OpenVR::Shutdown()
+{
+	if (vrSystem)
+	{
+		vr::VR_Shutdown();
+	}
+}
+
 
 void OpenVR::CreateTexAndSurface(int index, UINT Width, UINT Height, DWORD Usage, D3DFORMAT Format)
 {
@@ -237,7 +245,6 @@ void OpenVR::CreateTexAndSurface(int index, UINT Width, UINT Height, DWORD Usage
 
 	Logger::log << "[OpenVR] Created shared texture " << index << ", " << desc.Width << "x" << desc.Height << std::endl;
 }
-
 
 void OpenVR::UpdatePoses()
 {

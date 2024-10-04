@@ -10,7 +10,8 @@ class OpenVR : public IVR
 public:
 	// Start Interface IVR
 	void Init() override;
-	void OnGameFinishInit();
+	void OnGameFinishInit() override;
+	void Shutdown() override;
 	void UpdatePoses() override;
 	void PreDrawFrame(Renderer* renderer, float deltaTime) override;
 	void PostDrawFrame(Renderer* renderer, float deltaTime) override;

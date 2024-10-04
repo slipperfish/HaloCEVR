@@ -9,6 +9,7 @@ public:
 	// Start Interface IVR
 	void Init();
 	void OnGameFinishInit();
+	void Shutdown();
 	void UpdatePoses();
 	void PreDrawFrame(struct Renderer* renderer, float deltaTime);
 	void PostDrawFrame(struct Renderer* renderer, float deltaTime);
