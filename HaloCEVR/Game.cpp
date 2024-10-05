@@ -693,12 +693,12 @@ void Game::SetViewportScale(Viewport* viewport)
 	viewport->top = -height;
 }
 
-float Game::MetresToWorld(float m)
+float Game::MetresToWorld(float m) const
 {
 	return m / 3.048f;
 }
 
-float Game::WorldToMetres(float w)
+float Game::WorldToMetres(float w) const
 {
 	return w * 3.048f;
 }
@@ -747,6 +747,7 @@ void Game::SetupConfigs()
 	c_UIOverlayWidth = config.RegisterInt("UIOverlayWidth", "Width of the UI overlay in pixels", 600);
 	c_UIOverlayHeight = config.RegisterInt("UIOverlayHeight", "Height of the UI overlay in pixels", 600);
 	// Control settings
+	c_LeftHanded = config.RegisterBool("LeftHanded", "Make the left hand the dominant hand. Does not affect bindings, change these in the SteamVR overlay", false);
 	c_SnapTurn = config.RegisterBool("SnapTurn", "The look input will instantly rotate the view by a fixed amount, rather than smoothly rotating", true);
 	c_SnapTurnAmount = config.RegisterFloat("SnapTurnAmount", "Rotation in degrees a single snap turn will rotate the view by", 45.0f);
 	c_SmoothTurnAmount = config.RegisterFloat("SmoothTurnAmount", "Rotation in degrees per second the view will turn at when not using snap turning", 90.0f);

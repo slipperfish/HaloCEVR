@@ -426,7 +426,7 @@ void OpenVR::UpdateCameraFrustum(CameraFrustum* frustum, int eye)
 
 	Matrix4 headMatrix = GetHMDTransform(true);
 
-	Matrix4 viewMatrix = (headMatrix * eyeMatrix.invert()).scale(Game::MetresToWorld(1.0f));
+	Matrix4 viewMatrix = (headMatrix * eyeMatrix.invert()).scale(Game::instance.MetresToWorld(1.0f));
 
 	Matrix3 rotationMatrix = GetRotationMatrix(headMatrix);
 

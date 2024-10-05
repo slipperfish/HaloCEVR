@@ -95,13 +95,13 @@ void InputHandler::UpdateInputs()
 
 			Matrix4 handTrans = vr->GetControllerTransform(ControllerRole::Left, true);
 
-			Vector3 handPos = (handTrans * Vector3(0.0f, 0.0f, 0.0f)) * Game::MetresToWorld(1.0f) + Helpers::GetCamera().position;
+			Vector3 handPos = (handTrans * Vector3(0.0f, 0.0f, 0.0f)) * Game::instance.MetresToWorld(1.0f) + Helpers::GetCamera().position;
 
-			Vector3 centre = handPos + Vector3(0.0f, 0.0f, Game::MetresToWorld(0.1f));
+			Vector3 centre = handPos + Vector3(0.0f, 0.0f, Game::instance.MetresToWorld(0.1f));
 			Vector3 facing = -handTrans.getLeftAxis();
 			Vector3 upVector = handTrans.getForwardAxis();
 
-			Game::instance.inGameRenderer.DrawPolygon(centre, facing, upVector, 16, Game::MetresToWorld(0.01f), D3DCOLOR_XRGB(255, 0, 0), false, progress);
+			Game::instance.inGameRenderer.DrawPolygon(centre, facing, upVector, 16, Game::instance.MetresToWorld(0.01f), D3DCOLOR_XRGB(255, 0, 0), false, progress);
 		}
 	}
 	else if (bMenuChanged)
@@ -273,7 +273,7 @@ unsigned char InputHandler::UpdateMelee()
 
 	Vector3 handVel = vr->GetControllerVelocity(ControllerRole::Right);
 
-	handVel *= Game::WorldToMetres(1.0f);
+	handVel *= Game::instance.WorldToMetres(1.0f);
 
 	if (abs(handVel.z) > Game::instance.c_MeleeSwingSpeed->Value())
 	{

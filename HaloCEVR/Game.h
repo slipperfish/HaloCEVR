@@ -67,8 +67,8 @@ public:
 
 	float GetScopeSize() const { return c_ScopeScale->Value(); }
 
-	static float MetresToWorld(float m);
-	static float WorldToMetres(float w);
+	float MetresToWorld(float m) const;
+	float WorldToMetres(float w) const;
 
 	inline IVR* GetVR() const { return vr; }
 
@@ -178,5 +178,6 @@ public:
 	FloatProperty* c_CrouchHeight = nullptr;
 	BoolProperty* c_ShowRoomCentre = nullptr;
 	BoolProperty* c_ToggleGrip = nullptr;
+	BoolProperty* c_LeftHanded = nullptr;
 };
 

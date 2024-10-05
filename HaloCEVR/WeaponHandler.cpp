@@ -180,14 +180,13 @@ void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, V
 			}
 			else if (boneIndex == cachedViewModel.leftWristIndex)
 			{
-				//todo: find a way to get the correct offset when using 2h aiming
 				if (!Game::instance.bUseTwoHandAim)
 				{
-					Matrix4 newTransform = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Left, true);
+					Matrix4 newTransform = Game::instance.GetVR()->GetControllerTransform(Game::instance.c_LeftHanded->Value() ? ControllerRole::Right : ControllerRole::Left, true);
 					// Apply scale only to translation portion
 					Vector3 translation = newTransform * Vector3(0.0f, 0.0f, 0.0f);
 					newTransform.translate(-translation);
-					translation *= Game::MetresToWorld(1.0f);
+					translation *= Game::instance.MetresToWorld(1.0f);
 					translation += *pos;
 					newTransform.translate(translation);
 
@@ -311,7 +310,7 @@ inline void WeaponHandler::CalculateHandTransform(Vector3* pos, Matrix4& handTra
 	{
 		Vector3 translation = newTransform * Vector3(0.0f, 0.0f, 0.0f);
 		newTransform.translate(-translation);
-		translation *= Game::MetresToWorld(1.0f);
+		translation *= Game::instance.MetresToWorld(1.0f);
 		translation += *pos;
 		newTransform.translate(translation);
 	}
@@ -552,13 +551,16 @@ Vector3 WeaponHandler::GetScopeLocation(ScopedWeaponType type) const
 
 Matrix4 WeaponHandler::GetDominantHandTransform() const
 {
-	Matrix4 controllerTransform = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Right, true);
+	ControllerRole dominant = Game::instance.c_LeftHanded->Value() ? ControllerRole::Left : ControllerRole::Right;
+	ControllerRole nonDominant = Game::instance.c_LeftHanded->Value() ? ControllerRole::Right : ControllerRole::Left;
+
+	Matrix4 controllerTransform = Game::instance.GetVR()->GetControllerTransform(dominant, true);
 
 	// When 2h aiming point the main hand at the offhand 
 	if (Game::instance.bUseTwoHandAim)
 	{
-		Matrix4 aimingTransform = Game::instance.GetVR()->GetRawControllerTransform(ControllerRole::Right, true);
-		Matrix4 offHandTransform = Game::instance.GetVR()->GetRawControllerTransform(ControllerRole::Left, true);
+		Matrix4 aimingTransform = Game::instance.GetVR()->GetRawControllerTransform(dominant, true);
+		Matrix4 offHandTransform = Game::instance.GetVR()->GetRawControllerTransform(nonDominant, true);
 
 		const Vector3 actualControllerPos = controllerTransform * Vector3(0.0f, 0.0f, 0.0f);
 		const Vector3 mainHandPos = aimingTransform * Vector3(0.0f, 0.0f, 0.0f);

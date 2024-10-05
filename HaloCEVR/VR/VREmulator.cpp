@@ -112,7 +112,7 @@ void VREmulator::UpdatePoses()
 void VREmulator::UpdateCameraFrustum(CameraFrustum* frustum, int eye)
 {
 	// Emulate a 64mm IPD
-	const float DIST = Game::MetresToWorld(64.0f / 1000.0f);
+	const float DIST = Game::instance.MetresToWorld(64.0f / 1000.0f);
 
 	Vector3 rightVec = frustum->facingDirection.cross(frustum->upDirection);
 
