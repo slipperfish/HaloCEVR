@@ -67,6 +67,14 @@ void OpenVR::Init()
 		Logger::log << "[OpenVR] Could not add application manifest: " << appErr << std::endl;
 	}
 
+	appErr = vr::VRApplications()->IdentifyApplication(GetCurrentProcessId(), "livingfray.haloce");
+
+	if (appErr != vr::VRApplicationError_None)
+	{
+		Logger::log << "[OpenVR] Could not set id: " << appErr << std::endl;
+	}
+
+
 	std::filesystem::path actions = std::filesystem::current_path() / "VR" / "OpenVR" / "actions.json";
 	vrInput->SetActionManifestPath(actions.string().c_str());
 
