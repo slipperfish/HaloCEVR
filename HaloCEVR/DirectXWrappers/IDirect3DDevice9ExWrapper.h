@@ -8,6 +8,8 @@ public:
 	bool bIgnoreNextStart = false;
 	bool bIgnoreNextEnd = false;
 
+	bool bSkipWinding = false;
+
 	// Inherited via IDirect3DDevice9Ex
 	virtual __declspec(nothrow) HRESULT __stdcall QueryInterface(REFIID riid, void** ppvObj) override;
 	virtual __declspec(nothrow) ULONG __stdcall AddRef(void) override;

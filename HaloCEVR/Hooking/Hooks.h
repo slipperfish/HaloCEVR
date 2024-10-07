@@ -40,6 +40,7 @@ public:
 	DEFINE_HOOK_FULL(ThrowGrenade, void __cdecl, HaloID param1, bool param2);
 	DEFINE_HOOK_FULL(DrawLoadingScreen2, void __fastcall, void* param1);
 	DEFINE_HOOK(DrawCinematicBars);
+	DEFINE_HOOK(DrawViewModel);
 
 	// All direct patches go here:
 	static void P_FixTabOut();

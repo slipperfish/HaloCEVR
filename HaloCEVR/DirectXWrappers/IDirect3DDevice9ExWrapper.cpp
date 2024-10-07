@@ -328,6 +328,11 @@ HRESULT __stdcall IDirect3DDevice9ExWrapper::GetClipPlane(DWORD Index, float* pP
 
 HRESULT __stdcall IDirect3DDevice9ExWrapper::SetRenderState(D3DRENDERSTATETYPE State, DWORD Value)
 {
+	if (State == D3DRS_CULLMODE && bSkipWinding)
+	{
+		return S_OK;
+	}
+
 	return Real->SetRenderState(State, Value);
 }
 

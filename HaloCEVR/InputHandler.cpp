@@ -246,7 +246,7 @@ unsigned char InputHandler::UpdateFlashlight()
 
 	if (leftDistance > 0.0f)
 	{
-		Vector3 handPos = vr->GetControllerTransform(ControllerRole::Left) * Vector3(0.0f, 0.0f, 0.0f);
+		Vector3 handPos = vr->GetRawControllerTransform(ControllerRole::Left) * Vector3(0.0f, 0.0f, 0.0f);
 
 		if ((headPos - handPos).lengthSqr() < leftDistance * leftDistance)
 		{
@@ -256,7 +256,7 @@ unsigned char InputHandler::UpdateFlashlight()
 
 	if (rightDistance > 0.0f)
 	{
-		Vector3 handPos = vr->GetControllerTransform(ControllerRole::Right) * Vector3(0.0f, 0.0f, 0.0f);
+		Vector3 handPos = vr->GetRawControllerTransform(ControllerRole::Right) * Vector3(0.0f, 0.0f, 0.0f);
 
 		if ((headPos - handPos).lengthSqr() < rightDistance * rightDistance)
 		{

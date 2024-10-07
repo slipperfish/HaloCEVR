@@ -51,6 +51,7 @@ void Hooks::InitHooks()
 	CREATEHOOK(ThrowGrenade);
 	CREATEHOOK(DrawLoadingScreen2);
 	CREATEHOOK(DrawCinematicBars);
+	CREATEHOOK(DrawViewModel);
 
 	// These are handled with a direct patch, so manually scan them
 	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo) < 0;
@@ -89,6 +90,7 @@ void Hooks::EnableAllHooks()
 	ThrowGrenade.EnableHook();
 	DrawLoadingScreen2.EnableHook();
 	DrawCinematicBars.EnableHook();
+	DrawViewModel.EnableHook();
 
 	Freeze();
 
@@ -99,6 +101,9 @@ void Hooks::EnableAllHooks()
 	P_ForceCmdLineArgs();
 
 	P_DontStealMouse();
+
+	//NOPInstructions(0x51c749, 5);
+	//NOPInstructions(0x50e988, 5);
 
 	// If we think the user has chimera installed, don't try to patch their patches
 	if (!bPotentiallyFoundChimera)
@@ -792,6 +797,26 @@ void Hooks::H_DrawCinematicBars()
 	DrawCinematicBars.Original();
 
 	Helpers::GetDirect3DDevice9()->SetViewport(&currentViewport);
+}
+
+void Hooks::H_DrawViewModel()
+{
+	if (Game::instance.c_LeftHanded->Value())
+	{
+		Helpers::GetDirect3DDevice9()->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
+
+		reinterpret_cast<IDirect3DDevice9ExWrapper*>(Helpers::GetDirect3DDevice9())->bSkipWinding = true;
+
+		DrawViewModel.Original();
+
+		reinterpret_cast<IDirect3DDevice9ExWrapper*>(Helpers::GetDirect3DDevice9())->bSkipWinding = false;
+
+		Helpers::GetDirect3DDevice9()->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+	}
+	else
+	{
+		DrawViewModel.Original();
+	}
 }
 
 //================================//Patches//================================//

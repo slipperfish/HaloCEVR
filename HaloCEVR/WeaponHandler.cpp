@@ -204,8 +204,21 @@ void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, V
 					rightMatrix.invertAffine();
 					leftMatrix = rightMatrix * leftMatrix;
 
-					// Apply delta to controller transform
-					leftMatrix = handTransform * leftMatrix;
+					if (Game::instance.c_LeftHanded->Value())
+					{
+						leftMatrix.scale(1.0f, -1.0f, 1.0f);
+						Vector3 trans = (handTransform * leftMatrix) * Vector3(0.0f, 0.0f, 0.0f);
+						leftMatrix.scale(1.0f, -1.0f, 1.0f);
+			
+						leftMatrix = handTransform * leftMatrix;
+						leftMatrix.translate(-(leftMatrix * Vector3(0.0f, 0.0f, 0.0f)));
+						leftMatrix.translate(trans);
+					}
+					else
+					{
+						// Apply delta to controller transform
+						leftMatrix = handTransform * leftMatrix;
+					}
 
 					// Move non-dominant hand to new transform
 					MoveBoneToTransform(boneIndex, leftMatrix, realTransforms, outBoneTransforms);
@@ -334,7 +347,7 @@ void WeaponHandler::MoveBoneToTransform(int boneIndex, const Matrix4& newTransfo
 {
 	// Move hands to match controllers
 	Vector3 newTranslation = newTransform * Vector3(0.0f, 0.0f, 0.0f);
-	Matrix4 newRotation4 = newTransform;
+	Matrix4 newRotation4 = Game::instance.c_LeftHanded->Value() ? newTransform * Matrix4().scale(1.0f, -1.0f, 1.0f) : newTransform;
 	newRotation4.translate(-newTranslation);
 	newRotation4.rotateZ(localRotation.z);
 	newRotation4.rotateY(localRotation.y);
@@ -536,15 +549,17 @@ inline void WeaponHandler::TransformToMatrix4(Transform& inTransform, Matrix4& o
 
 Vector3 WeaponHandler::GetScopeLocation(ScopedWeaponType type) const
 {
+	Vector3 Scale = Game::instance.c_LeftHanded->Value() ? Vector3(1.0f, -1.0f, 1.0f) : Vector3(1.0f, 1.0f, 1.0f);
+
 	switch (type)
 	{
 	case ScopedWeaponType::Rocket:
-		return Game::instance.c_ScopeOffsetRocket->Value();
+		return Game::instance.c_ScopeOffsetRocket->Value() * Scale;
 	case ScopedWeaponType::Sniper:
-		return Game::instance.c_ScopeOffsetSniper->Value();
+		return Game::instance.c_ScopeOffsetSniper->Value() * Scale;
 	case ScopedWeaponType::Unknown:
 	case ScopedWeaponType::Pistol:
-		return Game::instance.c_ScopeOffsetPistol->Value();
+		return Game::instance.c_ScopeOffsetPistol->Value() * Scale;
 	}
 	return Vector3(0.0f, 0.0f, 0.0f);
 }
@@ -597,7 +612,9 @@ Matrix4 WeaponHandler::GetDominantHandTransform() const
 			cachedRot4.setColumn(i, cachedViewModel.fireRotation.getColumn(i));
 		}
 
-		controllerTransform *= cachedRot4.invertAffine();
+		//Logger::log << cachedRot4 << std::endl;
+
+		//controllerTransform *= cachedRot4.invertAffine();
 
 	}
 

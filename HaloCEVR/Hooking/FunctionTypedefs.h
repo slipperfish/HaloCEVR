@@ -20,7 +20,7 @@ typedef void(*Func_UpdateMouseInfo)();
 typedef void(__cdecl* Func_FireWeapon)(HaloID, short);
 typedef void(__cdecl* Func_ThrowGrenade)(HaloID, bool);
 typedef void(*Func_SetCameraMatrices)();
-
 typedef int(__cdecl* Func_MaybeNightVision)(float* param1);
 typedef void(__fastcall* Func_DrawLoadingScreen2)(void* parma1);
 typedef void(*Func_DrawCinematicBars)();
+typedef void(*Func_DrawViewModel)();
