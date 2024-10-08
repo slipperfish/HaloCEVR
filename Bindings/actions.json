@@ -2,11 +2,19 @@
     "default_bindings": [
         {
             "controller_type": "oculus_touch",
-            "binding_url": "oculus_touch.json"
+            "binding_url": "oculus_touch_right.json"
         },
         {
             "controller_type": "knuckles",
-            "binding_url": "knuckles.json"
+            "binding_url": "knuckles_right.json"
+        },
+        {
+            "controller_type": "oculus_touch",
+            "binding_url": "oculus_touch_left.json"
+        },
+        {
+            "controller_type": "knuckles",
+            "binding_url": "knuckles_left.json"
         }
     ],
     "actions": [
