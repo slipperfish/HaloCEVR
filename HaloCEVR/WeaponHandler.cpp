@@ -142,40 +142,41 @@ void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, V
 			}
 			else if (boneIndex == cachedViewModel.rightWristIndex)
 			{
-
-				// TODO: Check this works for other guns
-				// Not sure if I should keep this? Rotates the hand to make the gun face forwards when controller does
-				/*
-				Matrix4 newTransform = handTransform;
-				if (currentBone.RightLeaf != -1)
+				// This is dreadful code. Rework to be less insane
+				if (!Game::instance.bUseTwoHandAim)
 				{
-					Bone& GunBone = boneArray[currentBone.RightLeaf];
-					if (currentBone.RightLeaf == cachedViewModel.gunIndex)
+					Matrix4 newTransform = handTransform;
+					if (currentBone.RightLeaf != -1)
 					{
-						const TransformQuat* GunQuat = &boneTransforms[currentBone.RightLeaf];
-						Helpers::MakeTransformFromQuat(&GunQuat->rotation, &tempTransform);
-
-						Matrix4 rotation;
-						for (int x = 0; x < 3; x++)
+						Bone& GunBone = boneArray[currentBone.RightLeaf];
+						if (currentBone.RightLeaf == cachedViewModel.gunIndex)
 						{
-							for (int y = 0; y < 3; y++)
+							const TransformQuat* GunQuat = &boneTransforms[currentBone.RightLeaf];
+							Helpers::MakeTransformFromQuat(&GunQuat->rotation, &tempTransform);
+
+							Matrix4 rotation;
+							for (int x = 0; x < 3; x++)
 							{
-								rotation[x + y * 4] = tempTransform.rotation[x + y * 3];
+								for (int y = 0; y < 3; y++)
+								{
+									rotation[x + y * 4] = tempTransform.rotation[x + y * 3];
+								}
 							}
+
+							newTransform = newTransform * rotation.invert();
+						}
+						else
+						{
+							Logger::log << "ERROR: Right leaf of " << currentBone.BoneName << " is " << GunBone.BoneName << std::endl;
 						}
 
-						newTransform = newTransform * rotation.invert();
 					}
-					else
-					{
-						Logger::log << "ERROR: Right leaf of " << currentBone.BoneName << " is " << GunBone.BoneName << std::endl;
-					}
-
+					MoveBoneToTransform(boneIndex, newTransform, realTransforms, outBoneTransforms);
 				}
-				MoveBoneToTransform(boneIndex, newTransform, realTransforms, outBoneTransforms);
-				*/
-
-				MoveBoneToTransform(boneIndex, handTransform, realTransforms, outBoneTransforms);
+				else
+				{
+					MoveBoneToTransform(boneIndex, handTransform, realTransforms, outBoneTransforms);
+				}
 				CreateEndCap(boneIndex, currentBone, outBoneTransforms);
 			}
 			else if (boneIndex == cachedViewModel.leftWristIndex)
