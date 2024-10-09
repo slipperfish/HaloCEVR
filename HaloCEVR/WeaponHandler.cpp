@@ -202,22 +202,20 @@ void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, V
 
 					// Get inverse of dominant hand, apply it to non-dominant to get delta
 					rightMatrix.invertAffine();
-					leftMatrix = rightMatrix * leftMatrix;
+					Matrix4 deltaMatrix = rightMatrix * leftMatrix;
 
 					if (Game::instance.c_LeftHanded->Value())
-					{
-						leftMatrix.scale(1.0f, -1.0f, 1.0f);
-						Vector3 trans = (handTransform * leftMatrix) * Vector3(0.0f, 0.0f, 0.0f);
-						leftMatrix.scale(1.0f, -1.0f, 1.0f);
-			
-						leftMatrix = handTransform * leftMatrix;
-						leftMatrix.translate(-(leftMatrix * Vector3(0.0f, 0.0f, 0.0f)));
-						leftMatrix.translate(trans);
+					{						
+						Matrix4 flip;
+						flip.scale(1.0f, -1.0f, 1.0f);
+						
+						deltaMatrix = flip * deltaMatrix * flip;
+						leftMatrix = handTransform * deltaMatrix;
 					}
 					else
 					{
 						// Apply delta to controller transform
-						leftMatrix = handTransform * leftMatrix;
+						leftMatrix = handTransform * deltaMatrix;
 					}
 
 					// Move non-dominant hand to new transform
@@ -230,6 +228,15 @@ void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, V
 			{
 				Vector3& gunPos = outBoneTransforms[boneIndex].translation;
 				Matrix3 gunRot = outBoneTransforms[boneIndex].rotation;
+
+				if (Game::instance.c_LeftHanded->Value())
+				{
+					gunRot = gunRot * Matrix3(
+						1.0f, 0.0f, 0.0f,
+						0.0f, -1.0f, 0.0f,
+						0.0f, 0.0f, 1.0f
+					);
+				}
 
 				Vector3 handPos = handTransform * Vector3(0.0f, 0.0f, 0.0f);
 				Matrix4 handRotation = handTransform.translate(-handPos);
@@ -612,10 +619,7 @@ Matrix4 WeaponHandler::GetDominantHandTransform() const
 			cachedRot4.setColumn(i, cachedViewModel.fireRotation.getColumn(i));
 		}
 
-		//Logger::log << cachedRot4 << std::endl;
-
-		//controllerTransform *= cachedRot4.invertAffine();
-
+		controllerTransform *= cachedRot4.invertAffine();
 	}
 
 	return controllerTransform;
