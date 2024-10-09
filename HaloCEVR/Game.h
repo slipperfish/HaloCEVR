@@ -151,6 +151,8 @@ protected:
 
 	ERenderState mirrorSource;
 
+	bool bHasShutdown = false;
+
 	//======Configs======//
 public:
 

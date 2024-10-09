@@ -45,6 +45,7 @@ ULONG __stdcall IDirect3D9ExWrapper::AddRef(void)
 
 ULONG __stdcall IDirect3D9ExWrapper::Release(void)
 {
+	Game::instance.Shutdown();
 	return Real->Release();
 }
 

@@ -45,6 +45,12 @@ void Game::Init()
 
 void Game::Shutdown()
 {
+	if (bHasShutdown)
+	{
+		return;
+	}
+	bHasShutdown = true;
+
 	Logger::log << "HaloCEVR shutting down..." << std::endl;
 
 	vr->Shutdown();
