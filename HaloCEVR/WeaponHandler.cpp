@@ -180,6 +180,14 @@ void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, V
 								}
 							}
 
+							if (Game::instance.c_LeftHanded->Value())
+							{
+								Matrix4 scale;
+								scale.scale(1.0f, -1.0f, 1.0f);
+
+								rotation = scale * rotation * scale;
+							}
+
 							newTransform = newTransform * rotation.invert();
 						}
 						else
