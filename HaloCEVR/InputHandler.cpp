@@ -271,7 +271,16 @@ unsigned char InputHandler::UpdateMelee()
 {
 	IVR* vr = Game::instance.GetVR();
 
-	Vector3 handVel = vr->GetControllerVelocity(ControllerRole::Right);
+	Vector3 handVel = vr->GetControllerVelocity(ControllerRole::Left);
+
+	handVel *= Game::instance.WorldToMetres(1.0f);
+
+	if (abs(handVel.z) > Game::instance.c_MeleeSwingSpeed->Value())
+	{
+		return 127;
+	}
+
+	handVel = vr->GetControllerVelocity(ControllerRole::Right);
 
 	handVel *= Game::instance.WorldToMetres(1.0f);
 
