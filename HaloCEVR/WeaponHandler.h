@@ -49,9 +49,10 @@ protected:
 	struct ViewModelCache
 	{
 		HaloID currentAsset{ 0, 0 };
-		int leftWristIndex = 0;
-		int rightWristIndex = 0;
-		int gunIndex = 0;
+		int leftWristIndex = -1;
+		int rightWristIndex = -1;
+		int gunIndex = -1;
+		int displayIndex = -1;
 		Vector3 cookedFireOffset;
 		Matrix3 cookedFireRotation;
 		Vector3 fireOffset;

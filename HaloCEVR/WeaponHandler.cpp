@@ -125,6 +125,23 @@ void WeaponHandler::UpdateViewModel(HaloID& id, Vector3* pos, Vector3* facing, V
 
 			Helpers::MakeTransformFromQuat(&currentQuat->rotation, &tempTransform);
 			tempTransform.scale = currentQuat->scale;
+
+			if (boneIndex == cachedViewModel.displayIndex && Game::instance.c_LeftHanded->Value())
+			{
+				// Bit of a nasty place to do this, but we need to unflip the ammo counter on the BR
+				Matrix3 rot = tempTransform.rotation;
+				rot *= Matrix3(
+					1.0f, 0.0f, 0.0f,
+					0.0f, -1.0f, 0.0f,
+					0.0f, 0.0f, 1.0f
+				);
+				
+				for (int i = 0; i < 9; i++)
+				{
+					tempTransform.rotation[i] = rot[i];
+				}
+			}
+
 			tempTransform.translation = currentQuat->translation;
 			Helpers::CombineTransforms(parentTransform, &tempTransform, &outBoneTransforms[boneIndex]);
 
@@ -384,6 +401,7 @@ void WeaponHandler::UpdateCache(HaloID& id, AssetData_ModelAnimations* animation
 	cachedViewModel.leftWristIndex = -1;
 	cachedViewModel.rightWristIndex = -1;
 	cachedViewModel.gunIndex = -1;
+	cachedViewModel.displayIndex = -1;
 
 	Bone* boneArray = animationData->BoneArray;
 
@@ -418,6 +436,13 @@ void WeaponHandler::UpdateCache(HaloID& id, AssetData_ModelAnimations* animation
 			Logger::log << "[UpdateCache] Found Gun @ " << i << std::endl;
 #endif
 			cachedViewModel.gunIndex = i;
+		}
+		else if (cachedViewModel.displayIndex == -1 && strstr(CurrentBone.BoneName, "display"))
+		{
+#if DRAW_DEBUG_AIM
+			Logger::log << "[UpdateCache] Found Display @ " << i << std::endl;
+#endif
+			cachedViewModel.displayIndex = i;
 		}
 #if DRAW_DEBUG_AIM
 		else

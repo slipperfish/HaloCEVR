@@ -757,8 +757,10 @@ void Game::SetupConfigs()
 	c_SnapTurn = config.RegisterBool("SnapTurn", "The look input will instantly rotate the view by a fixed amount, rather than smoothly rotating", true);
 	c_SnapTurnAmount = config.RegisterFloat("SnapTurnAmount", "Rotation in degrees a single snap turn will rotate the view by", 45.0f);
 	c_SmoothTurnAmount = config.RegisterFloat("SmoothTurnAmount", "Rotation in degrees per second the view will turn at when not using snap turning", 90.0f);
+	c_HorizontalVehicleTurnAmount = config.RegisterFloat("HorizontalVehicleTurnAmount", "Rotation in degrees per second the view will turn horizontally when in vehicles", 90.0f);
+	c_VerticalVehicleTurnAmount = config.RegisterFloat("VerticalVehicleTurnAmount", "Rotation in degrees per second the view will turn vertically when in vehicles", 45.0f);
 	c_ToggleGrip = config.RegisterBool("ToggleGrip", "When true releasing two handed weapons requires pressing the grip action again", false);
-	c_LeftHandFlashlightDistance = config.RegisterFloat("LeftHandFlashlight", "Bringing the left hand within this distance of the head will toggle the flashlight (<0 to disable)", 0.3f);
+	c_LeftHandFlashlightDistance = config.RegisterFloat("LeftHandFlashlight", "Bringing the left hand within this distance of the head will toggle the flashlight (<0 to disable)", 0.2f);
 	c_RightHandFlashlightDistance = config.RegisterFloat("RightHandFlashlight", "Bringing the right hand within this distance of the head will toggle the flashlight (<0 to disable)", -1.0f);
 	c_MeleeSwingSpeed = config.RegisterFloat("MeleeSwingSpeed", "Minimum vertical velocity of the main hand required to initiate a melee attack in m/s", 2.5f);
 	c_CrouchHeight = config.RegisterFloat("CrouchHeight", "Minimum height to duck by in metres to automatically trigger the crouch input in game (<0 to disable)", 0.15f);

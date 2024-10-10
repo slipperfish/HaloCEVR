@@ -167,6 +167,8 @@ public:
 	BoolProperty* c_SnapTurn = nullptr;
 	FloatProperty* c_SnapTurnAmount = nullptr;
 	FloatProperty* c_SmoothTurnAmount = nullptr;
+	FloatProperty* c_HorizontalVehicleTurnAmount = nullptr;
+	FloatProperty* c_VerticalVehicleTurnAmount = nullptr;
 	FloatProperty* c_LeftHandFlashlightDistance = nullptr;
 	FloatProperty* c_RightHandFlashlightDistance = nullptr;
 	Vector3Property* c_ControllerOffset = nullptr;

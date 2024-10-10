@@ -803,7 +803,7 @@ void Hooks::H_DrawViewModel()
 {
 	if (Game::instance.c_LeftHanded->Value())
 	{
-		Helpers::GetDirect3DDevice9()->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
+		Helpers::GetDirect3DDevice9()->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
 		reinterpret_cast<IDirect3DDevice9ExWrapper*>(Helpers::GetDirect3DDevice9())->bSkipWinding = true;
 

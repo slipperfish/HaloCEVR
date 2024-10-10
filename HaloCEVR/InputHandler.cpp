@@ -222,8 +222,8 @@ void InputHandler::UpdateCameraForVehicles(float& yaw, float& pitch)
 
 	const float DegToRad = 3.141593f / 180.0f;
 
-	const float YawDelta = lookInput.x * Game::instance.c_SmoothTurnAmount->Value() * Game::instance.lastDeltaTime;
-	const float PitchDelta = lookInput.y * Game::instance.c_SmoothTurnAmount->Value() * Game::instance.lastDeltaTime;
+	const float YawDelta = lookInput.x * Game::instance.c_HorizontalVehicleTurnAmount->Value() * Game::instance.lastDeltaTime;
+	const float PitchDelta = lookInput.y * Game::instance.c_VerticalVehicleTurnAmount->Value() * Game::instance.lastDeltaTime;
 
 	float yawOffset = vr->GetYawOffset();
 	
@@ -239,7 +239,7 @@ unsigned char InputHandler::UpdateFlashlight()
 {
 	IVR* vr = Game::instance.GetVR();
 
-	Vector3 headPos = vr->GetHMDTransform() * Vector3(0.0f, 0.0f, 0.0f);
+	Vector3 headPos = vr->GetHMDTransform() * Vector3(-0.1f, 0.0f, 0.0f);
 
 	float leftDistance = Game::instance.c_LeftHandFlashlightDistance->Value();
 	float rightDistance = Game::instance.c_RightHandFlashlightDistance->Value();
