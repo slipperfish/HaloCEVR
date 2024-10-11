@@ -84,6 +84,9 @@ public:
 
 	InGameRenderer inGameRenderer;
 	InGameRenderer scopeRenderer;
+
+	bool bDetectedChimera = false;
+	Vector3 LastLookDir;
 protected:
 
 	void CreateConsole();

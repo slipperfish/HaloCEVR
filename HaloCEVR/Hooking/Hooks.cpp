@@ -13,8 +13,6 @@
 #define CREATEHOOK(Func) Func##.CreateHook(#Func, o.##Func##, &H_##Func##)
 #define RESOLVEINDIRECT(Name) ResolveIndirect(o.I_##Name, o.##Name)
 
-bool bPotentiallyFoundChimera = false;
-
 void Hooks::InitHooks()
 {
 	RESOLVEINDIRECT(AssetsArray);
@@ -54,15 +52,22 @@ void Hooks::InitHooks()
 	CREATEHOOK(DrawViewModel);
 
 	// These are handled with a direct patch, so manually scan them
-	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo) < 0;
-	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo2) < 0;
-	bPotentiallyFoundChimera |= SigScanner::UpdateOffset(o.TabOutVideo3) < 0;
 	SigScanner::UpdateOffset(o.CutsceneFPSCap);
 	SigScanner::UpdateOffset(o.CreateMouseDevice);
 	SigScanner::UpdateOffset(o.SetViewModelVisible);
 	SigScanner::UpdateOffset(o.TextureAlphaWrite);
 	SigScanner::UpdateOffset(o.TextAlphaWrite);
 	SigScanner::UpdateOffset(o.CrouchHeight);
+
+	// There's almost certainly a better way to detect chimera than this
+	Game::instance.bDetectedChimera |= SigScanner::UpdateOffset(o.TabOutVideo, false) < 0;
+	Game::instance.bDetectedChimera |= SigScanner::UpdateOffset(o.TabOutVideo2, false) < 0;
+	Game::instance.bDetectedChimera |= SigScanner::UpdateOffset(o.TabOutVideo3, false) < 0;
+
+	if (Game::instance.bDetectedChimera)
+	{
+		Logger::log << "[Hook] Detected known chimera patches, disabling conflicting patches and enabling chimera compatibility" << std::endl;
+	}
 
 	SigScanner::UpdateOffset(o.SetCameraMatrices);
 	oSetCameraMatrices = reinterpret_cast<Func_SetCameraMatrices>(o.SetCameraMatrices.Address);
@@ -102,11 +107,8 @@ void Hooks::EnableAllHooks()
 
 	P_DontStealMouse();
 
-	//NOPInstructions(0x51c749, 5);
-	//NOPInstructions(0x50e988, 5);
-
 	// If we think the user has chimera installed, don't try to patch their patches
-	if (!bPotentiallyFoundChimera)
+	if (!Game::instance.bDetectedChimera)
 	{
 		P_FixTabOut();
 	}
@@ -290,7 +292,7 @@ void Hooks::ResolveIndirect(Offset& offset, long long& Address)
 	SigScanner::UpdateOffset(offset);
 	void* pointer = *reinterpret_cast<void**>(offset.Address + Address);
 	Address = reinterpret_cast<long long>(pointer);
-	Logger::log << "Calculated indirect address: 0x" << std::hex << Address << std::dec << std::endl;
+	Logger::log << "[Hook] Calculated indirect address: 0x" << std::hex << Address << std::dec << std::endl;
 }
 
 //===============================//Hooks//===================================//
@@ -314,6 +316,19 @@ void Hooks::H_DrawFrame(Renderer* param1, short param2, short* param3, float tic
 	*/
 
 	bool bDrawMirror = Game::instance.GetDrawMirror();
+	
+	Camera trueCamera;
+
+	// Chimera does its own thing with camera interpolation, steal that for the camera position during rendering
+	if (Game::instance.bDetectedChimera)
+	{
+		trueCamera = Helpers::GetCamera();
+		Helpers::GetCamera().position = param1->frustum.position;
+		Helpers::GetCamera().lookDir = param1->frustum.facingDirection;
+		Helpers::GetCamera().lookDirUp = param1->frustum.upDirection;
+		Game::instance.LastLookDir = param1->frustum.facingDirection;
+	}
+
 
 	Game::instance.PreDrawFrame(param1, deltaTime);
 	reinterpret_cast<IDirect3DDevice9ExWrapper*>(Helpers::GetDirect3DDevice9())->bIgnoreNextEnd = true;
@@ -350,6 +365,11 @@ void Hooks::H_DrawFrame(Renderer* param1, short param2, short* param3, float tic
 		Game::instance.PostDrawMirror(param1, deltaTime);
 	}
 	Game::instance.PostDrawFrame(param1, deltaTime);
+
+	if (Game::instance.bDetectedChimera)
+	{
+		Helpers::GetCamera() = trueCamera;
+	}
 }
 
 void Hooks::H_DrawHUD()

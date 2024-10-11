@@ -19,7 +19,7 @@
 
 void Game::Init()
 {
-	Logger::log << "HaloCEVR initialising..." << std::endl;
+	Logger::log << "[Game] HaloCEVR initialising..." << std::endl;
 
 	SetupConfigs();
 
@@ -40,7 +40,7 @@ void Game::Init()
 	backBufferWidth = vr->GetViewWidth();
 	backBufferHeight = vr->GetViewHeight();
 
-	Logger::log << "HaloCEVR initialised" << std::endl;
+	Logger::log << "[Game] HaloCEVR initialised" << std::endl;
 }
 
 void Game::Shutdown()
@@ -51,7 +51,7 @@ void Game::Shutdown()
 	}
 	bHasShutdown = true;
 
-	Logger::log << "HaloCEVR shutting down..." << std::endl;
+	Logger::log << "[Game] HaloCEVR shutting down..." << std::endl;
 
 	vr->Shutdown();
 
@@ -59,14 +59,14 @@ void Game::Shutdown()
 
 	if (hookStatus != MH_OK)
 	{
-		Logger::log << "Could not remove hooks: " << MH_StatusToString(hookStatus) << std::endl;
+		Logger::log << "[Game] Could not remove hooks: " << MH_StatusToString(hookStatus) << std::endl;
 	}
 
 	hookStatus = MH_Uninitialize();
 
 	if (hookStatus != MH_OK)
 	{
-		Logger::log << "Could not uninitialise MinHook: " << MH_StatusToString(hookStatus) << std::endl;
+		Logger::log << "[Game] Could not uninitialise MinHook: " << MH_StatusToString(hookStatus) << std::endl;
 	}
 
 	if (c_ShowConsole && c_ShowConsole->Value())
@@ -81,11 +81,11 @@ void Game::Shutdown()
 
 void Game::OnInitDirectX()
 {
-	Logger::log << "Game has finished DirectX initialisation" << std::endl;
+	Logger::log << "[Game] Game has finished DirectX initialisation" << std::endl;
 
 	if (!Helpers::GetDirect3DDevice9())
 	{
-		Logger::log << "Couldn't get game's direct3d device" << std::endl;
+		Logger::err << "Couldn't get game's direct3d device" << std::endl;
 		return;
 	}
 
@@ -159,8 +159,6 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 			Hooks::P_KeepViewModelVisible(bNewShowViewModel);
 
 			bShowViewModel = bNewShowViewModel;
-
-			Logger::log << Player->parentSeatIndex << std::endl;
 		}
 		bInVehicle = bNewShowViewModel;
 		bHasWeapon = Player->weapon.id != 0xffff;
@@ -727,13 +725,13 @@ void Game::PatchGame()
 
 	if ((hookStatus = MH_Initialize()) != MH_OK)
 	{
-		Logger::log << "Could not initialise MinHook: " << MH_StatusToString(hookStatus) << std::endl;
+		Logger::err << "Could not initialise MinHook: " << MH_StatusToString(hookStatus) << std::endl;
 	}
 	else
 	{
-		Logger::log << "Creating hooks" << std::endl;
+		Logger::log << "[Game] Creating hooks" << std::endl;
 		Hooks::InitHooks();
-		Logger::log << "Enabling hooks" << std::endl;
+		Logger::log << "[Game] Enabling hooks" << std::endl;
 		Hooks::EnableAllHooks();
 	}
 }

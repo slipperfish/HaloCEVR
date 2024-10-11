@@ -203,7 +203,7 @@ void InputHandler::UpdateCamera(float& yaw, float& pitch)
 
 	Vector3 lookHMD = vr->GetHMDTransform().getLeftAxis();
 	// Get current camera angle
-	Vector3 lookGame = Helpers::GetCamera().lookDir;
+	Vector3 lookGame = Game::instance.bDetectedChimera ? Game::instance.LastLookDir : Helpers::GetCamera().lookDir;
 	// Apply deltas
 	float yawHMD = atan2(lookHMD.y, lookHMD.x);
 	float yawGame = atan2(lookGame.y, lookGame.x);

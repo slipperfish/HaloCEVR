@@ -60,7 +60,7 @@ public:
 	OFFSET(DrawImage,             0x11c9a0, "81 ec 4c 01 00 00 56 8b f0 a0 ?? ?? ?? ?? 84 c0 c6 44 24 07 01");
 	OFFSET(DrawLoadingScreen2,    0x097410, "a1 ?? ?? ?? ?? 81 ec 18 04 00 00 57 33 ff 3b c7 0f 84 ?? ?? ?? ?? a1 ?? ?? ?? ?? 56 83 ce ff");
 	OFFSET(DrawCinematicBars,     0x0499c0, "8b 15 ?? ?? ?? ?? 8a 4a 08 83 ec 34 84 c9 53 55 56 57");
-	OFFSET(DrawViewModel,	      0x0924b0, "");
+	OFFSET(DrawViewModel,	      0x0924b0, "66 8b 0d ?? ?? ?? ?? 81 ec 3c 0d 00 00 66 83 f9 ff 53 55 56 57");
 
 	OFFSET(SetViewModelPosition,  0x0d6880, "81 ec f0 00 00 00 53 55 25 ff ff 00 00 56 8b f1 8b 0d 14");
 	OFFSET(HandleInputs,          0x08b4b0, "83 ec 08 56 57 8d 44 24 08 50 ff 15 ?? ?? ?? ?? 8b 4c 24 0c");
@@ -81,7 +81,7 @@ public:
 
 	// Try to update the offset based on its signature
 	// Returns -1 if unsuccessful, 0 if offset already matched, NewOffset if updated
-	static long long UpdateOffset(struct Offset& Offset);
+	static long long UpdateOffset(struct Offset& Offset, bool bErrorOnFail = true);
 
 	static inline std::string ModuleName = "halo.exe";
 };

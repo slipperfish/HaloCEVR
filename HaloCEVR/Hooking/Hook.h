@@ -14,13 +14,13 @@ public:
 
 		if (!Func)
 		{
-			Logger::log << "Hook: Target Function pointer not provided to hook, skipping " << DebugName << std::endl;
+			Logger::log << "[Hook] Target Function pointer not provided to hook, skipping " << DebugName << std::endl;
 			return;
 		}
 
 		if (SigScanner::UpdateOffset(FunctionOffset) < 0)
 		{
-			Logger::log << "Hook: signature was invalid, skipping " << DebugName << std::endl;
+			Logger::log << "[Hook] signature was invalid, skipping " << DebugName << std::endl;
 			return;
 		}
 
@@ -28,25 +28,25 @@ public:
 
 		if (HookStatus != MH_OK)
 		{
-			Logger::log << "Hook: Could not create hook for " << DebugName << " : " << MH_StatusToString(HookStatus) << std::endl;
+			Logger::log << "[Hook] Could not create hook for " << DebugName << " : " << MH_StatusToString(HookStatus) << std::endl;
 			return;
 		}
 
 		TargetFunc = reinterpret_cast<LPVOID>(FunctionOffset.Address);
-		Logger::log << "Hook: Created hook for " << DebugName << std::endl;
+		Logger::log << "[Hook] Created hook for " << DebugName << std::endl;
 	}
 
 	void EnableHook()
 	{
 		if (bIsEnabled)
 		{
-			Logger::log << "Hook: cannot enable " << DebugName << " as it is already enabled" << std::endl;
+			Logger::log << "[Hook] cannot enable " << DebugName << " as it is already enabled" << std::endl;
 			return;
 		}
 
 		if (!TargetFunc)
 		{
-			Logger::log << "Hook: cannot enable " << DebugName << " as it is has not been successfully created" << std::endl;
+			Logger::log << "[Hook] cannot enable " << DebugName << " as it is has not been successfully created" << std::endl;
 			return;
 		}
 
@@ -54,25 +54,25 @@ public:
 
 		if (HookStatus != MH_OK)
 		{
-			Logger::log << "Hook: Could not enable hook for " << DebugName << " : " << MH_StatusToString(HookStatus) << std::endl;
+			Logger::log << "[Hook] Could not enable hook for " << DebugName << " : " << MH_StatusToString(HookStatus) << std::endl;
 			return;
 		}
 
 		bIsEnabled = true;
-		Logger::log << "Hook: Enabled hook for " << DebugName << std::endl;
+		Logger::log << "[Hook] Enabled hook for " << DebugName << std::endl;
 	}
 
 	void DisableHook()
 	{
 		if (!bIsEnabled)
 		{
-			Logger::log << "Hook: cannot disable " << DebugName << " as it is not enabled" << std::endl;
+			Logger::log << "[Hook] cannot disable " << DebugName << " as it is not enabled" << std::endl;
 			return;
 		}
 
 		if (!TargetFunc)
 		{
-			Logger::log << "Hook: cannot disable " << DebugName << " as the current target function is invalid" << std::endl;
+			Logger::log << "[Hook] cannot disable " << DebugName << " as the current target function is invalid" << std::endl;
 			return;
 		}
 
@@ -80,12 +80,12 @@ public:
 
 		if (HookStatus != MH_OK)
 		{
-			Logger::log << "Hook: Could not enable hook for " << DebugName << " : " << MH_StatusToString(HookStatus) << std::endl;
+			Logger::log << "[Hook] Could not enable hook for " << DebugName << " : " << MH_StatusToString(HookStatus) << std::endl;
 		}
 
 		bIsEnabled = false;
 		TargetFunc = nullptr;
-		Logger::log << "Hook: Disabled hook for " << DebugName << std::endl;
+		Logger::log << "[Hook] Disabled hook for " << DebugName << std::endl;
 	}
 
 protected:
