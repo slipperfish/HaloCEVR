@@ -275,21 +275,21 @@ void InGameRenderer::ExtractMatrices(Renderer* playerRenderer)
 	Hooks::SetCameraMatrices(&cameraMatrices.viewport, &playerRenderer->frustum, &cameraMatrices, true);
 
 
-	view._13 = cameraMatrices.viewMatrix.rotation[2];
-	view._12 = cameraMatrices.viewMatrix.rotation[1];
-	view._23 = cameraMatrices.viewMatrix.rotation[5];
 	view._11 = cameraMatrices.viewMatrix.rotation[0];
-	view._22 = cameraMatrices.viewMatrix.rotation[4];
-	view._33 = cameraMatrices.viewMatrix.rotation[8];
-	view._21 = cameraMatrices.viewMatrix.rotation[3];
-	view._32 = cameraMatrices.viewMatrix.rotation[7];
-	view._43 = cameraMatrices.viewMatrix.translation.z;
-	view._31 = cameraMatrices.viewMatrix.rotation[6];
-	view._42 = cameraMatrices.viewMatrix.translation.y;
+	view._12 = cameraMatrices.viewMatrix.rotation[1];
+	view._13 = cameraMatrices.viewMatrix.rotation[2];
 	view._14 = 0.0;
+	view._21 = cameraMatrices.viewMatrix.rotation[3];
+	view._22 = cameraMatrices.viewMatrix.rotation[4];
+	view._23 = cameraMatrices.viewMatrix.rotation[5];
 	view._24 = 0.0;
+	view._31 = cameraMatrices.viewMatrix.rotation[6];
+	view._32 = cameraMatrices.viewMatrix.rotation[7];
+	view._33 = cameraMatrices.viewMatrix.rotation[8];
 	view._34 = 0.0;
 	view._41 = cameraMatrices.viewMatrix.translation.x;
+	view._43 = cameraMatrices.viewMatrix.translation.z;
+	view._42 = cameraMatrices.viewMatrix.translation.y;
 	view._44 = 1.0;
 	world._43 = 0.0;
 	world._42 = 0.0;

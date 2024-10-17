@@ -61,12 +61,14 @@ struct CameraRenderMatrices
 	Vector4 quaternions[6];
 	float zNear;
 	float zFar;
-	Vector3 vectors[4];
+	Vector3 frustumCorners[4];
 	Vector3 cameraPosition;
-	Vector3 vector;
+	Vector3 frustumCentre;
 	float floats[6];
-	uint32_t unk;
+	uint32_t unk0;
 	D3DMATRIX projectionMatrix;
+	float unk1;
+	float unk2;
 };
 
 namespace Helpers

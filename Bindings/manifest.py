@@ -115,7 +115,7 @@ for v in variants:
                     finalhand = "left"
             
             if inputs[0] == "joystick":
-                if controllers == "knuckles":
+                if c == "knuckles":
                     inputs[0] = "thumbstick"
             
                 if len(inputs) > 1:
@@ -140,13 +140,13 @@ for v in variants:
                 parameters["click_activate_threshold"] = 0.8
                 parameters["click_deactivate_threshold"] = 0.7
             elif inputs[0] == "x":
-                if controllers == "knuckles":
+                if c == "knuckles":
                     inputs[0] = "a"
             elif inputs[0] == "y":
-                if controllers == "knuckles":
+                if c == "knuckles":
                     inputs[0] = "b"
             elif inputs[0] == "thumbrest":
-                if controllers == "knuckles":
+                if c == "knuckles":
                     inputs[0] = "trackpad"
             
                        

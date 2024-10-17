@@ -40,6 +40,8 @@ void Game::Init()
 	backBufferWidth = vr->GetViewWidth();
 	backBufferHeight = vr->GetViewHeight();
 
+	bHasShutdown = false;
+
 	Logger::log << "[Game] HaloCEVR initialised" << std::endl;
 }
 
@@ -688,13 +690,10 @@ void Game::UpdateMouseInfo(MouseInfo* mouseInfo)
 
 void Game::SetViewportScale(Viewport* viewport)
 {
-	float width = vr->GetViewWidthStretch();
-	float height = vr->GetViewHeightStretch();
-
-	viewport->left = -width;
-	viewport->right = width;
-	viewport->bottom = height;
-	viewport->top = -height;
+	viewport->left = -1.0f;
+	viewport->right = 1.0f;
+	viewport->bottom = 1.0f;
+	viewport->top = -1.0f;
 }
 
 float Game::MetresToWorld(float m) const

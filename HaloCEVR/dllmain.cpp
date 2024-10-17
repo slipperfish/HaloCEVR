@@ -9,28 +9,6 @@
 #pragma comment(lib, "libMinHook.x86.lib")
 #pragma comment(lib, "d3d9.lib")
 
-Logger Logger::log("VR/inject.log");
-Logger::LoggerAlert Logger::err(&Logger::log);
-Game Game::instance;
-
-BOOL APIENTRY DllMain( HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
-{
-	switch (ul_reason_for_call)
-	{
-	case DLL_PROCESS_ATTACH:
-		break;
-	case DLL_THREAD_ATTACH:
-	case DLL_THREAD_DETACH:
-		break;
-	case DLL_PROCESS_DETACH:
-		Game::instance.Shutdown();
-		break;
-	}
-	return TRUE;
-}
-
-//==== DLL proxying stuff below ====//
-
 typedef IDirect3D9* (WINAPI *LPD3D_Direct3DCreate9)(UINT nSDKVersion);
 typedef HRESULT (WINAPI *LPD3D_Direct3DCreate9Ex)(UINT nSDKVersion, IDirect3D9Ex**);
 typedef void(WINAPI* LPD3D_Direct3DShaderValidatorCreate9)(void);
@@ -40,11 +18,35 @@ HMODULE dllHandle;
 LPD3D_Direct3DCreate9 fnDirect3DCreate9 = nullptr;
 LPD3D_Direct3DCreate9Ex fnDirect3DCreate9Ex = nullptr;
 
+Logger Logger::log("VR/inject.log");
+Logger::LoggerAlert Logger::err(&Logger::log);
+Game Game::instance;
+
+BOOL APIENTRY DllMain( HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
+{
+	switch (ul_reason_for_call)
+	{
+	case DLL_PROCESS_ATTACH:
+		Logger::log << "[DLL] HaloCEVR attached" << std::endl;
+		break;
+	case DLL_THREAD_ATTACH:
+	case DLL_THREAD_DETACH:
+		break;
+	case DLL_PROCESS_DETACH:
+		Game::instance.Shutdown();
+		bHasInit = false;
+		break;
+	}
+	return TRUE;
+}
+
+//==== DLL proxying stuff below ====//
 
 bool LoadRealDLL()
 {
 	if (bHasInit)
 	{
+		Logger::log << "[DLL] Multiple calls to LoadRealDLL, returning existing handle: " << dllHandle << std::endl;
 		return dllHandle != NULL;
 	}
 	bHasInit = true;
@@ -56,6 +58,8 @@ bool LoadRealDLL()
 	buffer[MAX_PATH] = 0;
 	std::string dllFileName = buffer;
 	dllFileName += "\\d3d9.dll";
+
+	Logger::log << "[DLL] Loading real DirectX9 runtime from " << dllFileName << std::endl;
 
 	dllHandle = LoadLibraryA(dllFileName.c_str());
 
@@ -76,15 +80,17 @@ bool LoadRealDLL()
 		return false;
 	}
 
-	Logger::log << "Loaded real d3d9.dll" << std::endl;
+	Logger::log << "[DLL] Loaded real d3d9.dll" << std::endl;
 	return true;
 }
 
 #pragma comment(linker, "/export:Direct3DCreate9Ex=?H_Direct3DCreate9Ex@@YGJIPAPAUIDirect3D9Ex@@@Z")
 HRESULT WINAPI H_Direct3DCreate9Ex(UINT nSDKVersion, IDirect3D9Ex** outDirect3D9Ex)
 {
+	Logger::log << "[DLL] Intercepting call to Direct3dCreate9Ex" << std::endl;
 	if (!LoadRealDLL())
 	{
+		Logger::err << "[DLL] Failed to load real d3d9.dll" << std::endl;
 		return D3DERR_NOTAVAILABLE;
 	}
 
@@ -94,7 +100,7 @@ HRESULT WINAPI H_Direct3DCreate9Ex(UINT nSDKVersion, IDirect3D9Ex** outDirect3D9
 
 	if (FAILED(result))
 	{
-		Logger::log << "Call to Direct3DCreate9Ex Failed: " << result << std::endl;
+		Logger::err << "Call to Direct3DCreate9Ex Failed: " << result << std::endl;
 		return result;
 	}
 
@@ -106,13 +112,28 @@ HRESULT WINAPI H_Direct3DCreate9Ex(UINT nSDKVersion, IDirect3D9Ex** outDirect3D9
 #pragma comment(linker, "/export:Direct3DCreate9=?H_Direct3DCreate9@@YGPAUIDirect3D9@@I@Z")
 IDirect3D9* WINAPI H_Direct3DCreate9(UINT nSDKVersion)
 {
+	Logger::log << "[DLL] Intercepting call to Direct3dCreate9" << std::endl;
 	if (!LoadRealDLL())
 	{
+		Logger::err << "[DLL] Failed to load real d3d9.dll" << std::endl;
 		return nullptr;
 	}
 
 	IDirect3D9Ex* d3dEx;
-	HRESULT result = H_Direct3DCreate9Ex(D3D_SDK_VERSION, &d3dEx);
+	HRESULT result = H_Direct3DCreate9Ex(nSDKVersion, &d3dEx);
+
+	if (SUCCEEDED(result))
+	{
+		int numAdapters = d3dEx->GetAdapterCount();
+		Logger::log << "Adapters: " << numAdapters << std::endl;
+
+		D3DDISPLAYMODE outMode;
+
+		for (int i = 0; i < numAdapters; i++)
+		{
+			Logger::log << "Adapter " << i << ": " << (uint32_t) d3dEx->GetAdapterDisplayMode(i, &outMode) << " " << outMode.Width << "x" << outMode.Height << " " << (outMode.Format) << std::endl;
+		}
+	}
 
 	return d3dEx;
 }

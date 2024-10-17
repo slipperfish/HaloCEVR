@@ -76,7 +76,22 @@ HRESULT __stdcall IDirect3D9ExWrapper::EnumAdapterModes(UINT Adapter, D3DFORMAT 
 
 HRESULT __stdcall IDirect3D9ExWrapper::GetAdapterDisplayMode(UINT Adapter, D3DDISPLAYMODE* pMode)
 {
-	return Real->GetAdapterDisplayMode(Adapter, pMode);
+	HRESULT result = Real->GetAdapterDisplayMode(Adapter, pMode);
+
+	if (SUCCEEDED(result))
+	{
+		return result;
+	}
+
+	// There's a very weird bug on my Radeon machine where this call fails unless I swap the display's graphics format back and forth before launching
+	// Hopefully if we just lie to halo about the result of this call nothing will break...
+	Logger::log << "[D3D] WARNING! GetAdapterDisplayMode failed, lying about the results to shut up halo" << std::endl;
+
+	pMode->Format = D3DFMT_X8R8G8B8;
+	pMode->Width = 1080;
+	pMode->Height = 1920;
+	pMode->RefreshRate = 60;
+	return S_OK;
 }
 
 HRESULT __stdcall IDirect3D9ExWrapper::CheckDeviceType(UINT Adapter, D3DDEVTYPE DevType, D3DFORMAT AdapterFormat, D3DFORMAT BackBufferFormat, BOOL bWindowed)
