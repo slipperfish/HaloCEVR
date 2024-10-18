@@ -58,6 +58,7 @@ void Hooks::InitHooks()
 	SigScanner::UpdateOffset(o.TextureAlphaWrite);
 	SigScanner::UpdateOffset(o.TextAlphaWrite);
 	SigScanner::UpdateOffset(o.CrouchHeight);
+	SigScanner::UpdateOffset(o.CinematicBarDrawCall);
 
 	// There's almost certainly a better way to detect chimera than this
 	Game::instance.bDetectedChimera |= SigScanner::UpdateOffset(o.TabOutVideo, false) < 0;
@@ -104,6 +105,7 @@ void Hooks::EnableAllHooks()
 	P_EnableUIAlphaWrite();
 	P_DisableCrouchCamera();
 	P_ForceCmdLineArgs();
+	P_RemoveCinematicBars();
 
 	P_DontStealMouse();
 
@@ -903,6 +905,16 @@ void Hooks::P_ForceCmdLineArgs()
 	args.NoVideo = 1;
 	args.Width640 = 1;
 	*reinterpret_cast<int*>(o.IsWindowed) = 1; // This isn't stored with the rest of the args for some reason
+}
+
+void Hooks::P_RemoveCinematicBars()
+{
+	// I would just disable the function that draws these entirely, but then we lose the level titles
+	long long FirstAddress = o.CinematicBarDrawCall.Address;
+
+
+	NOPInstructions(FirstAddress, 5);
+	NOPInstructions(FirstAddress + 0x74, 5);
 }
 
 void Hooks::P_DontStealMouse()

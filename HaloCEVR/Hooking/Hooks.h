@@ -49,6 +49,7 @@ public:
 	static void P_EnableUIAlphaWrite();
 	static void P_DisableCrouchCamera();
 	static void P_ForceCmdLineArgs();
+	static void P_RemoveCinematicBars();
 
 	static void P_DontStealMouse();
 
