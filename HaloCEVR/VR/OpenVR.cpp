@@ -9,6 +9,7 @@
 #include "../Helpers/Renderer.h"
 #include "../Helpers/RenderTarget.h"
 #include "../Helpers/Camera.h"
+#include "../Helpers/Cutscene.h"
 
 #pragma comment(lib, "openvr_api.lib")
 #pragma comment(lib, "d3d11.lib")
@@ -435,11 +436,20 @@ void OpenVR::UpdateCameraFrustum(CameraFrustum* frustum, int eye)
 
 	Matrix4 headMatrix = GetHMDTransform(true);
 
+	// Yaw should follow cutscene camera
+	CutsceneData* cutscene = Helpers::GetCutsceneData();
+
+	if (cutscene->bInCutscene)
+	{
+		float cameraYaw = atan2(frustum->facingDirection.y, frustum->facingDirection.x) * (180.0f / 3.1415926f);
+		headMatrix.rotateZ(cameraYaw);
+	}
+
 	Matrix4 viewMatrix = (headMatrix * eyeMatrix.invert()).scale(Game::instance.MetresToWorld(1.0f));
 
 	Matrix3 rotationMatrix = GetRotationMatrix(headMatrix);
 
-	// Ignore all existing rotation for now
+
 	frustum->facingDirection = Vector3(1.0f, 0.0f, 0.0f);
 	frustum->upDirection = Vector3(0.0f, 0.0f, 1.0f);
 
