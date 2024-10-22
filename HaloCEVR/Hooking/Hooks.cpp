@@ -31,6 +31,8 @@ void Hooks::InitHooks()
 	RESOLVEINDIRECT(LoadingState);
 	RESOLVEINDIRECT(CmdLineArgs);
 	RESOLVEINDIRECT(IsWindowed);
+	RESOLVEINDIRECT(CutsceneData);
+	RESOLVEINDIRECT(CampaignLoading);
 
 	CREATEHOOK(InitDirectX);
 	CREATEHOOK(DrawFrame);

@@ -156,6 +156,8 @@ protected:
 
 	bool bHasShutdown = true;
 
+	bool bWasLoading = false;
+
 	//======Configs======//
 public:
 

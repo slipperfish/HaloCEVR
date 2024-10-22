@@ -13,4 +13,5 @@ namespace Helpers
 {
 	bool IsMouseVisible();
 	bool IsLoading();
+	bool IsCampaignLoading();
 }

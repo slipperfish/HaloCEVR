@@ -114,6 +114,14 @@ void Game::PreDrawFrame(struct Renderer* renderer, float deltaTime)
 
 	renderState = ERenderState::UNKNOWN;
 
+	bool bIsLoading = Helpers::IsCampaignLoading();
+
+	if (bWasLoading && !bIsLoading)
+	{
+		bNeedsRecentre = true;
+	}
+	bWasLoading = bIsLoading;
+
 	//CalcFPS(deltaTime);
 
 	vr->SetMouseVisibility(Helpers::IsMouseVisible());
@@ -239,7 +247,7 @@ void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
 
 void Game::PostDrawEye(struct Renderer* renderer, float deltaTime, int eye)
 {
-	if (Helpers::IsLoading())
+	if (Helpers::IsLoading() || Helpers::IsCampaignLoading())
 	{
 		Helpers::GetDirect3DDevice9()->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(0, 0, 0, 0), 1.0f, 0);
 	}

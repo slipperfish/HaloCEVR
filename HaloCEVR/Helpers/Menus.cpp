@@ -10,3 +10,8 @@ bool Helpers::IsLoading()
 {
     return *reinterpret_cast<int*>(Hooks::o.LoadingState) != 0;
 }
+
+bool Helpers::IsCampaignLoading()
+{
+	return *reinterpret_cast<bool*>(Hooks::o.CampaignLoading);
+}
