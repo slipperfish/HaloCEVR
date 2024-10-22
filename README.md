@@ -25,12 +25,14 @@ A full VR conversion mod for the original 2003 PC edition of _Halo: Combat Evolv
 * Desktop mirror (recommended to use SteamVR's desktop display instead)
 
 ## Known issues
+* Game sometimes isn't the focused window on launch and inputs/sounds may break when the game is unfocused
+* First stage of the tutorial ("look around") doesn't detect headset movement, wiggle the mouse and you should get passed it
 * Camera behaves weirdly briefly when entering/exiting vehicles
-* Cutscene camera often faces the wrong way
 * Reloading a checkpoint made while in a vehicle can mess with the camera position, get out and in again to fix it
 * Melee and interact use head aiming rather than controller aiming
 * Crosshair only lights up red when looking at an enemy, not when pointing a gun at one
 * On screen button prompts display keyboard bindings rather than VR bindings
+* If the game is installed in program files the mod config file (and log file) won't generate unless the game is run as administrator
 
 ## Installation
 0. Install _Halo: Combat Evolved for PC_ using an original installation CD + product key
