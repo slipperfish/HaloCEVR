@@ -384,6 +384,12 @@ void Game::PostDrawFrame(struct Renderer* renderer, float deltaTime)
 	vr->PostDrawFrame(renderer, deltaTime);
 	inGameRenderer.PostRender();
 
+	sRect* windowMain = Helpers::GetWindowRect();
+	windowMain->top = 0;
+	windowMain->left = 0;
+	windowMain->right = Helpers::GetRenderTargets()[0].width;
+	windowMain->bottom = Helpers::GetRenderTargets()[0].height;
+
 	if (c_DrawMirror->Value() && mirrorSource != ERenderState::GAME)
 	{
 		int sWidth = vr->GetViewWidth();
@@ -779,6 +785,7 @@ void Game::SetupConfigs()
 	c_ScopeOffsetRocket = config.RegisterVector3("ScopeOffsetRocket", "Offset of the scope view relative to the pistol's location", Vector3(0.1f, 0.2f, 0.1f));
 	// Misc settings
 	c_ShowRoomCentre = config.RegisterBool("ShowRoomCentre", "Draw an indicator at your feet to show where the player character is actually positioned", true);
+	c_d3d9Path = config.RegisterString("CustomD3D9Path", "If set first try to load d3d9.dll from the specified path instead of from system32", "");
 
 	config.LoadFromFile("VR/config.txt");
 	config.SaveToFile("VR/config.txt");

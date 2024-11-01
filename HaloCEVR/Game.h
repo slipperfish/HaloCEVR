@@ -188,5 +188,6 @@ public:
 	BoolProperty* c_ShowRoomCentre = nullptr;
 	BoolProperty* c_ToggleGrip = nullptr;
 	BoolProperty* c_LeftHanded = nullptr;
+	StringProperty* c_d3d9Path = nullptr;
 };
 

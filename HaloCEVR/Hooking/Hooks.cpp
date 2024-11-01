@@ -359,7 +359,8 @@ void Hooks::H_DrawFrame(Renderer* param1, short param2, short* param3, float tic
 	Game::instance.PreDrawEye(param1, deltaTime, 1);
 	DrawFrame.Original(param1, param2, param3, tickProgress, deltaTime);
 	Game::instance.PostDrawEye(param1, deltaTime, 1);
-	// Draw Mirror view, should be replaced at some point as it is wasteful to draw an entirely new viewport
+
+	// Draw Mirror view, but only if the secret mirror mode is set in settings due to performance cost
 	if (bDrawMirror)
 	{
 		reinterpret_cast<IDirect3DDevice9ExWrapper*>(Helpers::GetDirect3DDevice9())->bIgnoreNextStart = true;

@@ -52,16 +52,33 @@ bool LoadRealDLL()
 	bHasInit = true;
 	Game::instance.Init();
 
-	char buffer[MAX_PATH + 1];
+	if (Game::instance.c_d3d9Path->Value() != "")
+	{
+		dllHandle = LoadLibraryA(Game::instance.c_d3d9Path->Value().c_str());
 
-	GetSystemDirectoryA(buffer, sizeof(buffer));
-	buffer[MAX_PATH] = 0;
-	std::string dllFileName = buffer;
-	dllFileName += "\\d3d9.dll";
+		if (dllHandle)
+		{
+			Logger::log << "[DLL] Loading real DirectX9 runtime from " << Game::instance.c_d3d9Path->Value() << std::endl;
+		}
+		else
+		{
+			Logger::log << "[DLL] Could not load real Directx9 runtime from '" << Game::instance.c_d3d9Path->Value() << "'. Falling back to System32's version" << std::endl;
+		}
+	}
 
-	Logger::log << "[DLL] Loading real DirectX9 runtime from " << dllFileName << std::endl;
+	if (!dllHandle)
+	{
+		char buffer[MAX_PATH + 1];
 
-	dllHandle = LoadLibraryA(dllFileName.c_str());
+		GetSystemDirectoryA(buffer, sizeof(buffer));
+		buffer[MAX_PATH] = 0;
+		std::string dllFileName = buffer;
+		dllFileName += "\\d3d9.dll";
+
+		Logger::log << "[DLL] Loading real DirectX9 runtime from " << dllFileName << std::endl;
+
+		dllHandle = LoadLibraryA(dllFileName.c_str());
+	}
 
 	if (!dllHandle)
 	{
