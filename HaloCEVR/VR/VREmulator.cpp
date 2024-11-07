@@ -153,6 +153,11 @@ Vector3 VREmulator::GetControllerVelocity(ControllerRole Role, bool bRenderPose)
 	return Vector3();
 }
 
+bool VREmulator::TryGetControllerFacing(ControllerRole role, Vector3& outDirection)
+{
+    return false;
+}
+
 IDirect3DSurface9* VREmulator::GetRenderSurface(int eye)
 {
 	return eyeSurface_Game[eye][0];

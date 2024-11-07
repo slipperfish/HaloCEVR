@@ -37,7 +37,8 @@ public:
 	virtual Matrix4 GetRawControllerTransform(ControllerRole role, bool bRenderPose = false) = 0;
 	virtual Matrix4 GetControllerTransform(ControllerRole role, bool bRenderPose = false) = 0;
 	virtual Matrix4 GetControllerBoneTransform(ControllerRole role, int bone, bool bRenderPose = false) = 0;
-	virtual Vector3 GetControllerVelocity(ControllerRole Role, bool bRenderPose = false) = 0;
+	virtual Vector3 GetControllerVelocity(ControllerRole role, bool bRenderPose = false) = 0;
+	virtual bool TryGetControllerFacing(ControllerRole role, Vector3& outDirection) = 0;
 	virtual struct IDirect3DSurface9* GetRenderSurface(int eye) = 0;
 	virtual struct IDirect3DTexture9* GetRenderTexture(int eye) = 0;
 	virtual struct IDirect3DSurface9* GetUISurface() = 0;

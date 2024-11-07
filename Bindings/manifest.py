@@ -4,6 +4,7 @@ controllers = ["oculus_touch", "knuckles"]
 boolActions = ["Jump","SwitchGrenades","Interact","SwitchWeapons","Melee","Flashlight","Grenade","Fire","MenuForward","MenuBack","Crouch","Zoom","Reload", "Recentre", "TwoHandGrip"]
 vec1Actions = []
 vec2Actions = ["Look", "Move"]
+poseActions = ["Tip"]
 
 bindings = {
     "Jump" : { "h" : "right", "b" : "joystick|north", "f" : True},
@@ -31,6 +32,9 @@ manifest = {
     ]
 }
 
+poses = {
+    "Tip" : "tip"
+}
 
 variants = ["Right Handed", "Left Handed"]
 
@@ -47,6 +51,10 @@ for v in vec1Actions:
     
 for v in vec2Actions:
     manifest["actions"].append({"name" : "/actions/default/in/" + v, "requirement" : "suggested", "type" : "vector2"})
+
+for p in poseActions:
+    manifest["actions"].append({"name" : "/actions/default/in/Left" + p, "requirement" : "suggested", "type" : "pose"})
+    manifest["actions"].append({"name" : "/actions/default/in/Right" + p, "requirement" : "suggested", "type" : "pose"})
 
 manifest["actions"].append({"name" : "/actions/default/in/LeftHand", "type" : "skeleton", "skeleton": "/skeleton/hand/left"})
 manifest["actions"].append({"name" : "/actions/default/in/RightHand", "type" : "skeleton", "skeleton": "/skeleton/hand/right"})
@@ -94,6 +102,10 @@ for v in variants:
         
         controller["bindings"]["/actions/default"]["skeleton"].append({"output" : "/actions/default/in/LeftHand", "path" : "/user/hand/left/input/skeleton/left"})
         controller["bindings"]["/actions/default"]["skeleton"].append({"output" : "/actions/default/in/RightHand", "path" : "/user/hand/right/input/skeleton/right"})
+        
+        for p in poses:
+            controller["bindings"]["/actions/default"]["poses"].append({"output" : "/actions/default/in/Left"+p, "path" : "/user/hand/left/pose/"+poses[p]});
+            controller["bindings"]["/actions/default"]["poses"].append({"output" : "/actions/default/in/Right"+p, "path" : "/user/hand/right/pose/"+poses[p]});
         
         for binding in bindings:
             b = bindings[binding]

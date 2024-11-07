@@ -100,8 +100,28 @@ void OpenVR::Init()
 		Logger::log << "[OpenVR] Could not get right skeleton binding: " << skeletonError << std::endl;
 	}
 
+	bHasValidTipPoses = true;
+	vr::EVRInputError poseError = vrInput->GetActionHandle("/actions/default/in/LeftTip", &leftHandTip);
+
+	if (poseError != vr::EVRInputError::VRInputError_None)
+	{
+		Logger::log << "[OpenVR] Could not get left hand pose: " << poseError << std::endl;
+		bHasValidTipPoses = false;
+	}
+
+	poseError = vrInput->GetActionHandle("/actions/default/in/RightTip", &rightHandTip);
+
+	if (poseError != vr::EVRInputError::VRInputError_None)
+	{
+		Logger::log << "[OpenVR] Could not get right hand pose: " << poseError << std::endl;
+		bHasValidTipPoses = false;
+	}
+
 	UpdateInputs();
 	UpdateSkeleton(ControllerRole::Left);
+	UpdateSkeleton(ControllerRole::Right);
+	UpdatePose(ControllerRole::Left);
+	UpdatePose(ControllerRole::Right);
 
 	vrSystem->GetRecommendedRenderTargetSize(&recommendedWidth, &recommendedHeight);
 
@@ -267,6 +287,8 @@ void OpenVR::UpdatePoses()
 
 	UpdateSkeleton(ControllerRole::Left);
 	UpdateSkeleton(ControllerRole::Right);
+	UpdatePose(ControllerRole::Left);
+	UpdatePose(ControllerRole::Right);
 
 	if (!vrOverlay || !bMouseVisible)
 	{
@@ -298,7 +320,6 @@ void OpenVR::UpdateSkeleton(ControllerRole hand)
 {
 	if (!vrInput)
 	{
-		Logger::log << "no input" << std::endl;
 		return;
 	}
 
@@ -337,6 +358,27 @@ void OpenVR::UpdateSkeleton(ControllerRole hand)
 	{
 		cachedWrists[h] = bones[h][1];
 		bHasCachedWrists[h] = true;
+	}
+}
+
+void OpenVR::UpdatePose(ControllerRole hand)
+{
+	if (!vrInput || !bHasValidTipPoses)
+	{
+		return;
+	}
+
+	vr::EVRInputError err = vrInput->GetPoseActionDataForNextFrame(
+		hand == ControllerRole::Left ? leftHandTip : rightHandTip, vr::TrackingUniverseStanding,
+		hand == ControllerRole::Left ? &leftHandTipPose : &rightHandTipPose,
+		sizeof(vr::InputPoseActionData_t),
+		vr::k_ulInvalidInputValueHandle
+	);
+
+	if (err != vr::VRInputError_None)
+	{
+		Logger::log << "[OpenVR] Can't get tip pose for " << static_cast<int>(hand) << ": " << err << " (aiming may be incorrectly offset)" << std::endl;
+		return;
 	}
 }
 
@@ -633,6 +675,24 @@ Vector3 OpenVR::GetControllerVelocity(ControllerRole role, bool bRenderPose)
 	rotMat.rotateZ(-yawOffset);
 
 	return rotMat * Vector3(-velocity.v[2], -velocity.v[0], velocity.v[1]) * Game::instance.MetresToWorld(1.0f);
+}
+
+bool OpenVR::TryGetControllerFacing(ControllerRole role, Vector3& outDirection)
+{
+	// todo: only get once, cache offset, use that
+	if (bHasValidTipPoses)
+	{
+		const vr::InputPoseActionData_t& data = role == ControllerRole::Left ? leftHandTipPose : rightHandTipPose;
+		if (!data.bActive || !data.pose.bPoseIsValid)
+		{
+			return false;
+		}
+
+		Matrix4 facingMatrix = ConvertSteamVRMatrixToMatrix4(data.pose.mDeviceToAbsoluteTracking).translate(-positionOffset).rotateZ(-yawOffset);
+
+		outDirection = facingMatrix.getLeftAxis();
+	}
+	return bHasValidTipPoses;
 }
 
 IDirect3DSurface9* OpenVR::GetRenderSurface(int eye)

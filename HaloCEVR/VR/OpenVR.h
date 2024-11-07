@@ -33,6 +33,7 @@ public:
 	Matrix4 GetControllerTransform(ControllerRole Role, bool bRenderPose = false) override;
 	Matrix4 GetControllerBoneTransform(ControllerRole Role, int bone, bool bRenderPose = false) override;
 	Vector3 GetControllerVelocity(ControllerRole Role, bool bRenderPose = false) override;
+	bool TryGetControllerFacing(ControllerRole role, Vector3& outDirection) override;
 	IDirect3DSurface9* GetRenderSurface(int eye) override;
 	IDirect3DTexture9* GetRenderTexture(int eye) override;
 	IDirect3DSurface9* GetUISurface() override;
@@ -55,6 +56,7 @@ protected:
 	void CreateTexAndSurface(int index, UINT Width, UINT Height, DWORD Usage, D3DFORMAT Format);
 	void PositionOverlay();
 	void UpdateSkeleton(ControllerRole hand);
+	void UpdatePose(ControllerRole hand);
 
 	Matrix4 GetControllerTransformInternal(ControllerRole role, int bone, bool bRenderPose);
 
@@ -107,6 +109,12 @@ protected:
 
 	vr::VRActionHandle_t leftHandSkeleton;
 	vr::VRActionHandle_t rightHandSkeleton;
+
+	vr::VRActionHandle_t leftHandTip;
+	vr::VRActionHandle_t rightHandTip;
+	vr::InputPoseActionData_t leftHandTipPose;
+	vr::InputPoseActionData_t rightHandTipPose;
+	bool bHasValidTipPoses = false;
 
 	Matrix4 ConvertSteamVRMatrixToMatrix4(const vr::HmdMatrix34_t& matPose)
 	{

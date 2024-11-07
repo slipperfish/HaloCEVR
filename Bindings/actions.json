@@ -104,6 +104,16 @@
             "type": "vector2"
         },
         {
+            "name": "/actions/default/in/LeftTip",
+            "requirement": "suggested",
+            "type": "pose"
+        },
+        {
+            "name": "/actions/default/in/RightTip",
+            "requirement": "suggested",
+            "type": "pose"
+        },
+        {
             "name": "/actions/default/in/LeftHand",
             "type": "skeleton",
             "skeleton": "/skeleton/hand/left"

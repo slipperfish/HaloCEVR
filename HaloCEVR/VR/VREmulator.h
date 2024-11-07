@@ -29,10 +29,11 @@ public:
 	void SetYawOffset(float newOffset) {}
 	float GetYawOffset() { return 0.0f; }
 	Matrix4 GetHMDTransform(bool bRenderPose = false) { return Matrix4(); }
-	Matrix4 GetControllerTransform(ControllerRole Role, bool bRenderPose = false);
+	Matrix4 GetControllerTransform(ControllerRole role, bool bRenderPose = false);
 	Matrix4 GetRawControllerTransform(ControllerRole role, bool bRenderPose = false);
-	Matrix4 GetControllerBoneTransform(ControllerRole Role, int bone, bool bRenderPose = false);
-	Vector3 GetControllerVelocity(ControllerRole Role, bool bRenderPose = false);
+	Matrix4 GetControllerBoneTransform(ControllerRole role, int bone, bool bRenderPose = false);
+	Vector3 GetControllerVelocity(ControllerRole role, bool bRenderPose = false);
+	bool TryGetControllerFacing(ControllerRole role, Vector3& outDirection);
 	struct IDirect3DSurface9* GetRenderSurface(int eye);
 	struct IDirect3DTexture9* GetRenderTexture(int eye);
 	struct IDirect3DSurface9* GetUISurface();
