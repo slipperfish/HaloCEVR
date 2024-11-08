@@ -69,6 +69,11 @@ else:
 
 #todo: merge thumbstick dpad actions
 
+alternatives = {
+    "knuckles" : {
+        "SwitchWeapons" : "trackpad"
+    }
+}
 
 swapmap = {
     "oculus_touch" : {
@@ -115,6 +120,9 @@ for v in variants:
             mode = "button"
             
             inputs = b["b"].split("|")
+            
+            if c in alternatives and binding in alternatives[c]:
+                inputs = alternatives[c][binding].split("|")
             
             inputtype = "click"
             
