@@ -4,7 +4,8 @@
 
 # Halo: Combat Evolved VR
 A full VR conversion mod for the original 2003 PC edition of _Halo: Combat Evolved_.
-[Download here](../../releases)
+
+[Mod Download here](../../releases)
 
 **This mod is not compatible with _The Master Chief Collection_**
 
@@ -33,6 +34,7 @@ A full VR conversion mod for the original 2003 PC edition of _Halo: Combat Evolv
 * Crosshair only lights up red when looking at an enemy, not when pointing a gun at one
 * On screen button prompts display keyboard bindings rather than VR bindings
 * If the game is installed in program files the mod config file (and log file) won't generate unless the game is run as administrator
+* Occasional stutters can cause motion smoothing to kick in, which is very jarring in vehicles
 
 ## Installation
 0. Install _Halo: Combat Evolved for PC_ using an original installation CD + product key
@@ -68,8 +70,8 @@ Also it does not work in Co-op because this version of the game does not have th
 By default tapping your head with your left hand will toggle the flashlight, you can adjust the radius this triggers at and which hand to use in config.txt. Alternatively there is an optional binding you can configure in SteamVR's controller bindings page to toggle it directly.
 ### How do I melee/can melee be bound to a button on my controller?
 By default swinging either controller vertically with enough speed will trigger a melee attack wherever you are looking. If preferred there is a controller binding that is unset by default you can configure instead.
-### Things feel jittery in vehicles
-Halo internally runs a lower tick rate (I believe it is 30fps) and only interpolates the player camera, this makes things feel jittery when driving vehicles. To fix this install [chimera](https://github.com/SnowyMouse/chimera), as they have fixed this issue along with many others.
+### Things feel constantly jittery in vehicles
+Halo internally runs a lower tick rate (I believe it is 30fps) and only interpolates the player camera, this makes things feel jittery when driving vehicles. To fix this install [chimera](https://github.com/SnowyMouse/chimera), as they have fixed this issue along with many others. If you still experience intermittent stuttering on vehicles it may be due to the motion smoothing kicking in and locking the frame rate to 45 for a few seconds, you may experience smoother results by disabling it. 
 ### Does this mod support OpenXR?
 No, this mod is exclusively for SteamVR since it is the only runtime to support 32bit applications to my knowledge.
 ### Help the camera is too high/too low (or crouch seems to be stuck on)
