@@ -241,6 +241,8 @@ void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
 	primaryRenderTarget[0].width = vr->GetViewWidth();
 	primaryRenderTarget[0].height = vr->GetViewHeight();
 
+	IDirect3DSurface9* Current;
+
 	inGameRenderer.ExtractMatrices(renderer);
 }
 
@@ -512,7 +514,6 @@ void Game::PostDrawHUD()
 
 	Helpers::GetRenderTargets()[1].renderSurface = uiRealSurface;
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, uiRealSurface);
-	uiRealSurface->Release();
 
 }
 
@@ -543,7 +544,6 @@ void Game::PostDrawMenu()
 
 	Helpers::GetRenderTargets()[1].renderSurface = uiRealSurface;
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, uiRealSurface);
-	uiRealSurface->Release();
 }
 
 D3DVIEWPORT9 currentViewport;
