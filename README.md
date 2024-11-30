@@ -82,7 +82,7 @@ Stand up straight (or sit up if playing seated) and hold down the menu button fo
 2. Ensure that C++ Language Standard is ISO C++ 17 Standard (/std:c++17). This can be found under HaloCEVR Properties -> Configuration Properties -> General.
 3. Set solution build configuration to release and target x86.
 
-This should be everything that needs to be done inside of the HaloCEVR project, however it is likely you will need to compile MinHooks.
+This should be everything that needs to be done inside of the HaloCEVR project, however it is likely you will need to compile MinHook.
 1. Go to https://github.com/TsudaKageyu/minhook and clone the project.
 2. Open the file and navigate to build/VC17, open this solution.
 3. Set solution build configuration to release and target x86.
