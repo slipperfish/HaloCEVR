@@ -280,8 +280,8 @@ unsigned char InputHandler::UpdateHolster()
 	Vector3 headPos = vr->GetHMDTransform() * Vector3(-0.1f, 0.0f, 0.0f);
 
 	// Define offsets for left and right shoulder positions
-    Vector3 leftShoulderOffset(0.02f, -0.1f, -0.03f);  // Smaller offsets for minimal distance
-    Vector3 rightShoulderOffset(-0.02f, -0.1f, -0.03f); // Smaller offsets for minimal distance
+    Vector3 leftShoulderOffset(0.02f, -0.1f, -0.03f);
+    Vector3 rightShoulderOffset(-0.02f, -0.1f, -0.03f);
 
 	// Calculate shoulder positions
     Vector3 leftShoulderPos = headPos + leftShoulderOffset;
@@ -290,7 +290,7 @@ unsigned char InputHandler::UpdateHolster()
 	float leftDistance = Game::instance.c_LeftHandShoulderHolsterDistance->Value();
 	float rightDistance = Game::instance.c_RightHandShoulderHolsterDistance->Value();
 
-	if (leftDistance > 0.0f)
+	if (Game::instance.c_LeftHanded->Value() && leftDistance > 0.0f)
 	{
 		Vector3 handPos = vr->GetRawControllerTransform(ControllerRole::Left) * Vector3(0.0f, 0.0f, 0.0f);
 
@@ -298,9 +298,9 @@ unsigned char InputHandler::UpdateHolster()
 		{
 			return 127;
 		}
-	}
+	} 
 
-	if (rightDistance > 0.0f)
+	if (!Game::instance.c_LeftHanded->Value() && rightDistance > 0.0f)
 	{
 		Vector3 handPos = vr->GetRawControllerTransform(ControllerRole::Right) * Vector3(0.0f, 0.0f, 0.0f);
 
