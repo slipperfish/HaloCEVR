@@ -787,6 +787,10 @@ void Game::SetupConfigs()
 	c_ShowRoomCentre = config.RegisterBool("ShowRoomCentre", "Draw an indicator at your feet to show where the player character is actually positioned", true);
 	c_d3d9Path = config.RegisterString("CustomD3D9Path", "If set first try to load d3d9.dll from the specified path instead of from system32", "");
 
+	// Experimental settings
+	c_LeftHandShoulderHolsterDistance = config.RegisterFloat("LeftHandShoulderHolster", "Experimental - Bringing the left hand within this distance of your shoulder will swap weapons (<0 to disable)", 0.2f);
+	c_RightHandShoulderHolsterDistance = config.RegisterFloat("RightHandShoulderHolster", "Experimental - Bringing the right hand within this distance of your shoulder will swap weapons (<0 to disable)", -1.0f);
+
 	config.LoadFromFile("VR/config.txt");
 	config.SaveToFile("VR/config.txt");
 

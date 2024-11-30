@@ -63,6 +63,12 @@ void InputHandler::UpdateInputs()
 		controls.Flashlight = MotionControlFlashlight;
 	}
 
+	unsigned char MotionControlSwitchWeapons = UpdateHolster();
+	if (MotionControlSwitchWeapons > 0)
+	{
+		controls.SwitchWeapons = MotionControlSwitchWeapons;
+	}
+
 	unsigned char MotionControlMelee = UpdateMelee();
 	if (MotionControlMelee > 0)
 	{
@@ -259,6 +265,46 @@ unsigned char InputHandler::UpdateFlashlight()
 		Vector3 handPos = vr->GetRawControllerTransform(ControllerRole::Right) * Vector3(0.0f, 0.0f, 0.0f);
 
 		if ((headPos - handPos).lengthSqr() < rightDistance * rightDistance)
+		{
+			return 127;
+		}
+	}
+
+	return 0;
+}
+
+unsigned char InputHandler::UpdateHolster()
+{
+	IVR* vr = Game::instance.GetVR();
+
+	Vector3 headPos = vr->GetHMDTransform() * Vector3(-0.1f, 0.0f, 0.0f);
+
+	// Define offsets for left and right shoulder positions
+    Vector3 leftShoulderOffset(0.02f, -0.1f, -0.03f);  // Smaller offsets for minimal distance
+    Vector3 rightShoulderOffset(-0.02f, -0.1f, -0.03f); // Smaller offsets for minimal distance
+
+	// Calculate shoulder positions
+    Vector3 leftShoulderPos = headPos + leftShoulderOffset;
+    Vector3 rightShoulderPos = headPos + rightShoulderOffset;
+
+	float leftDistance = Game::instance.c_LeftHandShoulderHolsterDistance->Value();
+	float rightDistance = Game::instance.c_RightHandShoulderHolsterDistance->Value();
+
+	if (leftDistance > 0.0f)
+	{
+		Vector3 handPos = vr->GetRawControllerTransform(ControllerRole::Left) * Vector3(0.0f, 0.0f, 0.0f);
+
+		if ((leftShoulderPos - handPos).lengthSqr() < leftDistance * leftDistance)
+		{
+			return 127;
+		}
+	}
+
+	if (rightDistance > 0.0f)
+	{
+		Vector3 handPos = vr->GetRawControllerTransform(ControllerRole::Right) * Vector3(0.0f, 0.0f, 0.0f);
+
+		if ((rightShoulderPos - handPos).lengthSqr() < rightDistance * rightDistance)
 		{
 			return 127;
 		}

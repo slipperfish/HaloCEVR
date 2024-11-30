@@ -16,6 +16,7 @@ protected:
 
 
 	unsigned char UpdateFlashlight();
+	unsigned char UpdateHolster();
 	unsigned char UpdateMelee();
 	unsigned char UpdateCrouch();
 
