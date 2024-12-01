@@ -285,8 +285,8 @@ unsigned char InputHandler::UpdateHolstersSwitchWeapons()
 
 	Vector3 headPos = vr->GetHMDTransform() * Vector3(-0.0f, 0.0f, 0.0f);
 
-    Vector3 leftShoulderPos = headPos + Game::instance.c_LeftShoulderHolsterOffset->Value();
-    Vector3 rightShoulderPos = headPos + Game::instance.c_RightShoulderHolsterOffset->Value();
+	Vector3 leftShoulderPos = headPos + Game::instance.c_LeftShoulderHolsterOffset->Value();
+	Vector3 rightShoulderPos = headPos + Game::instance.c_RightShoulderHolsterOffset->Value();
 
 	Vector3 handPos;
 

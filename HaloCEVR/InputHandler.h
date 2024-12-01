@@ -17,8 +17,8 @@ protected:
 
 	unsigned char UpdateFlashlight();
 	unsigned char UpdateHolstersSwitchWeapons();
-    unsigned char UpdateMelee();
-    unsigned char UpdateCrouch();
+	unsigned char UpdateMelee();
+	unsigned char UpdateCrouch();
 	
 	char lastSnapState = 0;
 	unsigned char mouseDownState = 0;
