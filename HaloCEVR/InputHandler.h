@@ -6,7 +6,7 @@ class InputHandler
 {
 public:
 	void RegisterInputs();
-	void UpdateInputs();
+	void UpdateInputs(bool bInVehicle);
 	void UpdateCamera(float& yaw, float& pitch);
 	void UpdateCameraForVehicles(float& yaw, float& pitch);
 	void SetMousePosition(int& x, int& y);

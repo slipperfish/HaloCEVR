@@ -663,7 +663,7 @@ void Game::PostThrowGrenade(HaloID& playerID)
 
 void Game::UpdateInputs()
 {
-	inputHandler.UpdateInputs();
+	inputHandler.UpdateInputs(bInVehicle);
 }
 
 

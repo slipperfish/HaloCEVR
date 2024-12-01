@@ -51,7 +51,7 @@ Vector2 RotateVector2(const Vector2& v, float angle)
 
 #define DRAW_DEBUG_MOVE 0
 
-void InputHandler::UpdateInputs()
+void InputHandler::UpdateInputs(bool bInVehicle)
 {
 	IVR* vr = Game::instance.GetVR();
 
@@ -170,7 +170,7 @@ void InputHandler::UpdateInputs()
 
 	Vector2 MoveInput = vr->GetVector2Input(Move);
 
-	if (Game::instance.c_HandRelativeMovement->Value())
+	if (!bInVehicle && (Game::instance.c_HandRelativeMovement->Value() != 0))
 	{
 		Camera& cam = Helpers::GetCamera();
 		Vector3 camForward = cam.lookDir;
