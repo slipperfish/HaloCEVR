@@ -16,11 +16,9 @@ protected:
 
 
 	unsigned char UpdateFlashlight();
-	unsigned char UpdateHolster();
+	unsigned char UpdateHolstersSwitchWeapons();
     unsigned char UpdateMelee();
     unsigned char UpdateCrouch();
-
-	bool IsHandInHolster(const Vector3 &handPos, const Vector3 &shoulderPos, float distance);
 	
 	char lastSnapState = 0;
 	unsigned char mouseDownState = 0;
@@ -48,5 +46,8 @@ protected:
 	
 	InputBindingID Recentre = 0;
 	InputBindingID TwoHandGrip = 0;
+
+private:
+	bool IsHandInHolster(const Vector3 &handPos, const Vector3 &shoulderPos);
 };
 

@@ -46,7 +46,6 @@ void InputHandler::UpdateInputs()
 	ApplyBoolInput(Jump);
 	ApplyImpulseBoolInput(SwitchGrenades);
 	ApplyBoolInput(Interact);
-	//ApplyImpulseBoolInput(SwitchWeapons);
 	ApplyBoolInput(Melee);
 	ApplyBoolInput(Flashlight);
 	ApplyBoolInput(Grenade);
@@ -63,10 +62,17 @@ void InputHandler::UpdateInputs()
 		controls.Flashlight = MotionControlFlashlight;
 	}
 
-	unsigned char MotionControlSwitchWeapons = UpdateHolster();
-	if (MotionControlSwitchWeapons > 0)
+	if (Game::instance.c_ShoulderHolsterActivationDistance->Value() < 0)
 	{
 		ApplyImpulseBoolInput(SwitchWeapons);
+	}
+	else
+	{
+		unsigned char HolstersSwitchWeapons = UpdateHolstersSwitchWeapons();
+		if (HolstersSwitchWeapons > 0)
+		{
+			ApplyImpulseBoolInput(SwitchWeapons);
+		}
 	}
 
 	unsigned char MotionControlMelee = UpdateMelee();
@@ -273,13 +279,12 @@ unsigned char InputHandler::UpdateFlashlight()
 	return 0;
 }
 
-unsigned char InputHandler::UpdateHolster()
+unsigned char InputHandler::UpdateHolstersSwitchWeapons()
 {
 	IVR* vr = Game::instance.GetVR();
 
 	Vector3 headPos = vr->GetHMDTransform() * Vector3(-0.0f, 0.0f, 0.0f);
 
-	float holsterActivationDistance = Game::instance.c_ShoulderHolsterActivationDistance->Value();
     Vector3 leftShoulderPos = headPos + Game::instance.c_LeftShoulderHolsterOffset->Value();
     Vector3 rightShoulderPos = headPos + Game::instance.c_RightShoulderHolsterOffset->Value();
 
@@ -296,7 +301,7 @@ unsigned char InputHandler::UpdateHolster()
 	}
 
 	// Check both shoulder holsters
-	if (InputHandler::IsHandInHolster(handPos, leftShoulderPos, holsterActivationDistance) || InputHandler::IsHandInHolster(handPos, rightShoulderPos, holsterActivationDistance))
+	if (InputHandler::IsHandInHolster(handPos, leftShoulderPos) || InputHandler::IsHandInHolster(handPos, rightShoulderPos))
 	{
 		return 127;
 	}
@@ -305,9 +310,11 @@ unsigned char InputHandler::UpdateHolster()
 }
 
 // Helper function to check holster distance
-bool InputHandler::IsHandInHolster(const Vector3& handPos, const Vector3& shoulderPos, float distance)
+bool InputHandler::IsHandInHolster(const Vector3& handPos, const Vector3& shoulderPos)
 {
-	return distance > 0.0f && (shoulderPos - handPos).lengthSqr() < distance * distance;
+	float holsterActivationDistance = Game::instance.c_ShoulderHolsterActivationDistance->Value();
+	
+	return (shoulderPos - handPos).lengthSqr() < holsterActivationDistance * holsterActivationDistance;
 }
 
 unsigned char InputHandler::UpdateMelee()
