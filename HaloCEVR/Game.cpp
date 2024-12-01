@@ -788,7 +788,7 @@ void Game::SetupConfigs()
 	c_d3d9Path = config.RegisterString("CustomD3D9Path", "If set first try to load d3d9.dll from the specified path instead of from system32", "");
 
 	// Weapon holster settings
-	c_ShoulderHolsterActivationDistance = config.RegisterFloat("ShoulderHolsterDistance", "Weapons can only be switched by pressing the switch button while the main hand is within this distance of a shoulder holster (<0 to disable, 0.3 recommended)", -1.0f);
+	c_ShoulderHolsterActivationDistance = config.RegisterFloat("ShoulderHolsterDistance", "Weapons can only be switched by pressing the switch button while the main hand is within this distance of a shoulder holster (<0 to disable, 0.2 recommended)", -1.0f);
 	c_LeftShoulderHolsterOffset = config.RegisterVector3("LeftShoulderHolsterOffset", "Offset of the left shoulder holster relative to the headset's location", Vector3(0.25f, 0.0f, -0.15f));
 	c_RightShoulderHolsterOffset = config.RegisterVector3("RightShoulderHolsterOffset", "Offset of the right shoulder holster relative to the headset's location", Vector3(-0.25f, 0.0f, -0.15f));
 
