@@ -33,7 +33,25 @@ void InputHandler::RegisterInputs()
 	RegisterVector2Input(Look);
 }
 
-void InputHandler::UpdateInputs()
+float AngleBetweenVector2(const Vector2& v1, const Vector2& v2)
+{
+	const float dot = v1.dot(v2);
+	const float determinant = v1.x * v2.y - v1.y * v2.x;
+	const float angle = atan2(determinant, dot);
+	return angle;
+}
+
+Vector2 RotateVector2(const Vector2& v, float angle)
+{
+	Vector2 rotated;
+	rotated.x = v.x * cos(angle) - v.y * sin(angle);
+	rotated.y = v.x * sin(angle) + v.y * cos(angle);
+	return rotated;
+}
+
+#define DRAW_DEBUG_MOVE 0
+
+void InputHandler::UpdateInputs(bool bInVehicle)
 {
 	IVR* vr = Game::instance.GetVR();
 
@@ -151,6 +169,41 @@ void InputHandler::UpdateInputs()
 	Game::instance.bUseTwoHandAim = bIsGripping;
 
 	Vector2 MoveInput = vr->GetVector2Input(Move);
+
+	if (!bInVehicle && (Game::instance.c_HandRelativeMovement->Value() != 0))
+	{
+		Camera& cam = Helpers::GetCamera();
+		Vector3 camForward = cam.lookDir;
+
+		const bool leftHand = (Game::instance.c_HandRelativeMovement->Value() == 1);
+		const ControllerRole role = leftHand ? ControllerRole::Left : ControllerRole::Right;
+		Matrix4 controllerTransform = vr->GetControllerTransform(role); // TODO: Not sure about bRenderPose bool param here. Doesn't seem to matter.
+		const float offset = Game::instance.c_HandRelativeOffsetRotation->Value();
+		controllerTransform.rotateZ(leftHand ? offset: -offset);
+		Vector3 handForward = controllerTransform.getLeftAxis();
+
+#if DRAW_DEBUG_MOVE
+		Vector3 start = cam.position + cam.lookDirUp * -Game::instance.MetresToWorld(0.1f);
+		Game::instance.inGameRenderer.DrawLine3D(start, start + camForward * Game::instance.MetresToWorld(2.0f), D3DCOLOR_ARGB(255, 255, 0, 0), false, 0.5f);
+		Game::instance.inGameRenderer.DrawLine3D(start, start + handForward * Game::instance.MetresToWorld(2.0f), D3DCOLOR_ARGB(255, 0, 0, 255), false, 0.5f);
+		handForward.z = camForward.z = 0.0f;
+		Game::instance.inGameRenderer.DrawLine3D(start, start + camForward * Game::instance.MetresToWorld(2.0f), D3DCOLOR_ARGB(255, 255, 75, 0), false, 0.5f);
+		Game::instance.inGameRenderer.DrawLine3D(start, start + handForward * Game::instance.MetresToWorld(2.0f), D3DCOLOR_ARGB(255, 100, 0, 255), false, 0.5f);
+
+		start = cam.position + cam.lookDir * Game::instance.MetresToWorld(2.00f);
+		const Vector3 camRight = cam.lookDir.cross(cam.lookDirUp);
+		Vector3 end = start + cam.lookDirUp * MoveInput.y * Game::instance.MetresToWorld(1.0f) + camRight * MoveInput.x * Game::instance.MetresToWorld(1.0f);
+		Game::instance.inGameRenderer.DrawLine3D(start, end, D3DCOLOR_ARGB(255, 0, 255, 0), false, 0.5f);
+#endif
+
+		const float angle = AngleBetweenVector2(Vector2(camForward.x, camForward.y), Vector2(handForward.x, handForward.y));
+		MoveInput = RotateVector2(MoveInput, angle);
+
+#if DRAW_DEBUG_MOVE
+		end = start + cam.lookDirUp * MoveInput.y * Game::instance.MetresToWorld(1.0f) + camRight * MoveInput.x * Game::instance.MetresToWorld(1.0f);
+		Game::instance.inGameRenderer.DrawLine3D(start, end, D3DCOLOR_ARGB(255, 255, 255, 0), false, 0.5f);
+#endif
+	}
 
 	controls.Left = -MoveInput.x;
 	controls.Forwards = MoveInput.y;
