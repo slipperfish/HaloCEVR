@@ -16,7 +16,7 @@ protected:
 
 
 	unsigned char UpdateFlashlight();
-	unsigned char UpdateHolstersSwitchWeapons();
+	unsigned char UpdateHolsterSwitchWeapons();
 	unsigned char UpdateMelee();
 	unsigned char UpdateCrouch();
 	
@@ -48,6 +48,6 @@ protected:
 	InputBindingID TwoHandGrip = 0;
 
 private:
-	bool IsHandInHolster(const Vector3 &handPos, const Vector3 &shoulderPos);
+	bool IsHandInHolster(const Vector3 &handPos, const Vector3 &backHolsterPos);
 };
 
