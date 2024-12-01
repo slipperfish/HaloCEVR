@@ -169,9 +169,12 @@ public:
 	FloatProperty* c_UIOverlayCurvature = nullptr;
 	IntProperty* c_UIOverlayWidth = nullptr;
 	IntProperty* c_UIOverlayHeight = nullptr;
+	BoolProperty* c_ShowCrosshair = nullptr;
 	BoolProperty* c_SnapTurn = nullptr;
 	FloatProperty* c_SnapTurnAmount = nullptr;
 	FloatProperty* c_SmoothTurnAmount = nullptr;
+	IntProperty* c_HandRelativeMovement = nullptr;
+	FloatProperty* c_HandRelativeOffsetRotation = nullptr;
 	FloatProperty* c_HorizontalVehicleTurnAmount = nullptr;
 	FloatProperty* c_VerticalVehicleTurnAmount = nullptr;
 	FloatProperty* c_LeftHandFlashlightDistance = nullptr;
@@ -186,7 +189,8 @@ public:
 	Vector3Property* c_ScopeOffsetPistol = nullptr;
 	Vector3Property* c_ScopeOffsetSniper = nullptr;
 	Vector3Property* c_ScopeOffsetRocket = nullptr;
-	FloatProperty* c_MeleeSwingSpeed = nullptr;
+	FloatProperty* c_LeftHandMeleeSwingSpeed = nullptr;
+	FloatProperty* c_RightHandMeleeSwingSpeed = nullptr;
 	FloatProperty* c_CrouchHeight = nullptr;
 	BoolProperty* c_ShowRoomCentre = nullptr;
 	BoolProperty* c_ToggleGrip = nullptr;
