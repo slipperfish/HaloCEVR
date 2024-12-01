@@ -169,6 +169,7 @@ public:
 	FloatProperty* c_UIOverlayCurvature = nullptr;
 	IntProperty* c_UIOverlayWidth = nullptr;
 	IntProperty* c_UIOverlayHeight = nullptr;
+	BoolProperty* c_ShowCrosshair = nullptr;
 	BoolProperty* c_SnapTurn = nullptr;
 	FloatProperty* c_SnapTurnAmount = nullptr;
 	FloatProperty* c_SmoothTurnAmount = nullptr;

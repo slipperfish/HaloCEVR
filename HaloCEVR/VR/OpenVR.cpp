@@ -56,10 +56,6 @@ void OpenVR::Init()
 	vrOverlay->SetOverlayFlag(uiOverlay, vr::VROverlayFlags_IsPremultiplied, true);
 	vrOverlay->ShowOverlay(uiOverlay);
 
-	vrOverlay->CreateOverlay("CrosshairOverlay", "CrosshairOverlay", &crosshairOverlay);
-	vrOverlay->SetOverlayFlag(crosshairOverlay, vr::VROverlayFlags_IsPremultiplied, true);
-	vrOverlay->ShowOverlay(crosshairOverlay);
-
 	std::filesystem::path manifest = std::filesystem::current_path() / "VR" / "OpenVR" / "haloce.vrmanifest";
 	vr::EVRApplicationError appErr = vr::VRApplications()->AddApplicationManifest(manifest.string().c_str());
 
@@ -195,13 +191,6 @@ void OpenVR::OnGameFinishInit()
 		Logger::log << "[OpenVR] Error setting overlay width: " << err << std::endl;
 	}
 	Logger::log << "[OpenVR] Set UI Width = " << Game::instance.c_UIOverlayScale->Value() << std::endl;
-	err = vrOverlay->SetOverlayWidthInMeters(crosshairOverlay, Game::instance.c_UIOverlayScale->Value());
-	if (err != vr::VROverlayError_None)
-	{
-		Logger::log << "[OpenVR] Error setting overlay width: " << err << std::endl;
-	}
-	Logger::log << "[OpenVR] Set Crosshair Width = " << Game::instance.c_UIOverlayScale->Value() << std::endl;
-
 
 	float curvature = Game::instance.c_UIOverlayCurvature->Value();
 	if (curvature != 0.0f)
@@ -217,7 +206,6 @@ void OpenVR::OnGameFinishInit()
 	};
 
 	vrOverlay->SetOverlayTransformAbsolute(uiOverlay, vr::ETrackingUniverseOrigin::TrackingUniverseStanding, &overlayTransform);
-	vrOverlay->SetOverlayTransformAbsolute(crosshairOverlay, vr::ETrackingUniverseOrigin::TrackingUniverseStanding, &overlayTransform);
 
 	Logger::log << "[OpenVR] Finished Initialisation" << std::endl;
 }
@@ -457,14 +445,6 @@ void OpenVR::PostDrawFrame(Renderer* renderer, float deltaTime)
 	if (oError != vr::EVROverlayError::VROverlayError_None)
 	{
 		Logger::log << "[OpenVR] Could not submit ui texture: " << oError << std::endl;
-	}
-
-	vr::Texture_t crossTex{ (void*)vrRenderTexture[crosshairSurface], vr::TextureType_DirectX, vr::ColorSpace_Auto };
-	vr::EVROverlayError o2Error = vrOverlay->SetOverlayTexture(crosshairOverlay, &crossTex);
-
-	if (o2Error != vr::EVROverlayError::VROverlayError_None)
-	{
-		Logger::log << "[OpenVR] Could not submit crosshair texture: " << o2Error << std::endl;
 	}
 
 	vrCompositor->PostPresentHandoff();
@@ -749,9 +729,24 @@ void OpenVR::SetMouseVisibility(bool bIsVisible)
 
 void OpenVR::SetCrosshairTransform(Matrix4& newTransform)
 {
-	vr::HmdMatrix34_t overlayMatrix = ConvertMatrixToSteamVRMatrix4(newTransform.rotateZ(yawOffset).translate(positionOffset));
+	// This should be moved into game code really
 
-	vrOverlay->SetOverlayTransformAbsolute(crosshairOverlay, vr::TrackingUniverseStanding, &overlayMatrix);
+	Vector3 pos = (newTransform * Vector3(0.0f, 0.0f, 0.0f)) * Game::instance.MetresToWorld(1.0f) + Helpers::GetCamera().position;
+	Matrix3 rot;
+	Vector2 size(1.33f, 1.0f);
+	size *= Game::instance.MetresToWorld(Game::instance.c_UIOverlayScale->Value());
+
+	newTransform.translate(-pos);
+	newTransform.rotate(90.0f, newTransform.getLeftAxis());
+	newTransform.rotate(-90.0f, newTransform.getUpAxis());
+	newTransform.rotate(-90.0f, newTransform.getLeftAxis());
+
+	for (int i = 0; i < 3; i++)
+	{
+		rot.setColumn(i, &newTransform.get()[i * 4]);
+	}
+
+	Game::instance.inGameRenderer.DrawRenderTarget(gameRenderTexture[crosshairSurface], pos, rot, size, false);
 }
 
 void OpenVR::UpdateInputs()

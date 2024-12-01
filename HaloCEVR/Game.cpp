@@ -241,8 +241,6 @@ void Game::PreDrawEye(Renderer* renderer, float deltaTime, int eye)
 	primaryRenderTarget[0].width = vr->GetViewWidth();
 	primaryRenderTarget[0].height = vr->GetViewHeight();
 
-	IDirect3DSurface9* Current;
-
 	inGameRenderer.ExtractMatrices(renderer);
 }
 
@@ -763,6 +761,7 @@ void Game::SetupConfigs()
 	c_UIOverlayCurvature = config.RegisterFloat("UIOverlayCurvature", "Curvature of the UI Overlay, on a scale of 0 to 1", 0.1f);
 	c_UIOverlayWidth = config.RegisterInt("UIOverlayWidth", "Width of the UI overlay in pixels", 600);
 	c_UIOverlayHeight = config.RegisterInt("UIOverlayHeight", "Height of the UI overlay in pixels", 600);
+	c_ShowCrosshair = config.RegisterBool("ShowCrosshair", "Display a floating crosshair in the world at the location you are aiming", true);
 	// Control settings
 	c_LeftHanded = config.RegisterBool("LeftHanded", "Make the left hand the dominant hand. Does not affect bindings, change these in the SteamVR overlay", false);
 	c_SnapTurn = config.RegisterBool("SnapTurn", "The look input will instantly rotate the view by a fixed amount, rather than smoothly rotating", true);
@@ -866,7 +865,10 @@ void Game::UpdateCrosshairAndScope()
 	
 	fixupRotation(overlayTransform, targetPos);
 
-	vr->SetCrosshairTransform(overlayTransform);
+	if (c_ShowCrosshair->Value())
+	{
+		vr->SetCrosshairTransform(overlayTransform);
+	}
 	overlayTransform.identity();
 
 	short zoom = Helpers::GetInputData().zoomLevel;
