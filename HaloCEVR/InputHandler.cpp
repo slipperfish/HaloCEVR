@@ -46,7 +46,7 @@ void InputHandler::UpdateInputs()
 	ApplyBoolInput(Jump);
 	ApplyImpulseBoolInput(SwitchGrenades);
 	ApplyBoolInput(Interact);
-	ApplyImpulseBoolInput(SwitchWeapons);
+	//ApplyImpulseBoolInput(SwitchWeapons);
 	ApplyBoolInput(Melee);
 	ApplyBoolInput(Flashlight);
 	ApplyBoolInput(Grenade);
@@ -66,7 +66,7 @@ void InputHandler::UpdateInputs()
 	unsigned char MotionControlSwitchWeapons = UpdateHolster();
 	if (MotionControlSwitchWeapons > 0)
 	{
-		controls.SwitchWeapons = MotionControlSwitchWeapons;
+		ApplyImpulseBoolInput(SwitchWeapons);
 	}
 
 	unsigned char MotionControlMelee = UpdateMelee();
@@ -277,40 +277,40 @@ unsigned char InputHandler::UpdateHolster()
 {
 	IVR* vr = Game::instance.GetVR();
 
-	Vector3 headPos = vr->GetHMDTransform() * Vector3(-0.1f, 0.0f, 0.0f);
-
-	// Define offsets for left and right shoulder positions
-    Vector3 leftShoulderOffset(0.02f, -0.1f, -0.03f);
-    Vector3 rightShoulderOffset(-0.02f, -0.1f, -0.03f);
+	Vector3 headPos = vr->GetHMDTransform() * Vector3(-0.0f, 0.0f, 0.0f);
 
 	// Calculate shoulder positions
-    Vector3 leftShoulderPos = headPos + leftShoulderOffset;
-    Vector3 rightShoulderPos = headPos + rightShoulderOffset;
+    Vector3 leftShoulderPos = headPos + Game::instance.c_LeftShoulderHolsterOffset->Value();
+    Vector3 rightShoulderPos = headPos + Game::instance.c_RightShoulderHolsterOffset->Value();
 
-	float leftDistance = Game::instance.c_LeftHandShoulderHolsterDistance->Value();
-	float rightDistance = Game::instance.c_RightHandShoulderHolsterDistance->Value();
+	float leftHolsterDistance = Game::instance.c_LeftHandShoulderHolsterDistance->Value();
+	float rightHolsterDistance = Game::instance.c_RightHandShoulderHolsterDistance->Value();
 
-	if (Game::instance.c_LeftHanded->Value() && leftDistance > 0.0f)
+	Vector3 handPos;
+
+	// Determine hand position based on left-handed setting
+	if (Game::instance.c_LeftHanded->Value())
 	{
-		Vector3 handPos = vr->GetRawControllerTransform(ControllerRole::Left) * Vector3(0.0f, 0.0f, 0.0f);
-
-		if ((leftShoulderPos - handPos).lengthSqr() < leftDistance * leftDistance)
-		{
-			return 127;
-		}
-	} 
-
-	if (!Game::instance.c_LeftHanded->Value() && rightDistance > 0.0f)
+		handPos = vr->GetRawControllerTransform(ControllerRole::Left) * Vector3(0.0f, 0.0f, 0.0f);
+	}
+	else
 	{
-		Vector3 handPos = vr->GetRawControllerTransform(ControllerRole::Right) * Vector3(0.0f, 0.0f, 0.0f);
+		handPos = vr->GetRawControllerTransform(ControllerRole::Right) * Vector3(0.0f, 0.0f, 0.0f);
+	}
 
-		if ((rightShoulderPos - handPos).lengthSqr() < rightDistance * rightDistance)
-		{
-			return 127;
-		}
+	// Check both shoulder holsters
+	if (InputHandler::IsHandInHolster(handPos, leftShoulderPos, leftHolsterDistance) || InputHandler::IsHandInHolster(handPos, rightShoulderPos, rightHolsterDistance))
+	{
+		return 127;
 	}
 
 	return 0;
+}
+
+// Helper function to check holster distance
+bool InputHandler::IsHandInHolster(const Vector3& handPos, const Vector3& shoulderPos, float distance)
+{
+	return distance > 0.0f && (shoulderPos - handPos).lengthSqr() < distance * distance;
 }
 
 unsigned char InputHandler::UpdateMelee()

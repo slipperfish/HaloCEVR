@@ -17,9 +17,11 @@ protected:
 
 	unsigned char UpdateFlashlight();
 	unsigned char UpdateHolster();
-	unsigned char UpdateMelee();
-	unsigned char UpdateCrouch();
+    unsigned char UpdateMelee();
+    unsigned char UpdateCrouch();
 
+	bool IsHandInHolster(const Vector3 &handPos, const Vector3 &shoulderPos, float distance);
+	
 	char lastSnapState = 0;
 	unsigned char mouseDownState = 0;
 
