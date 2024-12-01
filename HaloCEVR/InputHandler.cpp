@@ -275,7 +275,7 @@ unsigned char InputHandler::UpdateMelee()
 
 	handVel *= Game::instance.WorldToMetres(1.0f);
 
-	if (abs(handVel.z) > Game::instance.c_MeleeSwingSpeed->Value())
+	if (Game::instance.c_LeftHandMeleeSwingSpeed->Value() > 0.0f && abs(handVel.z) > Game::instance.c_LeftHandMeleeSwingSpeed->Value())
 	{
 		return 127;
 	}
@@ -284,7 +284,7 @@ unsigned char InputHandler::UpdateMelee()
 
 	handVel *= Game::instance.WorldToMetres(1.0f);
 
-	if (abs(handVel.z) > Game::instance.c_MeleeSwingSpeed->Value())
+	if (Game::instance.c_RightHandMeleeSwingSpeed->Value() > 0.0f && abs(handVel.z) > Game::instance.c_RightHandMeleeSwingSpeed->Value())
 	{
 		return 127;
 	}
