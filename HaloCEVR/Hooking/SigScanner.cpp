@@ -8,13 +8,14 @@ long long SigScanner::UpdateOffset(Offset& offset, bool bErrorOnFail)
 {
 	std::vector<int> Signature;
 
-	HMODULE CurrentModule = GetModuleHandleA(ModuleName.c_str());
+	HMODULE CurrentModule = GetModuleHandleA(nullptr);
+
 
 	if (!CurrentModule)
 	{
 		if (bErrorOnFail)
 		{
-			Logger::err << "[SigScanner] [FAIL]:" << offset.DebugName << " can't be located as the module << " << ModuleName << " could not be found!" << std::endl;
+			Logger::err << "[SigScanner] [FAIL]:" << offset.DebugName << " can't be located as the default module could not be found!" << std::endl;
 		}
 		return -1;
 	}
@@ -27,7 +28,7 @@ long long SigScanner::UpdateOffset(Offset& offset, bool bErrorOnFail)
 	{
 		if (bErrorOnFail)
 		{
-			Logger::err << "[SigScanner] [FAIL]:" << offset.DebugName << " can't be validated as GetModuleInformation failed for " << ModuleName << std::endl;
+			Logger::err << "[SigScanner] [FAIL]:" << offset.DebugName << " can't be validated as GetModuleInformation failed " << std::endl;
 		}
 		return -1;
 	}

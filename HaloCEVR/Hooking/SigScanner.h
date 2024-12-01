@@ -85,8 +85,6 @@ public:
 	// Try to update the offset based on its signature
 	// Returns -1 if unsuccessful, 0 if offset already matched, NewOffset if updated
 	static long long UpdateOffset(struct Offset& Offset, bool bErrorOnFail = true);
-
-	static inline std::string ModuleName = "halo.exe";
 };
 
 #undef OFFSET
