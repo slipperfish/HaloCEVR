@@ -279,12 +279,9 @@ unsigned char InputHandler::UpdateHolster()
 
 	Vector3 headPos = vr->GetHMDTransform() * Vector3(-0.0f, 0.0f, 0.0f);
 
-	// Calculate shoulder positions
+	float holsterActivationDistance = Game::instance.c_ShoulderHolsterActivationDistance->Value();
     Vector3 leftShoulderPos = headPos + Game::instance.c_LeftShoulderHolsterOffset->Value();
     Vector3 rightShoulderPos = headPos + Game::instance.c_RightShoulderHolsterOffset->Value();
-
-	float leftHolsterDistance = Game::instance.c_LeftHandShoulderHolsterDistance->Value();
-	float rightHolsterDistance = Game::instance.c_RightHandShoulderHolsterDistance->Value();
 
 	Vector3 handPos;
 
@@ -299,7 +296,7 @@ unsigned char InputHandler::UpdateHolster()
 	}
 
 	// Check both shoulder holsters
-	if (InputHandler::IsHandInHolster(handPos, leftShoulderPos, leftHolsterDistance) || InputHandler::IsHandInHolster(handPos, rightShoulderPos, rightHolsterDistance))
+	if (InputHandler::IsHandInHolster(handPos, leftShoulderPos, holsterActivationDistance) || InputHandler::IsHandInHolster(handPos, rightShoulderPos, holsterActivationDistance))
 	{
 		return 127;
 	}
