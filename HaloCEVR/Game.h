@@ -179,7 +179,8 @@ public:
 	FloatProperty* c_VerticalVehicleTurnAmount = nullptr;
 	FloatProperty* c_LeftHandFlashlightDistance = nullptr;
 	FloatProperty* c_RightHandFlashlightDistance = nullptr;
-	FloatProperty* c_ShoulderHolsterActivationDistance = nullptr;
+	BoolProperty* c_EnableWeaponHolsters = nullptr;
+	FloatProperty* c_HolsterActivationDistance = nullptr;
 	Vector3Property* c_LeftShoulderHolsterOffset = nullptr;
 	Vector3Property* c_RightShoulderHolsterOffset = nullptr;
 	Vector3Property* c_ControllerOffset = nullptr;

@@ -80,7 +80,7 @@ void InputHandler::UpdateInputs(bool bInVehicle)
 		controls.Flashlight = MotionControlFlashlight;
 	}
 
-	if (Game::instance.c_ShoulderHolsterActivationDistance->Value() < 0)
+	if (Game::instance.c_EnableWeaponHolsters->Value())
 	{
 		ApplyImpulseBoolInput(SwitchWeapons);
 	}
@@ -336,10 +336,11 @@ unsigned char InputHandler::UpdateHolstersSwitchWeapons()
 {
 	IVR* vr = Game::instance.GetVR();
 
-	Vector3 headPos = vr->GetHMDTransform() * Vector3(-0.0f, 0.0f, 0.0f);
+	Matrix4 headTransform = vr->GetHMDTransform();
 
-	Vector3 leftShoulderPos = headPos + Game::instance.c_LeftShoulderHolsterOffset->Value();
-	Vector3 rightShoulderPos = headPos + Game::instance.c_RightShoulderHolsterOffset->Value();
+	// Calculate shoulder holster positions with the correct offset
+	Vector3 leftShoulderPos = headTransform * Game::instance.c_LeftShoulderHolsterOffset->Value();
+	Vector3 rightShoulderPos = headTransform * Game::instance.c_RightShoulderHolsterOffset->Value();
 
 	Vector3 handPos;
 
@@ -365,7 +366,7 @@ unsigned char InputHandler::UpdateHolstersSwitchWeapons()
 // Helper function to check holster distance
 bool InputHandler::IsHandInHolster(const Vector3& handPos, const Vector3& shoulderPos)
 {
-	float holsterActivationDistance = Game::instance.c_ShoulderHolsterActivationDistance->Value();
+	float holsterActivationDistance = Game::instance.c_HolsterActivationDistance->Value();
 	
 	return (shoulderPos - handPos).lengthSqr() < holsterActivationDistance * holsterActivationDistance;
 }
