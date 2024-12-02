@@ -650,7 +650,7 @@ Matrix4 WeaponHandler::GetDominantHandTransform() const
 		float clampedValue = std::clamp(userInput, 0.0f, 0.9f);	
 		float smoothFactor = (1 - clampedValue) * maxSmoothing;
 
-		smoothedPosition = clampedValue == 0 ? actualControllerPos + toOffHand : WeaponHandler::Lerp(smoothedPosition, actualControllerPos + toOffHand, smoothFactor * Game::instance.lastDeltaTime);
+		smoothedPosition = clampedValue == 0 ? actualControllerPos + toOffHand : Helpers::Lerp(smoothedPosition, actualControllerPos + toOffHand, smoothFactor * Game::instance.lastDeltaTime);
 		controllerTransform.lookAt(smoothedPosition, upVector);
 
 		controllerTransform.translate(-actualControllerPos);
@@ -888,9 +888,4 @@ void WeaponHandler::PostThrowGrenade(HaloID& playerID)
 		weaponFiredPlayer->aim = realPlayerAim;
 		weaponFiredPlayer = nullptr;
 	}
-}
-
-Vector3 WeaponHandler::Lerp(const Vector3& a, const Vector3& b, float t) const
-{
-	return a + t * (b - a);
 }
