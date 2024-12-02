@@ -20,7 +20,6 @@ A full VR conversion mod for the original 2003 PC edition of _Halo: Combat Evolv
 * Motion controlled melee (uses head-aiming)
 * Motion controlled flashlight (tap head)
 * Motion controlled crouching
-* Weapon holsters
 * Detached floating UI layer
 * Floating crosshair
 * Joystick steered vehicles
@@ -73,7 +72,8 @@ By default tapping your head with your left hand will toggle the flashlight, you
 By default swinging either controller vertically with enough speed will trigger a melee attack wherever you are looking. If preferred there is a controller binding that is unset by default you can configure instead.
 
 ### How do I switch weapons?
-By default, you can switch weapons using a controller binding. Alternatively, if enabled in the config.txt file, you can switch weapons using the back weapon holster. With this setting enabled, first hover your main hand over a shoulder or upper back, then press the switch weapon binding to change weapons.
+By default, you can switch weapons using a controller binding.
+Alternatively, if enabled in the config.txt file, you can switch weapons using the shoulder weapon holsters. With this setting enabled, first hover your main hand over a shoulder, then press the switch weapon binding to change weapons.
 
 ### Things feel constantly jittery in vehicles
 Halo internally runs a lower tick rate (I believe it is 30fps) and only interpolates the player camera, this makes things feel jittery when driving vehicles. To fix this install [chimera](https://github.com/SnowyMouse/chimera), as they have fixed this issue along with many others. If you still experience intermittent stuttering on vehicles it may be due to the motion smoothing kicking in and locking the frame rate to 45 for a few seconds, you may experience smoother results by disabling it. 

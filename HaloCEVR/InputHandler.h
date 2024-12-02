@@ -48,6 +48,6 @@ protected:
 	InputBindingID TwoHandGrip = 0;
 
 private:
-	bool IsHandInHolster(const Vector3 &handPos, const Vector3 &backHolsterPos);
+	bool IsHandInHolster(const Vector3& handPos, const Vector3& holsterPos, const float& holsterActivationDistance);
 };
 

@@ -790,9 +790,10 @@ void Game::SetupConfigs()
 	c_d3d9Path = config.RegisterString("CustomD3D9Path", "If set first try to load d3d9.dll from the specified path instead of from system32", "");
 
 	// Weapon holster settings
-	c_EnableWeaponHolsters = config.RegisterBool("EnableWeaponHolsters", "When enabled Weapons can only be switched by pressing the switch button while the main hand is within a holster", false);
-	c_HolsterActivationDistance = config.RegisterFloat("HolsterDistance", "The 'size' of each holster. This is the distance that the main hand needs to be from a holster to change weapons", 0.3f);
+	c_EnableWeaponHolsters = config.RegisterBool("EnableWeaponHolsters", "When enabled Weapons can only be switched by using the 'SwitchWeapons' binding while the main hand is within distance of a holster", false);
+	c_LeftShoulderHolsterActivationDistance = config.RegisterFloat("LeftShoulderHolsterDistance", "The 'size' of the left shoulder holster. This is the distance that the main hand needs to be from the holster to change weapons (<0 to disable)", 0.3f);
 	c_LeftShoulderHolsterOffset = config.RegisterVector3("LeftShoulderHolsterOffset", "The (foward, left, up) Offset of the left shoulder holster relative to the headset's location", Vector3(-0.15f, 0.25f, -0.25f));
+	c_RightShoulderHolsterActivationDistance = config.RegisterFloat("RightShoulderHolsterDistance", "The 'size' of the right shoulder holster. This is the distance that the main hand needs to be from the holster to change weapons (<0 to disable)", 0.3f);
 	c_RightShoulderHolsterOffset = config.RegisterVector3("RightShoulderHolsterOffset", "The (foward, left, up) Offset of the right shoulder holster relative to the headset's location", Vector3(-0.15f, -0.25f, -0.25f));
 
 	config.LoadFromFile("VR/config.txt");

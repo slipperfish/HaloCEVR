@@ -353,7 +353,8 @@ unsigned char InputHandler::UpdateHolsterSwitchWeapons()
 		handPos = vr->GetRawControllerTransform(ControllerRole::Right) * Vector3(0.0f, 0.0f, 0.0f);
 	}
 
-	if (InputHandler::IsHandInHolster(handPos, backHolsterPos))
+	if (InputHandler::IsHandInHolster(handPos, leftShoulderPos, Game::instance.c_LeftShoulderHolsterActivationDistance->Value())
+		|| InputHandler::IsHandInHolster(handPos, rightShoulderPos, Game::instance.c_LeftShoulderHolsterActivationDistance->Value()))
 	{
 		return 127;
 	}
@@ -362,11 +363,9 @@ unsigned char InputHandler::UpdateHolsterSwitchWeapons()
 }
 
 // Helper function to check if a hand is in a holster
-bool InputHandler::IsHandInHolster(const Vector3& handPos, const Vector3& backHolsterPos)
+bool InputHandler::IsHandInHolster(const Vector3& handPos, const Vector3& holsterPos, const float& holsterActivationDistance)
 {
-	float holsterActivationDistance = Game::instance.c_HolsterActivationDistance->Value();
-	
-	return (backHolsterPos - handPos).lengthSqr() < holsterActivationDistance * holsterActivationDistance;
+	return (holsterPos - handPos).lengthSqr() < holsterActivationDistance * holsterActivationDistance;
 }
 
 unsigned char InputHandler::UpdateMelee()
