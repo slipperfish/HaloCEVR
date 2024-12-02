@@ -45,6 +45,7 @@ protected:
 	inline Vector3 GetScopeLocation(ScopedWeaponType Type) const;
 
 	Matrix4 GetDominantHandTransform() const;
+	Vector3 Lerp(const Vector3& a, const Vector3& b, float t) const;
 
 	struct ViewModelCache
 	{

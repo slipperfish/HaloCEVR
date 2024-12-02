@@ -611,6 +611,7 @@ Matrix4 WeaponHandler::GetDominantHandTransform() const
 	ControllerRole nonDominant = Game::instance.c_LeftHanded->Value() ? ControllerRole::Right : ControllerRole::Left;
 
 	Matrix4 controllerTransform = Game::instance.GetVR()->GetControllerTransform(dominant, true);
+	static Vector3 smoothedPosition = controllerTransform * Vector3(0.0f, 0.0f, 0.0f);
 
 	Vector3 poseDirection;
 	bool bHasPoseData = Game::instance.GetVR()->TryGetControllerFacing(dominant, poseDirection);
@@ -642,7 +643,15 @@ Matrix4 WeaponHandler::GetDominantHandTransform() const
 		}
 		*/
 
-		controllerTransform.lookAt(actualControllerPos + toOffHand, upVector);
+		float userInput = Game::instance.c_WeaponSmoothingAmount->Value();
+		float maxSmoothing = 15.0f;		//15 is already a bit ridiculous but just incase people need that much smoothing. 
+
+		//A value of 0 causes weapons to invert so have just above. 
+		float clampedValue = std::clamp(userInput, 0.0f, 0.9f);	
+		float smoothFactor = (1 - clampedValue) * maxSmoothing;
+
+		smoothedPosition = clampedValue == 0 ? actualControllerPos + toOffHand : WeaponHandler::Lerp(smoothedPosition, actualControllerPos + toOffHand, smoothFactor * Game::instance.lastDeltaTime);
+		controllerTransform.lookAt(smoothedPosition, upVector);
 
 		controllerTransform.translate(-actualControllerPos);
 		controllerTransform.rotate(-90.0f, controllerTransform.getUpAxis());
@@ -879,4 +888,9 @@ void WeaponHandler::PostThrowGrenade(HaloID& playerID)
 		weaponFiredPlayer->aim = realPlayerAim;
 		weaponFiredPlayer = nullptr;
 	}
+}
+
+Vector3 WeaponHandler::Lerp(const Vector3& a, const Vector3& b, float t) const
+{
+	return a + t * (b - a);
 }

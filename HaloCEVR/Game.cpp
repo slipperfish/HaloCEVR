@@ -788,6 +788,7 @@ void Game::SetupConfigs()
 	// Misc settings
 	c_ShowRoomCentre = config.RegisterBool("ShowRoomCentre", "Draw an indicator at your feet to show where the player character is actually positioned", true);
 	c_d3d9Path = config.RegisterString("CustomD3D9Path", "If set first try to load d3d9.dll from the specified path instead of from system32", "");
+	c_WeaponSmoothingAmount = config.RegisterFloat("WeaponSmoothingAmount", "Amount of smoothing applied to weapon movement (0 is disabled, 1 is maximum, recommended around 0.2-0.5)", 0.0f);
 
 	config.LoadFromFile("VR/config.txt");
 	config.SaveToFile("VR/config.txt");
