@@ -81,6 +81,7 @@ public:
 
 	bool bNeedsRecentre = true;
 	bool bUseTwoHandAim = true;
+	bool bLeftHanded = false;
 
 	InGameRenderer inGameRenderer;
 	InGameRenderer scopeRenderer;

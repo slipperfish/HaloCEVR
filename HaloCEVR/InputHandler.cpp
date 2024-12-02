@@ -28,6 +28,7 @@ void InputHandler::RegisterInputs()
 	RegisterBoolInput(Zoom);
 	RegisterBoolInput(Reload);
 	RegisterBoolInput(TwoHandGrip);
+	RegisterBoolInput(SwapWeaponHands);
 
 	RegisterVector2Input(Move);
 	RegisterVector2Input(Look);
@@ -180,6 +181,23 @@ void InputHandler::UpdateInputs(bool bInVehicle)
 	}
 
 	Game::instance.bUseTwoHandAim = bIsGripping;
+
+	bool bWeaponHandChanged;
+	bool bIsSwitchHandsPressed = vr->GetBoolInput(SwapWeaponHands, bWeaponHandChanged);
+
+	// Swap main hands
+	if (true)
+	{
+		if (bIsSwitchHandsPressed && bIsSwitchHandsPressed)
+		{
+			bWasSwappingHands ^= true;
+		}
+
+		bIsGripping = bWasSwappingHands;
+	}
+
+	Game::instance.bLeftHanded = bIsGripping;
+
 
 	Vector2 MoveInput = vr->GetVector2Input(Move);
 
@@ -344,7 +362,7 @@ unsigned char InputHandler::UpdateHolsterSwitchWeapons()
 	Vector3 rightShoulderPos = headTransform * Game::instance.c_RightShoulderHolsterOffset->Value();
 
 	Vector3 handPos;
-	if (Game::instance.c_LeftHanded->Value())
+	if (Game::instance.bLeftHanded)
 	{
 		handPos = vr->GetRawControllerTransform(ControllerRole::Left) * Vector3(0.0f, 0.0f, 0.0f);
 	}
