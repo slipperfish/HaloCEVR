@@ -337,10 +337,12 @@ unsigned char InputHandler::UpdateHolsterSwitchWeapons()
 {
 	IVR* vr = Game::instance.GetVR();
 
-	Vector3 headPos = vr->GetHMDTransform() * Vector3(-0.0f, 0.0f, 0.0f);
-	Vector3 backHolsterPos = headPos + Game::instance.c_BackHolsterOffset->Value();
+	Matrix4 headTransform = vr->GetHMDTransform();
 
-	// Get the main hand position based on left-handed setting
+	// Calculate shoulder holster positions with the correct offset
+	Vector3 leftShoulderPos = headTransform * Game::instance.c_LeftShoulderHolsterOffset->Value();
+	Vector3 rightShoulderPos = headTransform * Game::instance.c_RightShoulderHolsterOffset->Value();
+
 	Vector3 handPos;
 	if (Game::instance.c_LeftHanded->Value())
 	{
@@ -362,7 +364,7 @@ unsigned char InputHandler::UpdateHolsterSwitchWeapons()
 // Helper function to check if a hand is in a holster
 bool InputHandler::IsHandInHolster(const Vector3& handPos, const Vector3& backHolsterPos)
 {
-	float holsterActivationDistance = Game::instance.c_BackHolsterActivationDistance->Value();
+	float holsterActivationDistance = Game::instance.c_HolsterActivationDistance->Value();
 	
 	return (backHolsterPos - handPos).lengthSqr() < holsterActivationDistance * holsterActivationDistance;
 }

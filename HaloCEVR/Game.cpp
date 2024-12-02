@@ -791,8 +791,9 @@ void Game::SetupConfigs()
 
 	// Weapon holster settings
 	c_EnableWeaponHolsters = config.RegisterBool("EnableWeaponHolsters", "When enabled Weapons can only be switched by pressing the switch button while the main hand is within a holster", false);
-	c_BackHolsterActivationDistance = config.RegisterFloat("BackHolsterDistance", "The 'size' of the back holster. This is the distance that the main hand needs to be from the back holster to change weapons", 0.4f);
-	c_BackHolsterOffset = config.RegisterVector3("BackHolsterOffset", "Offset of the back holster relative to the headset's location", Vector3(0.0f, 0.0f, -0.4f));
+	c_HolsterActivationDistance = config.RegisterFloat("HolsterDistance", "The 'size' of each holster. This is the distance that the main hand needs to be from a holster to change weapons", 0.3f);
+	c_LeftShoulderHolsterOffset = config.RegisterVector3("LeftShoulderHolsterOffset", "The (foward, left, up) Offset of the left shoulder holster relative to the headset's location", Vector3(-0.15f, 0.25f, -0.25f));
+	c_RightShoulderHolsterOffset = config.RegisterVector3("RightShoulderHolsterOffset", "The (foward, left, up) Offset of the right shoulder holster relative to the headset's location", Vector3(-0.15f, -0.25f, -0.25f));
 
 	config.LoadFromFile("VR/config.txt");
 	config.SaveToFile("VR/config.txt");
