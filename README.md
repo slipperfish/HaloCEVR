@@ -89,6 +89,17 @@ By default tapping your head with your left hand will toggle the flashlight, you
 By default swinging either controller vertically with enough speed will trigger a melee attack wherever you are looking. If preferred there is a controller binding that is unset by default you can configure instead.
 ### How do I activate smooth turning?
 Go to the VR config.txt file and change SnapTurn = false.  You can also adjust turning speed with SmoothTurnAmount.
+### How do I activate hand-directed movement?
+By default movement is in the direction the player's head is facing. If you would like to use hand-directed movement, open the VR config.txt file, and find these lines:
+```//[Int] Movement is relative to hand orientation, rather than head, 0 = off, 1 = left, 2 = right (Default Value: 0)
+HandRelativeMovement = 0
+
+//[Float] Hand direction rotational offset in degrees used for hand-relative movement (Default Value: -20)
+HandRelativeOffsetRotation = -20
+```
+Change HandRelativeMovement to 1 for movement to follow your left hand direction or 2 for movement to follow your right hand direction.
+### How do I turn the crosshair off?
+Open the VR config.txt file and change "ShowCrosshair" to false - "ShowCrosshair=false"
 ### Things feel constantly jittery in vehicles
 Halo internally runs a lower tick rate (I believe it is 30fps) and only interpolates the player camera, this makes things feel jittery when driving vehicles. To fix this install [chimera](https://github.com/SnowyMouse/chimera), as they have fixed this issue along with many others. If you still experience intermittent stuttering on vehicles it may be due to the motion smoothing kicking in and locking the frame rate to 45 for a few seconds, you may experience smoother results by disabling it. 
 ### Does this mod support OpenXR?
