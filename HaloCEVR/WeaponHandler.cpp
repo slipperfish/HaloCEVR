@@ -643,7 +643,22 @@ Matrix4 WeaponHandler::GetDominantHandTransform() const
 		}
 		*/
 
-		float userInput = Game::instance.c_WeaponSmoothingAmount->Value();
+		float userInput = 0.0f;
+		short zoom = Helpers::GetInputData().zoomLevel; 
+		
+		if (zoom == -1)
+		{
+			userInput = Game::instance.c_WeaponSmoothingAmountNoZoom->Value(); 
+		}
+		else if (zoom == 0)
+		{
+			userInput = Game::instance.c_WeaponSmoothingAmountOneZoom->Value();
+		}
+		else if (zoom == 1)
+		{
+			userInput = Game::instance.c_WeaponSmoothingAmountTwoZoom->Value();
+		}
+
 		float clampedValue = std::clamp(userInput, 0.0f, 1.0f);
 
 		float maxSmoothing = 20.0f;		//20 is already a bit ridiculous but just incase people need that much smoothing. 
