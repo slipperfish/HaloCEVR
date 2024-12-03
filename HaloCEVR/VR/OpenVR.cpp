@@ -14,6 +14,8 @@
 #pragma comment(lib, "openvr_api.lib")
 #pragma comment(lib, "d3d11.lib")
 
+#define SCALING_HACK 0
+
 void OpenVR::Init()
 {
 	Logger::log << "[OpenVR] Initialising OpenVR" << std::endl;
@@ -125,24 +127,29 @@ void OpenVR::Init()
 
 	float l_left = 0.0f, l_right = 0.0f, l_top = 0.0f, l_bottom = 0.0f;
 	vrSystem->GetProjectionRaw(vr::EVREye::Eye_Left, &l_left, &l_right, &l_top, &l_bottom);
+	Logger::log << "[OpenVR] Left eye raw projection[l, r, t, b] = [" << l_left << ", " << l_right << ", " << l_top << ", " << l_bottom << "]" << std::endl;
 
 	float r_left = 0.0f, r_right = 0.0f, r_top = 0.0f, r_bottom = 0.0f;
 	vrSystem->GetProjectionRaw(vr::EVREye::Eye_Right, &r_left, &r_right, &r_top, &r_bottom);
+	Logger::log << "[OpenVR] Right eye raw projection[l, r, t, b] = [" << r_left << ", " << r_right << ", " << r_top << ", " << r_bottom << "]" << std::endl;
 
 	float tanHalfFov[2];
 
 	tanHalfFov[0] = (std::max)({ -l_left, l_right, -r_left, r_right });
 	tanHalfFov[1] = (std::max)({ -l_top, l_bottom, -r_top, r_bottom });
+	Logger::log << "[OpenVR] tanHalfFov[horiz, vert] = [" << tanHalfFov[0] << ", " << tanHalfFov[1] << "]" << std::endl;
 
 	textureBounds[0].uMin = 0.5f + 0.5f * l_left / tanHalfFov[0];
 	textureBounds[0].uMax = 0.5f + 0.5f * l_right / tanHalfFov[0];
 	textureBounds[0].vMin = 0.5f - 0.5f * l_bottom / tanHalfFov[1];
 	textureBounds[0].vMax = 0.5f - 0.5f * l_top / tanHalfFov[1];
+	Logger::log << "[OpenVR] Left eye textureBounds[uMin, uMax, vMin, vMax] = [" << textureBounds[0].uMin << ", " << textureBounds[0].uMax << ", " << textureBounds[0].vMin << ", " << textureBounds[0].vMax << "]" << std::endl;
 
 	textureBounds[1].uMin = 0.5f + 0.5f * r_left / tanHalfFov[0];
 	textureBounds[1].uMax = 0.5f + 0.5f * r_right / tanHalfFov[0];
 	textureBounds[1].vMin = 0.5f - 0.5f * r_bottom / tanHalfFov[1];
 	textureBounds[1].vMax = 0.5f - 0.5f * r_top / tanHalfFov[1];
+	Logger::log << "[OpenVR] Right eye textureBounds[uMin, uMax, vMin, vMax] = [" << textureBounds[1].uMin << ", " << textureBounds[1].uMax << ", " << textureBounds[1].vMin << ", " << textureBounds[1].vMax << "]" << std::endl;
 
 	aspect = tanHalfFov[0] / tanHalfFov[1];
 	fov = 2.0f * atan(tanHalfFov[1]);
@@ -152,11 +159,18 @@ void OpenVR::Init()
 
 	const float widthDiv = (std::max)(textureBounds[0].uMax - textureBounds[0].uMin, textureBounds[1].uMax - textureBounds[1].uMin);
 	const float heightDiv = (std::max)(textureBounds[0].vMax - textureBounds[0].vMin, textureBounds[1].vMax - textureBounds[1].vMin);
-	const float minDiv = (std::min)(widthDiv, heightDiv);
+	Logger::log << "[OpenVR] Stretch factor[width, height] = [" << 1.0f / widthDiv << ", " << 1.0f / heightDiv << "]" << std::endl;
 
+#if SCALING_HACK
+	const float minDiv = (std::min)(widthDiv, heightDiv);
 	// Scale width and height by same amount, or we may see warping on head tilt.
+	// This seems to help on Quest 3 using Virutal Desktop, but makes some other configurations worse.
 	recommendedWidth = static_cast<uint32_t>(recommendedWidth / minDiv);
 	recommendedHeight = static_cast<uint32_t>(recommendedHeight / minDiv);
+#else
+	recommendedWidth = static_cast<uint32_t>(recommendedWidth / widthDiv);
+	recommendedHeight = static_cast<uint32_t>(recommendedHeight / heightDiv);
+#endif
 
 	Logger::log << "[OpenVR] Stretched Width/Height from " << realWidth << "x" << realHeight << " to " << recommendedWidth << "x" << recommendedHeight << std::endl;
 	Logger::log << "[OpenVR] Desired fov = " << (fov * (180.0f / 3.141593f)) << " Desired aspect ratio = " << aspect << std::endl;
