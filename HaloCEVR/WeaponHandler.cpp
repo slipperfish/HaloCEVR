@@ -644,13 +644,15 @@ Matrix4 WeaponHandler::GetDominantHandTransform() const
 		*/
 
 		float userInput = Game::instance.c_WeaponSmoothingAmount->Value();
-		float maxSmoothing = 15.0f;		//15 is already a bit ridiculous but just incase people need that much smoothing. 
+		float clampedValue = std::clamp(userInput, 0.0f, 1.0f);
 
-		//A value of 0 causes weapons to invert so have just above. 
-		float clampedValue = std::clamp(userInput, 0.0f, 0.9f);	
-		float smoothFactor = (1 - clampedValue) * maxSmoothing;
+		float maxSmoothing = 20.0f;		//20 is already a bit ridiculous but just incase people need that much smoothing. 
+		float speedRampup = 10.0f;		//This helps control the slowdown curve of the interpolation
 
-		smoothedPosition = clampedValue == 0 ? actualControllerPos + toOffHand : Helpers::Lerp(smoothedPosition, actualControllerPos + toOffHand, smoothFactor * Game::instance.lastDeltaTime);
+		float t = (clampedValue * maxSmoothing) * Game::instance.lastDeltaTime;
+
+		// Apply the smoothing using linear interpolation with the adjusted deltaTime
+		smoothedPosition = Helpers::Lerp(smoothedPosition, actualControllerPos + toOffHand, exp(-t * speedRampup));
 		controllerTransform.lookAt(smoothedPosition, upVector);
 
 		controllerTransform.translate(-actualControllerPos);
