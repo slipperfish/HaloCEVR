@@ -32,6 +32,7 @@ public:
 	void PreDrawMirror(struct Renderer* renderer, float deltaTime);
 	void PostDrawMirror(struct Renderer* renderer, float deltaTime);
 	void PostDrawFrame(struct Renderer* renderer, float deltaTime);
+	Vector3 GetSmoothedInput();
 
 	bool PreDrawHUD();
 	void PostDrawHUD();
@@ -53,8 +54,11 @@ public:
 	void PostFireWeapon(HaloID& WeaponID, short param2);
 	void PreThrowGrenade(HaloID& playerID);
 	void PostThrowGrenade(HaloID& playerID);
+	bool GetCalculatedHandPositions(Matrix4& controllerTransform, Vector3& dominantHandPos, Vector3& offHand); 
 
 	void UpdateInputs();
+	void CalculateSmoothedInput();
+
 	void UpdateCamera(float& yaw, float& pitch);
 	void SetMousePosition(int& x, int& y);
 	void UpdateMouseInfo(struct MouseInfo* mouseInfo);
@@ -196,6 +200,5 @@ public:
 	FloatProperty* c_WeaponSmoothingAmountNoZoom = nullptr;
 	FloatProperty* c_WeaponSmoothingAmountOneZoom = nullptr;
 	FloatProperty* c_WeaponSmoothingAmountTwoZoom = nullptr;
-
 };
 
