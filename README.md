@@ -109,7 +109,7 @@ Stand up straight (or sit up if playing seated) and hold down the menu button fo
 ### How do I crouch?
 By default you crouch in real life. If you do not prefer that, change the option in the config.txt file in the VR folder, specifically set CrouchHeight = -1.0 and bind a button to crouch in the SteamVR Input menu.
 ### I wish (insert action) was bound to a different key
-Use SteamVR input settings to change your bindings to whatever you want. You can also search for other peoples' bindings for your controller in the bindings menu.  You can learn how to use SteamVR input by googling or searching for videos.  It's useful in a bunch of games!
+Use SteamVR input settings to change your bindings to whatever you want. You can also search for other peoples' bindings for your controller in the bindings menu.  You can learn how to use SteamVR input by watching this video by HoriZon, who also has bindings available for Quest controllers: https://www.youtube.com/watch?v=rdlCu7IjbGI.  It's useful in a bunch of games!
 ### Textures seem to pop in too much.  Any fix?
 Try using chimera (highly recommended anyway) and create a file called chimera_preferences.txt in your Halo directory.  In that text file, insert the following lines:
 ```
