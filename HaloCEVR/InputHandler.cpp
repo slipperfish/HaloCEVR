@@ -188,7 +188,7 @@ void InputHandler::UpdateInputs(bool bInVehicle)
 	// Swap main hands
 	if (true)
 	{
-		if (bIsSwitchHandsPressed && bIsSwitchHandsPressed)
+		if (bWeaponHandChanged && bIsSwitchHandsPressed)
 		{
 			bWasSwappingHands ^= true;
 		}
