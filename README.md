@@ -20,6 +20,7 @@ A full VR conversion mod for the original 2003 PC edition of _Halo: Combat Evolv
 * Motion controlled melee (uses head-aiming)
 * Motion controlled flashlight (tap head)
 * Motion controlled crouching
+* Shoulder weapon holsters (for switching weapons)
 * Detached floating UI layer
 * Floating crosshair
 * Joystick steered vehicles
@@ -89,8 +90,8 @@ By default tapping your head with your left hand will toggle the flashlight, you
 By default swinging either controller vertically with enough speed will trigger a melee attack wherever you are looking. If preferred there is a controller binding that is unset by default you can configure instead.
 
 ### How do I switch weapons?
-By default, you can switch weapons using a controller binding.
-Alternatively, if enabled in the config.txt file, you can switch weapons using the shoulder weapon holsters. With this setting enabled, first hover your main hand over a shoulder, then press the switch weapon binding to change weapons.
+By default, you can switch weapons using the shoulder weapon holsters. To do this, hover your dominant hand over a shoulder and press the Switch Weapon controller binding in SteamVR.
+If you prefer, you can adjust the settings for the weapon holsters or disable them in config.txt to switch weapons using only the controller binding.
 
 ### How do I activate smooth turning?
 Go to the VR config.txt file and change SnapTurn = false.  You can also adjust turning speed with SmoothTurnAmount.
