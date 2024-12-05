@@ -83,7 +83,9 @@ void InputHandler::UpdateInputs(bool bInVehicle)
 	if (Game::instance.c_EnableWeaponHolsters->Value())
 	{
 		unsigned char HolsterSwitchWeapons = UpdateHolsterSwitchWeapons();
-		if (HolsterSwitchWeapons > 0)
+		bool bSwitchWeaponsPressed = vr->GetBoolInput(SwitchWeapons);
+
+		if (HolsterSwitchWeapons > 0 && bSwitchWeaponsPressed)
 		{
 			ApplyImpulseBoolInput(SwitchWeapons);
 		}
@@ -92,7 +94,6 @@ void InputHandler::UpdateInputs(bool bInVehicle)
 	{
 		ApplyImpulseBoolInput(SwitchWeapons);
 	}
-	
 
 	unsigned char MotionControlMelee = UpdateMelee();
 	if (MotionControlMelee > 0)
