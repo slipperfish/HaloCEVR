@@ -90,7 +90,7 @@ By default tapping your head with your left hand will toggle the flashlight, you
 By default swinging either controller vertically with enough speed will trigger a melee attack wherever you are looking. If preferred there is a controller binding that is unset by default you can configure instead.
 
 ### How do I switch weapons?
-By default, you can switch weapons using the shoulder weapon holsters. To do this, hover your dominant hand over a shoulder and press the Switch Weapon controller binding in SteamVR.
+By default, you can switch weapons using the shoulder weapon holsters. To do this, hover your dominant hand over a shoulder and press the Switch Weapon controller binding (can be configured in SteamVR's bindings).
 If you prefer, you can adjust the settings for the weapon holsters or disable them in config.txt to switch weapons using only the controller binding.
 
 ### How do I activate smooth turning?
