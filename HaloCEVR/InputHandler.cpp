@@ -354,8 +354,8 @@ unsigned char InputHandler::UpdateHolsterSwitchWeapons()
 		handPos = vr->GetRawControllerTransform(ControllerRole::Right) * Vector3(0.0f, 0.0f, 0.0f);
 	}
 
-	if (InputHandler::IsHandInHolster(handPos, leftShoulderPos, Game::instance.c_LeftShoulderHolsterActivationDistance->Value())
-		|| InputHandler::IsHandInHolster(handPos, rightShoulderPos, Game::instance.c_LeftShoulderHolsterActivationDistance->Value()))
+	if (InputHandler::IsHandInHolster(handPos, leftShoulderPos, Game::instance.c_LeftShoulderHolsterActivationDistance->Value()) 
+		|| InputHandler::IsHandInHolster(handPos, rightShoulderPos, Game::instance.c_RightShoulderHolsterActivationDistance->Value()))
 	{
 		return 127;
 	}
