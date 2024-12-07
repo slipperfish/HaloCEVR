@@ -209,5 +209,9 @@ public:
 	FloatProperty* c_WeaponSmoothingAmountNoZoom = nullptr;
 	FloatProperty* c_WeaponSmoothingAmountOneZoom = nullptr;
 	FloatProperty* c_WeaponSmoothingAmountTwoZoom = nullptr;
+	FloatProperty* c_TEMPViewportLeft = nullptr;
+	FloatProperty* c_TEMPViewportRight = nullptr;
+	FloatProperty* c_TEMPViewportTop = nullptr;
+	FloatProperty* c_TEMPViewportBottom = nullptr;
 };
 
