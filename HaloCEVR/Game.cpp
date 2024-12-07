@@ -793,8 +793,24 @@ void Game::SetupConfigs()
 	c_ShowRoomCentre = config.RegisterBool("ShowRoomCentre", "Draw an indicator at your feet to show where the player character is actually positioned", true);
 	c_d3d9Path = config.RegisterString("CustomD3D9Path", "If set first try to load d3d9.dll from the specified path instead of from system32", "");
 
-	config.LoadFromFile("VR/config.txt");
-	config.SaveToFile("VR/config.txt");
+	const bool bLoadedConfig = config.LoadFromFile("VR/config.txt");
+	const bool bSavedConfig = config.SaveToFile("VR/config.txt");
+	
+	if (!bLoadedConfig)
+	{
+		Logger::log << "[Config] First time startup, generating default config file" << std::endl;
+	}
+
+	if (!bSavedConfig)
+	{
+		Logger::log << "[Config] Couldn't save config file, halo is likely running as non-administrator from a protected directory" << std::endl;
+	}
+	
+	// First run, but couldn't create config file
+	if (!bLoadedConfig && !bSavedConfig)
+	{
+		Logger::err << "Could not create /VR/config.txt.\nHalo may have been installed in Program Files, to generate the config file either run halo.exe as an administrator or reinstall the game in a non-protected folder (e.g. Documents)." << std::endl;
+	}
 
 	weaponHandler.localOffset = Vector3(c_ControllerOffset->Value().x, c_ControllerOffset->Value().y, c_ControllerOffset->Value().z);
 	weaponHandler.localRotation = Vector3(c_ControllerRotation->Value().x, c_ControllerRotation->Value().y, c_ControllerRotation->Value().z);
