@@ -756,8 +756,12 @@ void Game::SetupConfigs()
 	c_DrawMirror = config.RegisterBool("DrawMirror", "Update the desktop window display to show the current game view, rather than leaving it on the splash screen", true);
 	c_MirrorEye = config.RegisterInt("MirrorEye", "Index of the eye to use for the mirror view  (0 = left, 1 = right)", 0);
 	// UI settings
+	c_CrosshairDistance = config.RegisterFloat("CrosshairDistance", "Distance in metres in front of the weapon to display the crosshair", 15.0f);
+	c_MenuOverlayDistance = config.RegisterFloat("MenuOverlayDistance", "Distance in metres in front of the HMD to display the menu", 15.0f);
 	c_UIOverlayDistance = config.RegisterFloat("UIOverlayDistance", "Distance in metres in front of the HMD to display the UI", 15.0f);
 	c_UIOverlayScale = config.RegisterFloat("UIOverlayScale", "Width of the UI overlay in metres", 10.0f);
+	c_MenuOverlayScale = config.RegisterFloat("MenuOverlayScale", "Width of the menu overlay in metres", 10.0f);
+	c_CrosshairScale = config.RegisterFloat("CrosshairScale", "Width of the crosshair overlay in metres", 10.0f);
 	c_UIOverlayCurvature = config.RegisterFloat("UIOverlayCurvature", "Curvature of the UI Overlay, on a scale of 0 to 1", 0.1f);
 	c_UIOverlayWidth = config.RegisterInt("UIOverlayWidth", "Width of the UI overlay in pixels", 600);
 	c_UIOverlayHeight = config.RegisterInt("UIOverlayHeight", "Height of the UI overlay in pixels", 600);
@@ -859,7 +863,7 @@ void Game::UpdateCrosshairAndScope()
 
 	Matrix4 overlayTransform;
 
-	Vector3 targetPos = aimPos + aimDir * c_UIOverlayDistance->Value();
+	Vector3 targetPos = aimPos + aimDir * c_CrosshairDistance->Value();
 
 	Vector3 hmdPos = vr->GetHMDTransform(true) * Vector3(0.0f, 0.0f, 0.0f);
 

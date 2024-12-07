@@ -164,8 +164,12 @@ public:
 	BoolProperty* c_ShowConsole = nullptr;
 	BoolProperty* c_DrawMirror = nullptr;
 	IntProperty* c_MirrorEye = nullptr;
+	FloatProperty* c_CrosshairDistance = nullptr;
+	FloatProperty* c_CrosshairScale = nullptr;
+	FloatProperty* c_MenuOverlayDistance = nullptr;
 	FloatProperty* c_UIOverlayDistance = nullptr;
 	FloatProperty* c_UIOverlayScale = nullptr;
+	FloatProperty* c_MenuOverlayScale = nullptr;
 	FloatProperty* c_UIOverlayCurvature = nullptr;
 	IntProperty* c_UIOverlayWidth = nullptr;
 	IntProperty* c_UIOverlayHeight = nullptr;
