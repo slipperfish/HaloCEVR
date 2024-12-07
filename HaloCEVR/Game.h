@@ -84,7 +84,7 @@ public:
 	float lastDeltaTime = 0.0f;
 
 	bool bNeedsRecentre = true;
-	bool bUseTwoHandAim = true;
+	bool bUseTwoHandAim = false;
 
 	InGameRenderer inGameRenderer;
 	InGameRenderer scopeRenderer;
@@ -204,6 +204,7 @@ public:
 	FloatProperty* c_CrouchHeight = nullptr;
 	BoolProperty* c_ShowRoomCentre = nullptr;
 	BoolProperty* c_ToggleGrip = nullptr;
+	FloatProperty* c_TwoHandDistance = nullptr;
 	BoolProperty* c_LeftHanded = nullptr;
 	StringProperty* c_d3d9Path = nullptr;
 	FloatProperty* c_WeaponSmoothingAmountNoZoom = nullptr;

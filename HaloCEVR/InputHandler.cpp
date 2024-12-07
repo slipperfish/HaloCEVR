@@ -180,7 +180,32 @@ void InputHandler::UpdateInputs(bool bInVehicle)
 		bIsGripping = bWasGripping;
 	}
 
-	Game::instance.bUseTwoHandAim = bIsGripping;
+	float handDistance = Game::instance.c_TwoHandDistance->Value();
+
+	if (handDistance >= 0.0f)
+	{
+		if (bGripChanged)
+		{
+			if (bIsGripping)
+			{
+				const Vector3 leftPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Left, true) * Vector3(0.0f, 0.0f, 0.0f);
+				const Vector3 rightPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Right, true) * Vector3(0.0f, 0.0f, 0.0f);
+
+				if ((rightPos - leftPos).lengthSqr() < handDistance * handDistance)
+				{
+					Game::instance.bUseTwoHandAim = true;
+				}
+			}
+			else
+			{
+				Game::instance.bUseTwoHandAim = false;
+			}
+		}
+	}
+	else
+	{
+		Game::instance.bUseTwoHandAim = bIsGripping;
+	}
 
 	Vector2 MoveInput = vr->GetVector2Input(Move);
 
@@ -459,8 +484,15 @@ bool InputHandler::GetCalculatedHandPositions(Matrix4& controllerTransform, Vect
 		const Vector3 actualControllerPos = controllerTransform * Vector3(0.0f, 0.0f, 0.0f);
 		const Vector3 mainHandPos = aimingTransform * Vector3(0.0f, 0.0f, 0.0f);
 		const Vector3 offHandPos = Game::instance.bUseTwoHandAim ? offHandTransform * Vector3(0.0f, 0.0f, 0.0f) : mainHandPos + poseDirection;
-		const Vector3 toOffHand = (offHandPos - mainHandPos).normalize();
+		Vector3 toOffHand = (offHandPos - mainHandPos);
 
+		// Avoid NaN errors
+		if (toOffHand.lengthSqr() < 1e-8)
+		{
+			return false;
+		}
+
+		toOffHand.normalize();
 		dominantHandPos = actualControllerPos; 
 		offHand = toOffHand; 
 
