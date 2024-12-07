@@ -10,6 +10,7 @@
 #include "../Helpers/RenderTarget.h"
 #include "../Helpers/Camera.h"
 #include "../Helpers/Cutscene.h"
+#include "../Helpers/Menus.h"
 
 #pragma comment(lib, "openvr_api.lib")
 #pragma comment(lib, "d3d11.lib")
@@ -402,7 +403,7 @@ void OpenVR::PositionOverlay()
 	position.v[1] = mat.m[1][3];
 	position.v[2] = mat.m[2][3];
 
-	float distance = Game::instance.c_UIOverlayDistance->Value();
+	float distance = bMouseVisible ? Game::instance.c_MenuOverlayDistance->Value() : Game::instance.c_UIOverlayDistance->Value();
 
 	float len = sqrt(mat.m[0][2] * mat.m[0][2] + mat.m[2][2] * mat.m[2][2]);
 
@@ -744,6 +745,7 @@ void OpenVR::SetMouseVisibility(bool bIsVisible)
 	}
 
 	vrOverlay->SetOverlayInputMethod(uiOverlay, bIsVisible ? vr::VROverlayInputMethod_Mouse : vr::VROverlayInputMethod_None);
+	vrOverlay->SetOverlayWidthInMeters(uiOverlay, bIsVisible ? Game::instance.c_MenuOverlayScale->Value() : Game::instance.c_UIOverlayScale->Value());
 }
 
 void OpenVR::SetCrosshairTransform(Matrix4& newTransform)
@@ -753,7 +755,7 @@ void OpenVR::SetCrosshairTransform(Matrix4& newTransform)
 	Vector3 pos = (newTransform * Vector3(0.0f, 0.0f, 0.0f)) * Game::instance.MetresToWorld(1.0f) + Helpers::GetCamera().position;
 	Matrix3 rot;
 	Vector2 size(1.33f, 1.0f);
-	size *= Game::instance.MetresToWorld(Game::instance.c_UIOverlayScale->Value());
+	size *= Game::instance.MetresToWorld(Game::instance.c_CrosshairScale->Value());
 
 	newTransform.translate(-pos);
 	newTransform.rotate(90.0f, newTransform.getLeftAxis());
