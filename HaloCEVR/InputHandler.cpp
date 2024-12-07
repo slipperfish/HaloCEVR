@@ -211,19 +211,27 @@ void InputHandler::UpdateInputs(bool bInVehicle)
 	bool bWeaponHandChanged;
 	bool bIsSwitchHandsPressed = vr->GetBoolInput(SwapWeaponHands, bWeaponHandChanged);
 
-	// Swap main hands
-	if (true)
+	float swapHandDistance = Game::instance.c_SwapHandDistance->Value();
+
+	if (swapHandDistance >= 0.0f)
 	{
-		if (bWeaponHandChanged && bIsSwitchHandsPressed)
+		// Check if hands are within swap distance
+		const Vector3 leftPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Left, true) * Vector3(0.0f, 0.0f, 0.0f);
+		const Vector3 rightPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Right, true) * Vector3(0.0f, 0.0f, 0.0f);
+		bool handsWithinSwapDistance = (rightPos - leftPos).lengthSqr() < swapHandDistance * swapHandDistance;
+
+		// Only toggle hand swap on initial button press when hands are within distance
+		if (bWeaponHandChanged && bIsSwitchHandsPressed && handsWithinSwapDistance)
 		{
-			bWasSwappingHands ^= true;
+			Game::instance.bLeftHanded = !Game::instance.bLeftHanded;
 		}
 
-		bIsGripping = bWasSwappingHands;
+		// Prevent two-handed aim while button is held and hands are within distance
+		if (bIsSwitchHandsPressed && handsWithinSwapDistance)
+		{
+			Game::instance.bUseTwoHandAim = false;
+		}
 	}
-
-	Game::instance.bLeftHanded = bIsGripping;
-
 
 	Vector2 MoveInput = vr->GetVector2Input(Move);
 
@@ -485,8 +493,8 @@ void InputHandler::UpdateMouseInfo(MouseInfo* mouseInfo)
 
 bool InputHandler::GetCalculatedHandPositions(Matrix4& controllerTransform, Vector3& dominantHandPos, Vector3& offHand)
 {
-	ControllerRole dominant = Game::instance.c_LeftHanded->Value() ? ControllerRole::Left : ControllerRole::Right;
-	ControllerRole nonDominant = Game::instance.c_LeftHanded->Value() ? ControllerRole::Right : ControllerRole::Left;
+	ControllerRole dominant = Game::instance.bLeftHanded ? ControllerRole::Left : ControllerRole::Right;
+	ControllerRole nonDominant = Game::instance.bLeftHanded ? ControllerRole::Right : ControllerRole::Left;
 
 	controllerTransform = Game::instance.GetVR()->GetControllerTransform(dominant, true);
 

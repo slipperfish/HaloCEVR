@@ -95,7 +95,8 @@ protected:
 		{"Crouch", VK_LCONTROL},
 		{"Zoom", 'Z'},
 		{"Reload", 'R'},
-		{"SwapWeaponHands", 'N'},
+		{"SwapWeaponHands", 'M'},
+		{"TwoHandGrip", 'M'},
 		{"EMU_MoveHandSwap", 'H'}
 	};
 

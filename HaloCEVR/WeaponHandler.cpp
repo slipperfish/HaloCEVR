@@ -616,24 +616,6 @@ Matrix4 WeaponHandler::GetDominantHandTransform() const
 	{
 		return controllerTransform;
 	}
-	ControllerRole dominant = Game::instance.bLeftHanded ? ControllerRole::Left : ControllerRole::Right;
-	ControllerRole nonDominant = Game::instance.bLeftHanded ? ControllerRole::Right : ControllerRole::Left;
-
-	Matrix4 controllerTransform = Game::instance.GetVR()->GetControllerTransform(dominant, true);
-
-	Vector3 poseDirection;
-	bool bHasPoseData = Game::instance.GetVR()->TryGetControllerFacing(dominant, poseDirection);
-
-	// When 2h aiming point the main hand at the offhand 
-	if (Game::instance.bUseTwoHandAim || bHasPoseData)
-	{
-		Matrix4 aimingTransform = Game::instance.GetVR()->GetRawControllerTransform(dominant, true);
-		Matrix4 offHandTransform = Game::instance.GetVR()->GetRawControllerTransform(nonDominant, true);
-
-		const Vector3 actualControllerPos = controllerTransform * Vector3(0.0f, 0.0f, 0.0f);
-		const Vector3 mainHandPos = aimingTransform * Vector3(0.0f, 0.0f, 0.0f);
-		const Vector3 offHandPos = Game::instance.bUseTwoHandAim ? offHandTransform * Vector3(0.0f, 0.0f, 0.0f) : mainHandPos + poseDirection;
-		const Vector3 toOffHand = (offHandPos - mainHandPos).normalize();
 
 	Vector3 upVector = controllerTransform.getForwardAxis();
 
