@@ -133,9 +133,9 @@ exec=C:\HaloVRMod\Halo\chimera_preferences.txt
 Note that deleting the semicolon is what makes this line active.  It's telling chimera to load the text commands you wrote that control the level of detail. If others share chimera commands in the future you can place them here.
 You can test that the commands are being executed by changing the name of the VR mod dll file, d3d9.dll, to something else temporarily and booting the game up in flat screen.  The commands will flash on the screen if this step worked.
 #### How can I make sounds even more immersive?
-Check out DSOAL for 3D sound ingame: https://vaporeon.io/hosted/dsoal-builds/dsoal-latest.7z
--Right-Click and extract to dsoal-latest
--Copy and Paste all files into your Halo folder
+Check out DSOAL for 3D sound ingame: https://github.com/ThreeDeeJay/dsoal/releases/tag/0.9.6, specific download zip link: https://github.com/ThreeDeeJay/dsoal/releases/download/0.9.6/DSOAL+HRTF.zip 
+-Extract to a location on your computer. Inside the zip, find the Win32 folder, open it, and copy and paste all Win32 files into your Halo folder
+-One of the files will be called alsoft.ini which is a configuration file for DSOAL.
 
 Path: Halo>alsoft.ini
 
