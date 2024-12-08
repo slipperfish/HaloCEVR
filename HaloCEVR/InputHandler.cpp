@@ -530,13 +530,17 @@ void InputHandler::CalculateSmoothedInput()
 	}
 
 	float clampedValue = std::clamp(userInput, 0.0f, 1.0f);
-
-	float maxSmoothing = 20.0f;		//20 is already a bit ridiculous but just incase people need that much smoothing. 
-	float speedRampup = 10.0f;		//This helps control the slowdown curve of the interpolation
-
+	if (clampedValue == 0.0f)
+	{
+		smoothedPosition = actualControllerPos + toOffHand;
+	}
+	else
+	{
+		float t = Game::instance.lastDeltaTime * 7.0f / clampedValue;
+		t = std::clamp(t, 0.0f, 1.0f);
+		smoothedPosition = Helpers::Lerp(smoothedPosition, actualControllerPos + toOffHand, t);
+	}
 	// Apply the smoothing using linear interpolation with the adjusted deltaTime
-	float t = (clampedValue * maxSmoothing) * Game::instance.lastDeltaTime;
-	smoothedPosition = Helpers::Lerp(smoothedPosition, actualControllerPos + toOffHand, exp(-t * speedRampup));
 }
 
 
