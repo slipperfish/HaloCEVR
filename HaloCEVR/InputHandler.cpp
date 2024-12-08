@@ -168,51 +168,12 @@ void InputHandler::UpdateInputs(bool bInVehicle)
 		SendInput(1, &input, sizeof(INPUT));
 	}
 
-	bool bGripChanged;
-	bool bIsGripping = vr->GetBoolInput(TwoHandGrip, bGripChanged);
-
-	if (Game::instance.c_ToggleGrip->Value())
-	{
-		if (bGripChanged && bIsGripping)
-		{
-			bWasGripping ^= true;
-		}
-
-		bIsGripping = bWasGripping;
-	}
-
-	float handDistance = Game::instance.c_TwoHandDistance->Value();
-
-	if (handDistance >= 0.0f)
-	{
-		if (bGripChanged)
-		{
-			if (bIsGripping)
-			{
-				const Vector3 leftPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Left, true) * Vector3(0.0f, 0.0f, 0.0f);
-				const Vector3 rightPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Right, true) * Vector3(0.0f, 0.0f, 0.0f);
-
-				if ((rightPos - leftPos).lengthSqr() < handDistance * handDistance)
-				{
-					Game::instance.bUseTwoHandAim = true;
-				}
-			}
-			else
-			{
-				Game::instance.bUseTwoHandAim = false;
-			}
-		}
-	}
-	else
-	{
-		Game::instance.bUseTwoHandAim = bIsGripping;
-	}
-
 	bool bWeaponHandChanged;
 	bool bIsSwitchHandsPressed = vr->GetBoolInput(SwapWeaponHands, bWeaponHandChanged);
 
 	float swapHandDistance = Game::instance.c_SwapHandDistance->Value();
 
+	bool handsWithinSwapWeaponDistance = false;
 	if (swapHandDistance >= 0.0f)
 	{
 		// Check if hands are within swap distance
@@ -220,16 +181,57 @@ void InputHandler::UpdateInputs(bool bInVehicle)
 		const Vector3 rightPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Right, true) * Vector3(0.0f, 0.0f, 0.0f);
 		bool handsWithinSwapDistance = (rightPos - leftPos).lengthSqr() < swapHandDistance * swapHandDistance;
 
-		// Only toggle hand swap on initial button press when hands are within distance
-		if (bWeaponHandChanged && bIsSwitchHandsPressed && handsWithinSwapDistance)
+		if (handsWithinSwapDistance)
 		{
-			Game::instance.bLeftHanded = !Game::instance.bLeftHanded;
+			handsWithinSwapWeaponDistance = true;
+			// Only toggle hand swap on initial button press when hands are within distance
+			if (bWeaponHandChanged && bIsSwitchHandsPressed)
+			{
+				Game::instance.bLeftHanded = !Game::instance.bLeftHanded;
+			}
+		}
+	}
+
+	if (!handsWithinSwapWeaponDistance)
+	{
+		bool bGripChanged;
+		bool bIsGripping = vr->GetBoolInput(TwoHandGrip, bGripChanged);
+
+		if (Game::instance.c_ToggleGrip->Value())
+		{
+			if (bGripChanged && bIsGripping)
+			{
+				bWasGripping ^= true;
+			}
+
+			bIsGripping = bWasGripping;
 		}
 
-		// Prevent two-handed aim while button is held and hands are within distance
-		if (bIsSwitchHandsPressed && handsWithinSwapDistance)
+		float handDistance = Game::instance.c_TwoHandDistance->Value();
+
+		if (handDistance >= 0.0f)
 		{
-			Game::instance.bUseTwoHandAim = false;
+			if (bGripChanged)
+			{
+				if (bIsGripping)
+				{
+					const Vector3 leftPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Left, true) * Vector3(0.0f, 0.0f, 0.0f);
+					const Vector3 rightPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Right, true) * Vector3(0.0f, 0.0f, 0.0f);
+
+					if ((rightPos - leftPos).lengthSqr() < handDistance * handDistance)
+					{
+						Game::instance.bUseTwoHandAim = true;
+					}
+				}
+				else
+				{
+					Game::instance.bUseTwoHandAim = false;
+				}
+			}
+		}
+		else
+		{
+			Game::instance.bUseTwoHandAim = bIsGripping;
 		}
 	}
 
