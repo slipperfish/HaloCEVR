@@ -788,7 +788,7 @@ void Game::SetupConfigs()
 	c_UIOverlayHeight = config.RegisterInt("UIOverlayHeight", "Height of the UI overlay in pixels", 600);
 	c_ShowCrosshair = config.RegisterBool("ShowCrosshair", "Display a floating crosshair in the world at the location you are aiming", true);
 	// Control settings
-	c_LeftHanded = config.RegisterBool("LeftHanded", "Make the left hand the dominant hand. Does not affect bindings, change these in the SteamVR overlay", false);
+	c_LeftHanded = config.RegisterBool("LeftHanded", "Make the left hand the dominant hand by default. This swaps the button bindings but doesn't swap the sticks, full left handed bindings can be found in the SteamVR overlay", false);
 	c_SnapTurn = config.RegisterBool("SnapTurn", "The look input will instantly rotate the view by a fixed amount, rather than smoothly rotating", true);
 	c_SnapTurnAmount = config.RegisterFloat("SnapTurnAmount", "Rotation in degrees a single snap turn will rotate the view by", 45.0f);
 	c_SmoothTurnAmount = config.RegisterFloat("SmoothTurnAmount", "Rotation in degrees per second the view will turn at when not using snap turning", 90.0f);

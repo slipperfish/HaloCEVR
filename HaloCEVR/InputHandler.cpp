@@ -42,6 +42,8 @@ void InputHandler::RegisterInputs()
 
 	RegisterVector2Input(Move);
 	RegisterVector2Input(Look);
+
+	Game::instance.bLeftHanded = Game::instance.c_LeftHanded->Value();
 }
 
 float AngleBetweenVector2(const Vector2& v1, const Vector2& v2)
