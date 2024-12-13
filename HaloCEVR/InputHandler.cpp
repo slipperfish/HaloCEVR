@@ -217,11 +217,11 @@ void InputHandler::UpdateInputs(bool bInVehicle)
 
 		if (handsWithinSwapWeaponDistance)
 		{
-			if (!Game::instance.bLeftHanded && bWeaponHandChanged && bIsSwitchHandsPressed)
+			if (!Game::instance.bLeftHanded && bWeaponHandChanged && bIsSwitchHandsPressed && !bIsOffhandSwitchHandsPressed)
 			{
 				Game::instance.bLeftHanded = true;
 			}
-			else if (Game::instance.bLeftHanded && bOffhandWeaponHandChanged && bIsOffhandSwitchHandsPressed)
+			else if (Game::instance.bLeftHanded && bOffhandWeaponHandChanged && bIsOffhandSwitchHandsPressed && !bIsSwitchHandsPressed)
 			{
 				Game::instance.bLeftHanded = !Game::instance.bLeftHanded;
 			}
@@ -267,7 +267,7 @@ void InputHandler::UpdateInputs(bool bInVehicle)
 	            }
 	            else
 	            {
-	                Game::instance.bUseTwoHandAim = false; // Ensure two-hand mode is disabled when grip is released
+	                Game::instance.bUseTwoHandAim = false;
 	            }
 	        }
 	    }
@@ -275,12 +275,6 @@ void InputHandler::UpdateInputs(bool bInVehicle)
 	    {
 	        Game::instance.bUseTwoHandAim = bIsGripping;
 	    }
-		/*
-	    // Explicitly disable two-hand mode if grip is not active
-	    if (!bIsGripping) {
-	        Game::instance.bUseTwoHandAim = false;
-	    }
-		*/
 	}
 
 	Vector2 MoveInput = vr->GetVector2Input(Move);
@@ -412,7 +406,10 @@ unsigned char InputHandler::UpdateFlashlight()
 	float leftDistance = Game::instance.c_LeftHandFlashlightDistance->Value();
 	float rightDistance = Game::instance.c_RightHandFlashlightDistance->Value();
 
-	if (leftDistance > 0.0f)
+	bool offhandFlashlightEnabled = Game::instance.c_OffhandHandFlashlight->Value();
+
+	bool checkLeftHand = !offhandFlashlightEnabled || !Game::instance.bLeftHanded; 
+	if (checkLeftHand && leftDistance > 0.0f)
 	{
 		Vector3 handPos = vr->GetRawControllerTransform(ControllerRole::Left) * Vector3(0.0f, 0.0f, 0.0f);
 
@@ -422,7 +419,8 @@ unsigned char InputHandler::UpdateFlashlight()
 		}
 	}
 
-	if (rightDistance > 0.0f)
+	bool checkRightHand = !offhandFlashlightEnabled || Game::instance.bLeftHanded; 
+	if (checkRightHand && rightDistance > 0.0f)
 	{
 		Vector3 handPos = vr->GetRawControllerTransform(ControllerRole::Right) * Vector3(0.0f, 0.0f, 0.0f);
 

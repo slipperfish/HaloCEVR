@@ -186,6 +186,7 @@ public:
 	FloatProperty* c_HandRelativeOffsetRotation = nullptr;
 	FloatProperty* c_HorizontalVehicleTurnAmount = nullptr;
 	FloatProperty* c_VerticalVehicleTurnAmount = nullptr;
+	BoolProperty* c_OffhandHandFlashlight = nullptr;
 	FloatProperty* c_LeftHandFlashlightDistance = nullptr;
 	FloatProperty* c_RightHandFlashlightDistance = nullptr;
 	BoolProperty* c_EnableWeaponHolsters = nullptr;
