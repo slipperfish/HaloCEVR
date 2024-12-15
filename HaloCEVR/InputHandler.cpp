@@ -200,82 +200,7 @@ void InputHandler::UpdateInputs(bool bInVehicle)
 		SendInput(1, &input, sizeof(INPUT));
 	}
 
-	bool bWeaponHandChanged;
-	bool bOffhandWeaponHandChanged;
-	bool bIsSwitchHandsPressed = vr->GetBoolInput(SwapWeaponHands, bWeaponHandChanged);
-	bool bIsOffhandSwitchHandsPressed = vr->GetBoolInput(OffhandSwapWeaponHands, bOffhandWeaponHandChanged);
-
-	float swapHandDistance = Game::instance.c_SwapHandDistance->Value();
-
-	bool handsWithinSwapWeaponDistance = false;
-	if (swapHandDistance >= 0.0f)
-	{
-		// Check if hands are within swap distance
-		const Vector3 leftPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Left, true) * Vector3(0.0f, 0.0f, 0.0f);
-		const Vector3 rightPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Right, true) * Vector3(0.0f, 0.0f, 0.0f);
-		handsWithinSwapWeaponDistance = (rightPos - leftPos).lengthSqr() < swapHandDistance * swapHandDistance;
-
-		if (handsWithinSwapWeaponDistance)
-		{
-			if (!Game::instance.bLeftHanded && bWeaponHandChanged && bIsSwitchHandsPressed && !bIsOffhandSwitchHandsPressed)
-			{
-				Game::instance.bLeftHanded = true;
-			}
-			else if (Game::instance.bLeftHanded && bOffhandWeaponHandChanged && bIsOffhandSwitchHandsPressed && !bIsSwitchHandsPressed)
-			{
-				Game::instance.bLeftHanded = !Game::instance.bLeftHanded;
-			}
-		}
-	}
-
-	bool bGripChanged;
-	bool bIsGripping = vr->GetBoolInput(TwoHandGripBinding, bGripChanged);
-
-	if (handsWithinSwapWeaponDistance)
-	{
-		if (!bIsGripping) {
-	        Game::instance.bUseTwoHandAim = false;
-	    }
-	}
-	else
-	{
-	    if (Game::instance.c_ToggleGrip->Value())
-	    {
-	        if (bGripChanged && bIsGripping)
-	        {
-	            bWasGripping ^= true;
-	        }
-
-	        bIsGripping = bWasGripping;
-	    }
-
-	    float handDistance = Game::instance.c_TwoHandDistance->Value();
-
-	    if (handDistance >= 0.0f)
-	    {
-	        if (bGripChanged)
-	        {
-	            if (bIsGripping)
-	            {
-	                const Vector3 leftPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Left, true) * Vector3(0.0f, 0.0f, 0.0f);
-	                const Vector3 rightPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Right, true) * Vector3(0.0f, 0.0f, 0.0f);
-
-	                if ((rightPos - leftPos).lengthSqr() < handDistance * handDistance)
-	                {
-	                    Game::instance.bUseTwoHandAim = true;
-	                }
-	            }
-	            else
-	            {
-	                Game::instance.bUseTwoHandAim = false;
-	            }
-	        }
-	    }
-	    else
-	    {
-	        Game::instance.bUseTwoHandAim = bIsGripping;
-	    }
-	}
+	UpdateHandsProximity();
 
 	Vector2 MoveInput = vr->GetVector2Input(Move);
 
@@ -613,6 +538,102 @@ void InputHandler::CalculateSmoothedInput()
 	smoothedPosition = Helpers::Lerp(smoothedPosition, actualControllerPos + toOffHand, exp(-t * speedRampup));
 }
 
+void InputHandler::UpdateHandsProximity()
+{
+	float swapHandDistance = Game::instance.c_SwapHandDistance->Value();
+	
+	const Vector3 leftPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Left, true) * Vector3(0.0f, 0.0f, 0.0f);
+	const Vector3 rightPos = Game::instance.GetVR()->GetControllerTransform(ControllerRole::Right, true) * Vector3(0.0f, 0.0f, 0.0f);
+	float handDistance = (rightPos - leftPos).lengthSqr();
+
+	bool handsWithinSwapWeaponDistance = false;
+	if (swapHandDistance >= 0.0f && handDistance < swapHandDistance * swapHandDistance)
+	{
+		handsWithinSwapWeaponDistance = true;
+		CheckSwapWeaponHands();
+	}
+
+	UpdateTwoHandedHold(handDistance, handsWithinSwapWeaponDistance);
+}
+
+void InputHandler::CheckSwapWeaponHands()
+{
+	IVR* vr = Game::instance.GetVR();
+
+	bool bWeaponHandChanged;
+	bool bOffhandWeaponHandChanged;
+	bool bIsSwitchHandsPressed = vr->GetBoolInput(SwapWeaponHands, bWeaponHandChanged);
+	bool bIsOffhandSwitchHandsPressed = vr->GetBoolInput(OffhandSwapWeaponHands, bOffhandWeaponHandChanged);
+
+	bool offHandGrabbedWeapon = false;
+	bool dominantHandReleasedWeapon = false;
+
+    if (!Game::instance.bLeftHanded)
+    {
+		offHandGrabbedWeapon = bIsSwitchHandsPressed && bWeaponHandChanged && !bIsOffhandSwitchHandsPressed;
+		dominantHandReleasedWeapon = bIsSwitchHandsPressed && !bIsOffhandSwitchHandsPressed && bOffhandWeaponHandChanged;
+    }
+    else
+    {
+        offHandGrabbedWeapon = bIsOffhandSwitchHandsPressed && bOffhandWeaponHandChanged && !bIsSwitchHandsPressed;
+		dominantHandReleasedWeapon = bIsOffhandSwitchHandsPressed && !bIsSwitchHandsPressed && bWeaponHandChanged;
+    }
+
+	if (offHandGrabbedWeapon || dominantHandReleasedWeapon)
+    {
+        Game::instance.bLeftHanded = !Game::instance.bLeftHanded;
+    }
+}
+
+void InputHandler::UpdateTwoHandedHold(float handDistance, bool handsWithinSwapWeaponDistance)
+{
+	IVR* vr = Game::instance.GetVR();
+
+	InputBindingID twoHandGripBinding = Game::instance.bLeftHanded ? OffhandSwitchWeapons : SwitchWeapons;
+
+	bool bGripChanged;
+	bool bIsGripping = vr->GetBoolInput(twoHandGripBinding, bGripChanged);
+
+	if (handsWithinSwapWeaponDistance)
+	{
+		if (!bIsGripping) {
+	        Game::instance.bUseTwoHandAim = false;
+	    }
+		return;
+	}
+
+	if (Game::instance.c_ToggleGrip->Value())
+	{
+	    if (bGripChanged && bIsGripping)
+	    {
+	        bWasGripping ^= true;
+	    }
+	    bIsGripping = bWasGripping;
+	}
+
+	float twoHandDistance = Game::instance.c_TwoHandDistance->Value();
+	if (twoHandDistance >= 0.0f)
+	{
+	    if (bGripChanged)
+	    {
+	        if (bIsGripping)
+	        {
+				if (handDistance < twoHandDistance * twoHandDistance)
+	            {
+	                Game::instance.bUseTwoHandAim = true;
+	            }
+	        }
+	        else
+	        {
+	            Game::instance.bUseTwoHandAim = false;
+	        }
+	    }
+	}
+	else
+	{
+	    Game::instance.bUseTwoHandAim = bIsGripping;
+	}
+}
 
 #undef ApplyBoolInput
 #undef ApplyImpulseBoolInput

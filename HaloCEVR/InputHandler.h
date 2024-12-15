@@ -12,7 +12,7 @@ public:
 	void SetMousePosition(int& x, int& y);
 	void UpdateMouseInfo(struct MouseInfo* mouseInfo);
 	bool GetCalculatedHandPositions(Matrix4& controllerTransform, Vector3& dominantHandPos, Vector3& offHand);
-	void CalculateSmoothedInput(); 
+	void CalculateSmoothedInput();
 
 	Vector3 smoothedPosition = Vector3(0.0f, 0.0f, 0.0f);
 
@@ -23,7 +23,12 @@ protected:
 	unsigned char UpdateHolsterSwitchWeapons();
 	unsigned char UpdateMelee();
 	unsigned char UpdateCrouch();
-	
+
+	// Update Controls that rely on the distance between hands
+	void UpdateHandsProximity();
+	void CheckSwapWeaponHands();
+	void UpdateTwoHandedHold(float handDistance, bool handsWithinSwapWeaponDistance);
+
 	char lastSnapState = 0;
 	unsigned char mouseDownState = 0;
 
