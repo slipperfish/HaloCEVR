@@ -674,6 +674,25 @@ bool Game::GetCalculatedHandPositions(Matrix4& controllerTransform, Vector3& dom
 	return inputHandler.GetCalculatedHandPositions(controllerTransform, dominantHandPos, offHand);
 }
 
+void Game::ReloadStart(HaloID param1, short param2, bool param3)
+{
+	// TODO: Check if this reload was from the player (can probably be done by checking the weapon's parent ID matches the player)
+	WeaponDynamicObject* weaponObject = static_cast<WeaponDynamicObject*>((Helpers::GetDynamicObject(param1)));
+
+	Weapon& weapon = weaponObject->weaponData[param2];
+
+	// Reload function gets called whenever the player tries to reload, if reloadstate is 1 then a reload was actually triggered
+	if (weapon.reloadState == 1)
+	{
+		Logger::log << "Reload Start (" << param1 << ", " << param2 << ", " << param3 << ")" << std::endl;
+	}
+}
+
+void Game::ReloadEnd(short param1, HaloID param2)
+{
+	Logger::log << "Reload End" << std::endl;
+}
+
 Vector3 Game::GetSmoothedInput()
 {
 	return inputHandler.smoothedPosition;

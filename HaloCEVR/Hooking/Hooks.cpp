@@ -52,6 +52,8 @@ void Hooks::InitHooks()
 	CREATEHOOK(DrawLoadingScreen2);
 	CREATEHOOK(DrawCinematicBars);
 	CREATEHOOK(DrawViewModel);
+	CREATEHOOK(ReloadStart);
+	CREATEHOOK(ReloadEnd);
 
 	// These are handled with a direct patch, so manually scan them
 	SigScanner::UpdateOffset(o.CutsceneFPSCap);
@@ -99,6 +101,8 @@ void Hooks::EnableAllHooks()
 	DrawLoadingScreen2.EnableHook();
 	DrawCinematicBars.EnableHook();
 	DrawViewModel.EnableHook();
+	//ReloadStart.EnableHook();
+	//ReloadEnd.EnableHook();
 
 	Freeze();
 
@@ -842,6 +846,39 @@ void Hooks::H_DrawViewModel()
 	else
 	{
 		DrawViewModel.Original();
+	}
+}
+
+void Hooks::H_ReloadStart(HaloID param1, short param2, bool param3)
+{
+	ReloadStart.Original(param1, param2, param3);
+
+	Game::instance.ReloadStart(param1, param2, param3);
+}
+
+void __declspec(naked) Hooks::H_ReloadEnd()
+{
+	static short param1;
+	static HaloID param2;
+
+	_asm
+	{
+		mov param1, cx
+		push eax
+		mov eax, [esp + 0x8]
+		mov param2, eax
+		pop eax
+		push param2
+	}
+
+	ReloadEnd.Original();
+
+	Game::instance.ReloadEnd(param1, param2);
+
+	_asm
+	{
+		add esp, 0x4
+		ret;
 	}
 }
 
