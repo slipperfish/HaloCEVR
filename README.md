@@ -58,9 +58,9 @@ A full VR conversion mod for the original 2003 PC edition of _Halo: Combat Evolv
 Dsoal allows you to turn on hardware acceleration and EAX in Halo without said hardware to enjoy environmental sound effects like reverb and HRTF(head-related transfer function), providing realistic, locatable 3D sound with high accuracy for virtual reality. Highly recommended even for low fidelity audio such as on Quest. (Notice: Doesn't currently work on first-person sounds)
 
 1) Download and extract https://github.com/ThreeDeeJay/dsoal/releases/download/0.9.6/DSOAL+HRTF.zip 
-2) Open the \Win32\ folder
-3) Copy & paste all files (alsoft.ini, dsoal-aldrv.dll, dsound.dll) in your \Halo\halo.exe folder.
-4) Edit and paste these settings into alsoft.ini:
+2) Open the \DSOAL+HRTF\Win32\ folder
+3) Copy & paste all files from \Win32\ (alsoft.ini, dsoal-aldrv.dll, dsound.dll) into your \Halo\ install folder where halo.exe is located.
+4) Edit alsoft.ini and copy & paste these settings:
 ```
  [general]
 channels=stereo
@@ -84,7 +84,7 @@ See installation instructions above. If you installed chimera, you can execute c
 
 To launch the game in flat mode and use the console with the tilde ~ key, you can disable the VR mod by temporarily renaming d3d9.dll to something like d3d9aa.dll. However executed console commands are saved and read from/to a text file, which you can navigate to and edit directly instead.
 
-Go to (Your User Folder)\Documents\My Games\Halo\chimera\preferences.txt, and add these commands.
+Go to (Your User Folder)\Documents\My Games\Halo\chimera\preferences.txt, and add these commands:
 ```
 chimera_model_detail 8
 chimera_af 1
