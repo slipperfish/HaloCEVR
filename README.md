@@ -55,14 +55,16 @@ A full VR conversion mod for the original 2003 PC edition of _Halo: Combat Evolv
 ## Graphical and Audio Enhancements, Restoration
 ### dsoal 
 
-Dsoal allows you to turn on hardware acceleration and EAX in Halo without said hardware to enjoy environmental sound effects like reverb and HRTF(head-related transfer function), providing realistic, locatable 3D sound with high accuracy for virtual reality. Highly recommended even for low fidelity audio such as on Quest. (Notice: Doesn't currently work on first-person sounds)
+Dsoal allows you to turn on hardware acceleration and EAX in Halo without requisite hardware to enjoy environmental sound effects like reverb and HRTF, providing realistic, locatable 3D sound with high accuracy for virtual reality. Highly recommended for even low fidelity headphones such as on Quest. 
 
-1) Download and extract https://github.com/ThreeDeeJay/dsoal/releases/download/0.9.6/DSOAL+HRTF.zip 
-2) Open the \DSOAL+HRTF\Win32\ folder
-3) Copy & paste all files from \Win32\ (alsoft.ini, dsoal-aldrv.dll, dsound.dll) into your \Halo\ install folder where halo.exe is located.
+Note: Chimera is required for reverb on first person sounds. HRTF does not work on first person sounds.
+
+1) Download and extract from https://github.com/ThreeDeeJay/dsoal/releases/download/0.9.6/DSOAL+HRTF.zip 
+2) Open the DSOAL+HRTF\Win32\ folder.
+3) Copy & paste all files from Win32\ (alsoft.ini, dsoal-aldrv.dll, dsound.dll) into your Halo\ install folder where halo.exe is located.
 4) Edit alsoft.ini and copy & paste these settings:
 ```
- [general]
+[general]
 channels=stereo
 frequency=48000
 stereo-mode=headphones
@@ -78,39 +80,39 @@ boost=-6
 ```
 ### chimera
 
-Chimera passively increases animation framerate, corrects some fog, boosts polygon limit, object limit, and draw distance. Highly recommended for comfort and bug fixes alone.
+Chimera passively increases animation framerate, corrects some fog, boosts polygon limit, object limit, and draw distance, but is highly recommended for bug fixes and QOL changes alone.
 
-See installation instructions above. If you installed chimera, you can execute commands to reduce pop-in and low detail models (lods), turn on anisotrophic filtering for sharper textures on world geometry, and turn on reverberation for first person sounds (requires dsoal). These are not turned on by default. There are several ways to do this. Please read about all 3 methods before proceeding.
+See installation instructions above. If you installed chimera, you can execute console commands to reduce pop-in and low detail models (lods), turn on anisotrophic filtering for sharper textures on world geometry, and turn on reverberation for first person sounds (requires dsoal). These are not turned on by default. There are several ways to do this. Please read about all 3 methods before proceeding.
 
-To launch the game in flat mode and use the console with the tilde ~ key, you can disable the VR mod by temporarily renaming d3d9.dll to something like d3d9aa.dll. However executed console commands are saved and read from/to a text file, which you can navigate to and edit directly instead.
+* To launch the game in flat mode and use the console with the tilde ~ key, you can disable the VR mod by temporarily renaming d3d9.dll to something like d3d9aa.dll. 
 
-Go to (Your User Folder)\Documents\My Games\Halo\chimera\preferences.txt, and add these commands:
+* However, executed console commands are saved and read from a text file, it might be easier to edit this file directly instead. After running Halo once with chimera installed, close Halo and go to (Your User Folder)\Documents\My Games\Halo\chimera\preferences.txt, and add these commands:
 ```
 chimera_model_detail 8
 chimera_af 1
 chimera_fp_reverb 1
 ```
-If you want these preferences to be portable and travel with your Halo installation:
+* If you want these preferences to be portable and travel with your Halo installation:
 
-1) Create a new text file named chimera_preferences.txt in the \Halo\ folder along side chimera.ini
-2) edit \Halo\chimera.ini
-3) Do not paste the commands into chimera.ini, some of them will not work
+1) Create a new text file named chimera_preferences.txt in the Halo\ folder alongside chimera.ini
+2) edit Halo\chimera.ini
+3) Do not paste the commands into chimera.ini, some of them will not work.
 5) chimera.ini comments(disables) lines with a semi-colon ```;```. Find ```exec=``` and remove any semi-colon on that line, such as ```;exec=```
 6) set the value to ```exec=./chimera_preferences.txt```
 7) paste the commands listed above into chimera_preferences.txt
 
 ### Halo Refined
 
-When Halo was ported to PC in 2003, many graphical effects present in the original Xbox version were broken and outdated assets were accidentally used. Halo Refined is a community project that fixes many issues such as invisible bumpmapping, missing specular, broken transparency effects, etc and provides some faithful high resolution assets by replacing Halo's map files.
+A Community project that restores many graphical effects present in the original Xbox version by replacing Halo's map files. Fixes issues such as invisible bumpmapping, missing specular, broken transparency effects, etc. Also provides some high res asset replacements, most notably an HD HUD. 
 
 Halo Refined is poorly tested with HaloCEVR but seems to work, recommended for experimental use. Please keep back ups of your original .map files before installing. If you are having any issues with HaloCEVR while using Refined's maps, restore the original files and retest before reporting your issue.
 
-Recent versions require chimera. Refined is designed with dgVoodoo2 and CEnshine in mind to fix even more effects, but these are tools and modifications can't be used with HaloCEVR. CEnshine is for Custom Edition only which HaloCEVR does not currently support.
+Recent versions require chimera. Refined is designed with dgVoodoo2 and CEnshine in mind to fix even more effects, but these are tools and modifications can't be used with HaloCEVR. 
 
 1) Download and extract the latest distribution for Retail, not Custom Edition
-2) Backup all files in \Halo\maps\
-3) Replace files in \Halo\maps\
-4) (Optional) Read \Halo\maps\info.txt
+2) Backup all files in Halo\maps\ by copying them to a different location
+3) Replace files in Halo\maps\
+4) (Optional) Read Halo\maps\info.txt
 
 Download, updated as of the time of writing:
 https://www.proxeninc.net/Halo/Refined/
