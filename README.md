@@ -82,7 +82,7 @@ Chimera passively increases animation framerate, corrects some fog, boosts polyg
 
 See installation instructions above. If you installed chimera, you can execute commands to reduce pop-in and low detail models (lods), turn on anisotrophic filtering for sharper textures on world geometry, and turn on reverberation for first person sounds (requires dsoal). These are not turned on by default. There are several ways to do this. Please read about all 3 methods before proceeding.
 
-To launch the game in flat mode and use the console with the tilde ~ key, you can temporarily rename d3d9.dll to d3d9aa.dll. However executed console commands are saved and read from/to a text file, which you can navigate to and edit directly instead.
+To launch the game in flat mode and use the console with the tilde ~ key, you can disable the VR mod by temporarily renaming d3d9.dll to something like d3d9aa.dll. However executed console commands are saved and read from/to a text file, which you can navigate to and edit directly instead.
 
 Go to (Your User Folder)\Documents\My Games\Halo\chimera\preferences.txt, and add these commands.
 ```
