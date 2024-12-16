@@ -52,6 +52,73 @@ A full VR conversion mod for the original 2003 PC edition of _Halo: Combat Evolv
 1. Go play the MCC version instead
 2. Delete/rename the d3d9.dll you placed in the same directory as the halo executable (this contains all of the mod code and is only pretending to be d3d9 to trick halo into loading it).  For example, you could rename it to d3d9-backup.dll.
 
+## Graphical and Audio Enhancements, Restoration
+### dsoal 
+
+Dsoal allows you to turn on hardware acceleration and EAX in Halo without said hardware to enjoy environmental sound effects like reverb and HRTF(head-related transfer function), providing realistic, locatable 3D sound with high accuracy for virtual reality. Highly recommended even for low fidelity audio such as on Quest. (Notice: Doesn't currently work on first-person sounds)
+
+1) Download and extract https://github.com/ThreeDeeJay/dsoal/releases/download/0.9.6/DSOAL+HRTF.zip 
+2) Open the \Win32\ folder
+3) Copy & paste all files (alsoft.ini, dsoal-aldrv.dll, dsound.dll) in your \Halo\halo.exe folder.
+4) Edit and paste these settings into alsoft.ini:
+```
+ [general]
+channels=stereo
+frequency=48000
+stereo-mode=headphones
+cf_level=0
+sources=512
+sample-type=float32
+hrtf=true
+period_size=960
+hrtf-mode = full
+
+[reverb]
+boost=-6
+```
+### chimera
+
+Chimera passively increases animation framerate, corrects some fog, boosts polygon limit, object limit, and draw distance. Highly recommended for comfort and bug fixes alone.
+
+See installation instructions above. If you installed chimera, you can execute commands to reduce pop-in and low detail models (lods), turn on anisotrophic filtering for sharper textures on world geometry, and turn on reverberation for first person sounds (requires dsoal). These are not turned on by default. There are several ways to do this. Please read about all 3 methods before proceeding.
+
+To launch the game in flat mode and use the console with the tilde ~ key, you can temporarily rename d3d9.dll to d3d9aa.dll. However executed console commands are saved and read from/to a text file, which you can navigate to and edit directly instead.
+
+Go to (Your User Folder)\Documents\My Games\Halo\chimera\preferences.txt, and add these commands.
+```
+chimera_model_detail 8
+chimera_af 1
+chimera_fp_reverb 1
+```
+If you want these preferences to be portable and travel with your Halo installation:
+
+1) Create a new text file named chimera_preferences.txt in the \Halo\ folder along side chimera.ini
+2) edit \Halo\chimera.ini
+3) Do not paste the commands into chimera.ini, some of them will not work
+5) chimera.ini comments(disables) lines with a semi-colon ```;```. Find ```exec=``` and remove any semi-colon on that line, such as ```;exec=```
+6) set the value to ```exec=./chimera_preferences.txt```
+7) paste the commands listed above into chimera_preferences.txt
+
+### Halo Refined
+
+When Halo was ported to PC in 2003, many graphical effects present in the original Xbox version were broken and outdated assets were accidentally used. Halo Refined is a community project that fixes many issues such as invisible bumpmapping, missing specular, broken transparency effects, etc and provides some faithful high resolution assets by replacing Halo's map files.
+
+Halo Refined is poorly tested with HaloCEVR but seems to work, recommended for experimental use. Please keep back ups of your original .map files before installing. If you are having any issues with HaloCEVR while using Refined's maps, restore the original files and retest before reporting your issue.
+
+Recent versions require chimera. Refined is designed with dgVoodoo2 and CEnshine in mind to fix even more effects, but these are tools and modifications can't be used with HaloCEVR. CEnshine is for Custom Edition only which HaloCEVR does not currently support.
+
+1) Download and extract the latest distribution for Retail, not Custom Edition
+2) Backup all files in \Halo\maps\
+3) Replace files in \Halo\maps\
+4) (Optional) Read \Halo\maps\info.txt
+
+Download, updated as of the time of writing:
+https://www.proxeninc.net/Halo/Refined/
+
+Mirror, outdated as of the time of writing:
+http://vaporeon.io/hosted/halo/refined/
+
+
 ## FAQ
 ### Why the gearbox port and not MCC?
 Short answer: skill issue.
@@ -116,44 +183,6 @@ Stand up straight (or sit up if playing seated) and hold down the menu button fo
 By default you crouch in real life. If you do not prefer that, change the option in the config.txt file in the VR folder, specifically set CrouchHeight = -1.0 and bind a button to crouch in the SteamVR Input menu.
 ### I wish (insert action) was bound to a different key
 Use SteamVR input settings to change your bindings to whatever you want. You can also search for other peoples' bindings for your controller in the bindings menu.  You can learn how to use SteamVR input by watching this video by HoriZon, who also has bindings available for Quest controllers: https://www.youtube.com/watch?v=rdlCu7IjbGI.  It's useful in a bunch of games!
-### Textures seem to pop in too much.  Any fix?
-Try using chimera (highly recommended anyway) and create a file called chimera_preferences.txt in your Halo directory.  In that text file, insert the following lines:
-```
-chimera_model_detail 8
-chimera_lod 1
-```
-Then in your chimera.ini file, find the line that starts with ;exec= and change it to:
-```
-exec=path\to\your\chimera_preferences.txt
-```
-Example:
-```
-exec=C:\HaloVRMod\Halo\chimera_preferences.txt
-```
-Note that deleting the semicolon is what makes this line active.  It's telling chimera to load the text commands you wrote that control the level of detail. If others share chimera commands in the future you can place them here.
-You can test that the commands are being executed by changing the name of the VR mod dll file, d3d9.dll, to something else temporarily and booting the game up in flat screen.  The commands will flash on the screen if this step worked.
-#### How can I make sounds even more immersive?
-Check out DSOAL for 3D sound ingame: https://github.com/ThreeDeeJay/dsoal/releases/tag/0.9.6, specific download zip link: https://github.com/ThreeDeeJay/dsoal/releases/download/0.9.6/DSOAL+HRTF.zip 
--Extract to a location on your computer. Inside the zip, find the Win32 folder, open it, and copy and paste all Win32 files into your Halo folder
--One of the files will be called alsoft.ini which is a configuration file for DSOAL.
-
-Path: Halo>alsoft.ini
-
-Copy and Paste into alsoft.ini:
-```
- [general]
-channels=stereo
-frequency=48000
-stereo-mode=headphones
-cf_level=0
-sources=512
-sample-type=float32
-hrtf=true
-period_size=960
-
-[reverb]
-boost=-6
-```
 ### I know C++ coding or will learn to help develop the mod.  How do I help?
 Thank you! See compiling source directions below and submit a Pull Request on Github explaining the changes you have made and impact on other files.  Be sure to thoroughly test any changes before submitting them. After others and I test the changes, they may be incorporated into the mod release.
 
