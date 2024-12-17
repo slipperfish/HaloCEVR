@@ -28,7 +28,7 @@ A full VR conversion mod for the original 2003 PC edition of _Halo: Combat Evolv
 
 ## Known issues
 * Game sometimes isn't the focused window on launch and inputs/sounds may break when the game is unfocused
-* First stage of the tutorial ("look around") doesn't detect headset movement, wiggle the mouse and you should get passed it
+* First stage of the tutorial ("look around") doesn't detect headset movement, wiggle the mouse (physically or via steamvr's desktop view) and you should get past it
 * Camera behaves weirdly briefly when entering/exiting vehicles
 * Reloading a checkpoint made while in a vehicle can mess with the camera position, get out and in again to fix it
 * Melee and interact use head aiming rather than controller aiming
@@ -39,9 +39,9 @@ A full VR conversion mod for the original 2003 PC edition of _Halo: Combat Evolv
 * Some people report a minor distortion or warping effect when tilting their head side to side.
 
 ## Installation
-0. Install _Halo: Combat Evolved for PC_ (not Custom Edition) using an original installation CD + product key.  IMPORTANT: Install in a directory OTHER THAN Program Files (example: C:\HaloVRMod\Halo). Installing in Program Files potentailly causes numerous permissions-related issues.
-1. Install the 1.10 patch for PC (not Custom Edition)
-2. (Optional) Install [chimera](https://github.com/SnowyMouse/chimera) (fixes a few bugs/issues such as entities moving at 30fps).  Grab the RELEASE files from [releases](https://github.com/SnowyMouse/chimera/releases/download/1.0.0r1021/chimera-1.0.0r1021.10144368.7z).  Copy chimera.ini, strings.dll, and the fonts folder from the chimera zip after unzipping and place into your halo game folder in the same location as halo.exe.
+0. Install _Halo: Combat Evolved for PC_ (not Custom Edition) using an original installation CD + product key.  **IMPORTANT: Install in a directory OTHER THAN Program Files (example: C:\HaloVRMod\Halo). Installing in Program Files potentailly causes numerous permissions-related issues**.
+1. Install the 1.0.10 patch for PC (not Custom Edition)
+2. (Optional) Install [chimera](https://github.com/SnowyMouse/chimera) (fixes a few bugs/issues such as entities moving at 30fps).  Grab the RELEASE files from [releases](https://github.com/SnowyMouse/chimera/releases).  Copy chimera.ini, strings.dll, and the fonts folder from the chimera zip after unzipping and place into your halo game folder in the same location as halo.exe.
 3. If using chimera: open chimera.ini, locate the "Font Override Settings" section, and change enabled=1 to enabled=0 (failing to do this will break many UI elements in VR)
 4. Download the latest version of this mod from the [releases page](../../releases)
 5. Extract HaloCEVR.zip and place the files in the same directory as the halo executable (You should see a VR folder, openvr_api.dll and d3d9.dll if done correctly - if you do not see these files your antivirus may be interfering)
@@ -81,7 +81,7 @@ hrtf-mode = full
 [reverb]
 boost=-6
 ```
-### chimera
+### Chimera
 
 Chimera increases animation framerate, corrects fog, enables anisotropic filtering, enables reverb for first person sounds (requires dsoal), and boosts polygon count, object limit, and draw distance. But is highly recommended for bug fixes and QOL changes alone.
 
@@ -134,13 +134,13 @@ As you may guess, this is hard. By focusing on an older title I have a simpler p
 ### Where do I even get a CD copy in \<current year\>? Can I use a cracked version?
 No.
 
-This mod is intended to only be used with legitimate copies of Halo: Combat Evolved with the official 1.10 patch. Fortunately the product keys aren't single use, so if you can find a second hand copy (or a friend willing to lend the copy they happened to archive 20 years ago) you can use that without worrying about the key being invalid. 
+This mod is intended to only be used with legitimate copies of Halo: Combat Evolved with the official 1.10 patch. Fortunately the product keys aren't single use, so if you can find a second hand copy (or a friend/person on the _internet_ willing to lend the copy they happened to _archive_ 20 years ago) you can use that without worrying about the key being invalid. 
 ### Does multiplayer work?
 This mod was designed for singleplayer, it is untested in multiplayer and as such some features, such as weapon aiming, may not function or only work for the host.
 
 Also it does not work in Co-op because this version of the game does not have that mode.
 ### Does this work with Custom Edition?
-No.
+Not currently.
 ### Does this work with MCC Edition?
 No.
 ### Does this work with SPV3?
