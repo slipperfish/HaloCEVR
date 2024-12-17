@@ -87,11 +87,11 @@ See installation instructions above. If you installed chimera, there is an enhan
 
 * You can bring up the in-game console with tilde ~ key, but it helps to disable the VR mod by temporarily by renaming d3d9.dll to something like d3d9aa.dll so you can see the console. 
 
-* Executed console commands are saved and read from a text file. You can create this file yourself:
+* Or, executed console commands are saved and read from a text file. You can create this file yourself:
 1) Navigate to (Your User Folder)\Documents\My Games\Halo\chimera\ and create a text file named preferences.txt
 2) Edit your preferences.txt and add ```chimera_model_detail 8```
 
-* If you want this command and other preferences to be portable and travel with your Halo installation:
+* Or, If you want this command and other preferences to be portable and travel with your Halo installation:
 
 1) Create a new text file named chimera_preferences.txt in the Halo\ folder alongside chimera.ini
 2) Edit Halo\chimera.ini
