@@ -55,7 +55,7 @@ A full VR conversion mod for the original 2003 PC edition of _Halo: Combat Evolv
 ## Installing Graphical and Audio Enhancements
 ### dsoal 
 
-Dsoal allows you to turn on hardware acceleration and EAX in Halo without requisite hardware to use environmental sound effects like reverb and HRTF, providing realistic, locatable 3D sound with high accuracy for virtual reality. Highly recommended, you do not need high-fidelity headphones to enjoy this.
+Dsoal allows you to turn on hardware acceleration and EAX in Halo without requisite hardware to use environmental sound effects like reverb and HRTF, providing realistic, locatable 3D sound with high accuracy for virtual reality. Highly recommended, and you do not need high-fidelity headphones to enjoy this.
 
 Note: Chimera is required for reverb on first person sounds. First person sounds have no stereo/HRTF/location effects.
 
