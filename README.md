@@ -63,7 +63,9 @@ Note: Chimera is required for reverb on first person sounds. First person sounds
 2) Open the DSOAL+HRTF\Win32\ folder.
 3) Copy & paste all files from Win32\ (alsoft.ini, dsoal-aldrv.dll, dsound.dll) into your Halo\ install folder where halo.exe is located.
 5) Edit alsoft.ini and copy & paste the settings shown below:
-6) Launch Halo and go to Settings >> Audio Setup. Make sure Hardware Acceleration is set to Yes and Environmental Sound to EAX.
+6) ```hrtf-mode = full``` may or may not be CPU intensive, remove if you experience new performance issues.
+7) Launch Halo and go to Settings >> Audio Setup. Make sure Hardware Acceleration is set to Yes and Environmental Sound to EAX.
+
 ```
 [general]
 channels=stereo
