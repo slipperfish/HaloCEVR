@@ -916,7 +916,7 @@ void Hooks::P_EnableUIAlphaWrite()
 {
 	// By default the UI doesn't write to the alpha channel (since its being drawn last + straight onto the main image)
 	// We need the alpha value in order to have transparency in floating UI elements
-	SetByte(o.TextureAlphaWrite.Address + 0x4a, 0xf);
+	SetByte(o.TextureAlphaWrite.Address + 0x19, 0xf);
 	SetByte(o.TextAlphaWrite.Address + 0x72, 0xf);
 }
 
