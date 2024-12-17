@@ -52,7 +52,7 @@ A full VR conversion mod for the original 2003 PC edition of _Halo: Combat Evolv
 1. Go play the MCC version instead
 2. Delete/rename the d3d9.dll you placed in the same directory as the halo executable (this contains all of the mod code and is only pretending to be d3d9 to trick halo into loading it).  For example, you could rename it to d3d9-backup.dll.
 
-## Graphical and Audio Enhancements, Restoration
+## Installing Graphical and Audio Enhancements
 ### dsoal 
 
 Dsoal allows you to turn on hardware acceleration and EAX in Halo without requisite hardware to use environmental sound effects like reverb and HRTF, providing realistic, locatable 3D sound with high accuracy for virtual reality. Highly recommended, you do not need high-fidelity headphones to enjoy this.
