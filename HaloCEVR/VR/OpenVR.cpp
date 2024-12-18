@@ -5,18 +5,20 @@
 #include "OpenVR.h"
 #include "../Logger.h"
 #include "../Game.h"
+#include "../Profiler.h"
 #include "../Helpers/DX9.h"
 #include "../Helpers/Renderer.h"
 #include "../Helpers/RenderTarget.h"
 #include "../Helpers/Camera.h"
 #include "../Helpers/Cutscene.h"
-#include "../Helpers/Menus.h"
 
 #pragma comment(lib, "openvr_api.lib")
 #pragma comment(lib, "d3d11.lib")
 
 void OpenVR::Init()
 {
+	VR_PROFILE_SCOPE(OpenVR_Init);
+
 	Logger::log << "[OpenVR] Initialising OpenVR" << std::endl;
 
 	vr::EVRInitError initError = vr::VRInitError_None;
@@ -162,6 +164,8 @@ void OpenVR::Init()
 
 void OpenVR::OnGameFinishInit()
 {
+	VR_PROFILE_SCOPE(OpenVR_OnGameFinishInit);
+
 	HRESULT result = D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, NULL, NULL, D3D11_SDK_VERSION, &d3dDevice, NULL, NULL);
 
 	if (FAILED(result))
@@ -222,6 +226,8 @@ void OpenVR::Shutdown()
 
 void OpenVR::CreateTexAndSurface(int index, UINT Width, UINT Height, DWORD Usage, D3DFORMAT Format)
 {
+	VR_PROFILE_SCOPE(OpenVR_CreateTexAndSurface);
+
 	HANDLE sharedHandle = nullptr;
 
 	// Create texture on game
@@ -267,12 +273,16 @@ void OpenVR::CreateTexAndSurface(int index, UINT Width, UINT Height, DWORD Usage
 
 void OpenVR::UpdatePoses()
 {
+	VR_PROFILE_SCOPE(OpenVR_UpdatePoses);
+
 	if (!vrCompositor)
 	{
 		return;
 	}
 
+	VR_PROFILE_START(OpenVR_WaitGetPoses);
 	vrCompositor->WaitGetPoses(renderPoses, vr::k_unMaxTrackedDeviceCount, gamePoses, vr::k_unMaxTrackedDeviceCount);
+	VR_PROFILE_STOP(OpenVR_WaitGetPoses);
 
 	UpdateSkeleton(ControllerRole::Left);
 	UpdateSkeleton(ControllerRole::Right);
@@ -307,6 +317,8 @@ void OpenVR::UpdatePoses()
 
 void OpenVR::UpdateSkeleton(ControllerRole hand)
 {
+	VR_PROFILE_SCOPE(OpenVR_UpdateSkeleton);
+
 	if (!vrInput)
 	{
 		return;
@@ -352,6 +364,8 @@ void OpenVR::UpdateSkeleton(ControllerRole hand)
 
 void OpenVR::UpdatePose(ControllerRole hand)
 {
+	VR_PROFILE_SCOPE(OpenVR_UpdatePose);
+
 	if (!vrInput || !bHasValidTipPoses)
 	{
 		return;
@@ -377,6 +391,8 @@ void OpenVR::PreDrawFrame(Renderer* renderer, float deltaTime)
 
 void OpenVR::PositionOverlay()
 {
+	VR_PROFILE_SCOPE(OpenVR_PositionOverlay);
+
 	// Get the HMD's position and rotation
 	vr::HmdMatrix34_t mat = renderPoses[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking;
 	vr::HmdVector3_t position;
@@ -407,12 +423,15 @@ void OpenVR::PositionOverlay()
 
 void OpenVR::PostDrawFrame(Renderer* renderer, float deltaTime)
 {
+	VR_PROFILE_SCOPE(OpenVR_PostDrawFrame);
+
 	if (!vrCompositor)
 	{
 		return;
 	}
 
 	// Wait for frame to finish rendering
+	VR_PROFILE_START(OpenVR_QueryD3D);
 	IDirect3DQuery9* pEventQuery = nullptr;
 	Helpers::GetDirect3DDevice9()->CreateQuery(D3DQUERYTYPE_EVENT, &pEventQuery);
 	if (pEventQuery != nullptr)
@@ -421,7 +440,9 @@ void OpenVR::PostDrawFrame(Renderer* renderer, float deltaTime)
 		while (pEventQuery->GetData(nullptr, 0, D3DGETDATA_FLUSH) != S_OK);
 		pEventQuery->Release();
 	}
+	VR_PROFILE_STOP(OpenVR_QueryD3D);
 
+	VR_PROFILE_START(OpenVR_SubmitEyes);
 	vr::Texture_t leftEye { (void*)vrRenderTexture[0], vr::TextureType_DirectX, vr::ColorSpace_Auto};
 	vr::EVRCompositorError error = vrCompositor->Submit(vr::Eye_Left, &leftEye, &textureBounds[0], vr::Submit_Default);
 
@@ -437,6 +458,7 @@ void OpenVR::PostDrawFrame(Renderer* renderer, float deltaTime)
 	{
 		Logger::log << "[OpenVR] Could not submit right eye texture: " << error << std::endl;
 	}
+	VR_PROFILE_STOP(OpenVR_SubmitEyes);
 
 	PositionOverlay();
 
@@ -448,11 +470,14 @@ void OpenVR::PostDrawFrame(Renderer* renderer, float deltaTime)
 		Logger::log << "[OpenVR] Could not submit ui texture: " << oError << std::endl;
 	}
 
+	VR_PROFILE_START(OpenVR_PostPresentHandoff);
 	vrCompositor->PostPresentHandoff();
+	VR_PROFILE_STOP(OpenVR_PostPresentHandoff);
 }
 
 void OpenVR::UpdateCameraFrustum(CameraFrustum* frustum, int eye)
 {
+	VR_PROFILE_SCOPE(OpenVR_UpdateCameraFrustum);
 	frustum->fov = fov;
 
 	Matrix4 eyeMatrix = GetHMDMatrixPoseEye((vr::Hmd_Eye) eye);
@@ -546,6 +571,7 @@ float OpenVR::GetYawOffset()
 
 Matrix4 OpenVR::GetHMDTransform(bool bRenderPose)
 {
+	VR_PROFILE_SCOPE(OpenVR_GetHMDTransform);
 	if (bRenderPose)
 	{
 		return ConvertSteamVRMatrixToMatrix4(renderPoses[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking).translate(-positionOffset).rotateZ(-yawOffset);
@@ -558,6 +584,7 @@ Matrix4 OpenVR::GetHMDTransform(bool bRenderPose)
 
 Matrix4 OpenVR::GetRawControllerTransform(ControllerRole role, bool bRenderPose)
 {
+	VR_PROFILE_SCOPE(OpenVR_GetRawControllerTransform);
 	vr::TrackedDeviceIndex_t controllerIndex = vrSystem->GetTrackedDeviceIndexForControllerRole(role == ControllerRole::Left ? vr::TrackedControllerRole_LeftHand : vr::TrackedControllerRole_RightHand);
 
 	Matrix4 outMatrix;
@@ -574,6 +601,7 @@ Matrix4 OpenVR::GetRawControllerTransform(ControllerRole role, bool bRenderPose)
 
 Matrix4 OpenVR::GetControllerTransformInternal(ControllerRole role, int bone, bool bRenderPose)
 {
+	VR_PROFILE_SCOPE(OpenVR_GetControllerTransformInternal);
 	if (!vrSystem)
 	{
 		return Matrix4();
@@ -634,6 +662,7 @@ Matrix4 OpenVR::GetControllerBoneTransform(ControllerRole role, int bone, bool b
 
 Vector3 OpenVR::GetControllerVelocity(ControllerRole role, bool bRenderPose)
 {
+	VR_PROFILE_SCOPE(OpenVR_GetControllerVelocity);
 	if (!vrSystem)
 	{
 		return Vector3();
@@ -660,6 +689,8 @@ Vector3 OpenVR::GetControllerVelocity(ControllerRole role, bool bRenderPose)
 
 bool OpenVR::TryGetControllerFacing(ControllerRole role, Vector3& outDirection)
 {
+	VR_PROFILE_SCOPE(OpenVR_TryGetControllerFacing);
+
 	// todo: only get once, cache offset, use that
 	if (bHasValidTipPoses)
 	{
@@ -708,6 +739,8 @@ IDirect3DTexture9* OpenVR::GetScopeTexture()
 
 void OpenVR::SetMouseVisibility(bool bIsVisible)
 {
+	VR_PROFILE_SCOPE(OpenVR_SetMouseVisibility);
+
 	if (!vrOverlay)
 	{
 		return;
@@ -731,6 +764,8 @@ void OpenVR::SetMouseVisibility(bool bIsVisible)
 
 void OpenVR::SetCrosshairTransform(Matrix4& newTransform)
 {
+	VR_PROFILE_SCOPE(OpenVR_SetCrosshairTransform);
+
 	// This should be moved into game code really
 
 	Vector3 pos = (newTransform * Vector3(0.0f, 0.0f, 0.0f)) * Game::instance.MetresToWorld(1.0f) + Helpers::GetCamera().position;
@@ -753,6 +788,8 @@ void OpenVR::SetCrosshairTransform(Matrix4& newTransform)
 
 void OpenVR::UpdateInputs()
 {
+	VR_PROFILE_SCOPE(OpenVR_UpdateInputs);
+
 	vr::EVRInputError error = vrInput->UpdateActionState(actionSets, sizeof(vr::VRActiveActionSet_t), 1);
 
 	if (error != vr::VRInputError_None)
