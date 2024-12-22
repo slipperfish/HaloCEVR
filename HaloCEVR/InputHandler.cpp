@@ -85,8 +85,6 @@ void InputHandler::UpdateInputs(bool bInVehicle)
 
 	// Bindings with gestures
 	InputBindingID SwitchWeaponsBinding = Game::instance.bLeftHanded ? OffhandSwitchWeapons : SwitchWeapons;
-	InputBindingID SwapWeaponHandsBinding = Game::instance.bLeftHanded ? OffhandSwapWeaponHands : SwapWeaponHands;
-	InputBindingID TwoHandGripBinding = Game::instance.bLeftHanded ? OffhandTwoHandGrip : TwoHandGrip;
 
 	// Controls which will swap hands
 	bool bSwitchGrenadesChanged;
@@ -589,7 +587,7 @@ void InputHandler::UpdateTwoHandedHold(float handDistance, bool handsWithinSwapW
 {
 	IVR* vr = Game::instance.GetVR();
 
-	InputBindingID twoHandGripBinding = Game::instance.bLeftHanded ? OffhandSwitchWeapons : SwitchWeapons;
+	InputBindingID twoHandGripBinding = Game::instance.bLeftHanded ? OffhandTwoHandGrip : TwoHandGrip;
 
 	bool bGripChanged;
 	bool bIsGripping = vr->GetBoolInput(twoHandGripBinding, bGripChanged);
