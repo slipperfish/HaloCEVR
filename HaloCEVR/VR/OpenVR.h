@@ -83,7 +83,8 @@ protected:
 	bool bMouseDown;
 
 	vr::VRActiveActionSet_t actionSets[1];
-
+	void SetActiveActionSet(const std::string& actionSetName); // New method to switch action sets
+	
 	vr::VROverlayHandle_t uiOverlay;
 
 	vr::TrackedDevicePose_t gamePoses[vr::k_unMaxTrackedDeviceCount];

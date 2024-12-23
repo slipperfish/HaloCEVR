@@ -5,8 +5,8 @@
 #include "Helpers/Menus.h"
 
 
-#define RegisterBoolInput(x) x = vr->RegisterBoolInput("default", #x);
-#define RegisterVector2Input(x) x = vr->RegisterVector2Input("default", #x);
+#define RegisterBoolInput(set, x) x = vr->RegisterBoolInput(set, #x);
+#define RegisterVector2Input(set, x) x = vr->RegisterVector2Input(set, #x);
 #define ApplyBoolInput(x) controls.##x = vr->GetBoolInput(x) ? 127 : 0;
 #define ApplyImpulseBoolInput(x) controls.##x = vr->GetBoolInput(x, bHasChanged) && bHasChanged ? 127 : 0;
 
@@ -14,36 +14,36 @@ void InputHandler::RegisterInputs()
 {
 	IVR* vr = Game::instance.GetVR();
 
-	RegisterBoolInput(Jump);
-	RegisterBoolInput(SwitchGrenades);
-	RegisterBoolInput(OffhandSwitchGrenades);
-	RegisterBoolInput(Interact);
-	RegisterBoolInput(OffhandInteract);
-	RegisterBoolInput(SwitchWeapons);
-	RegisterBoolInput(OffhandSwitchWeapons);
-	RegisterBoolInput(Melee);
-	RegisterBoolInput(Flashlight);
-	RegisterBoolInput(Grenade);
-	RegisterBoolInput(OffhandGrenade);
-	RegisterBoolInput(Fire);
-	RegisterBoolInput(OffhandFire);
-	RegisterBoolInput(MenuForward);
-	RegisterBoolInput(MenuBack);
-	RegisterBoolInput(OffhandMenuBack);
-	RegisterBoolInput(Crouch);
-	RegisterBoolInput(Zoom);
-	RegisterBoolInput(OffhandZoom);
-	RegisterBoolInput(Reload);
-	RegisterBoolInput(OffhandReload);
-	RegisterBoolInput(TwoHandGrip);
-	RegisterBoolInput(OffhandTwoHandGrip);
-	RegisterBoolInput(SwapWeaponHands);
-	RegisterBoolInput(OffhandSwapWeaponHands);
+	const char* actionSet = Game::instance.bLeftHanded ? "lefthand" : "default";
+	
+	RegisterBoolInput(actionSet, Jump);
+	RegisterBoolInput("default", SwitchGrenades);
+	RegisterBoolInput("lefthand", OffhandSwitchGrenades);
+	RegisterBoolInput("default", Interact);
+	RegisterBoolInput("lefthand", OffhandInteract);
+	RegisterBoolInput("default", SwitchWeapons);
+	RegisterBoolInput("lefthand", OffhandSwitchWeapons);
+	RegisterBoolInput(actionSet, Melee);
+	RegisterBoolInput(actionSet, Flashlight);
+	RegisterBoolInput("default", Grenade);
+	RegisterBoolInput("lefthand", OffhandGrenade);
+	RegisterBoolInput("default", Fire);
+	RegisterBoolInput("lefthand", OffhandFire);
+	RegisterBoolInput("default", MenuForward);
+	RegisterBoolInput("default", MenuBack);
+	RegisterBoolInput("lefthand", OffhandMenuBack);
+	RegisterBoolInput(actionSet, Crouch);
+	RegisterBoolInput("default", Zoom);
+	RegisterBoolInput("lefthand", OffhandZoom);
+	RegisterBoolInput("default", Reload);
+	RegisterBoolInput("lefthand", OffhandReload);
+	RegisterBoolInput("default", TwoHandGrip);
+	RegisterBoolInput("lefthand", OffhandTwoHandGrip);
+	RegisterBoolInput("default", SwapWeaponHands);
+	RegisterBoolInput("lefthand", OffhandSwapWeaponHands);
 
-	RegisterVector2Input(Move);
-	RegisterVector2Input(Look);
-
-	Game::instance.bLeftHanded = Game::instance.c_LeftHanded->Value();
+	RegisterVector2Input(actionSet, Move);
+	RegisterVector2Input(actionSet, Look);
 }
 
 float AngleBetweenVector2(const Vector2& v1, const Vector2& v2)
@@ -568,8 +568,10 @@ void InputHandler::CheckSwapWeaponHands()
 
     if (!Game::instance.bLeftHanded)
     {
-		offHandGrabbedWeapon = bIsSwitchHandsPressed && bWeaponHandChanged && !bIsOffhandSwitchHandsPressed;
-		dominantHandReleasedWeapon = bIsSwitchHandsPressed && !bIsOffhandSwitchHandsPressed && bOffhandWeaponHandChanged;
+		//offHandGrabbedWeapon = bIsSwitchHandsPressed && bWeaponHandChanged && !bIsOffhandSwitchHandsPressed;
+		//dominantHandReleasedWeapon = bIsSwitchHandsPressed && !bIsOffhandSwitchHandsPressed && bOffhandWeaponHandChanged;
+		offHandGrabbedWeapon = bIsSwitchHandsPressed && bWeaponHandChanged;
+		dominantHandReleasedWeapon = bIsOffhandSwitchHandsPressed && bOffhandWeaponHandChanged;
     }
     else
     {
@@ -580,6 +582,8 @@ void InputHandler::CheckSwapWeaponHands()
 	if (offHandGrabbedWeapon || dominantHandReleasedWeapon)
     {
         Game::instance.bLeftHanded = !Game::instance.bLeftHanded;
+		// Update the bindings
+		RegisterInputs();
     }
 }
 

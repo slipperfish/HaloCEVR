@@ -44,37 +44,11 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/default/in/OffhandTwoHandGrip"
-                        }
-                    },
-                    "mode": "button",
-                    "path": "/user/hand/right/input/grip",
-                    "parameters": {
-                        "click_activate_threshold": 0.8,
-                        "click_deactivate_threshold": 0.7
-                    }
-                },
-                {
-                    "inputs": {
-                        "click": {
                             "output": "/actions/default/in/SwitchWeapons"
                         }
                     },
                     "mode": "button",
                     "path": "/user/hand/right/input/grip",
-                    "parameters": {
-                        "click_activate_threshold": 0.8,
-                        "click_deactivate_threshold": 0.7
-                    }
-                },
-                {
-                    "inputs": {
-                        "click": {
-                            "output": "/actions/default/in/OffhandSwitchWeapons"
-                        }
-                    },
-                    "mode": "button",
-                    "path": "/user/hand/left/input/grip",
                     "parameters": {
                         "click_activate_threshold": 0.8,
                         "click_deactivate_threshold": 0.7
@@ -119,31 +93,11 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/default/in/OffhandMenuBack"
-                        }
-                    },
-                    "mode": "button",
-                    "path": "/user/hand/right/input/b",
-                    "parameters": {}
-                },
-                {
-                    "inputs": {
-                        "click": {
                             "output": "/actions/default/in/SwitchGrenades"
                         }
                     },
                     "mode": "button",
                     "path": "/user/hand/left/input/x",
-                    "parameters": {}
-                },
-                {
-                    "inputs": {
-                        "click": {
-                            "output": "/actions/default/in/offhandSwitchGrenades"
-                        }
-                    },
-                    "mode": "button",
-                    "path": "/user/hand/right/input/a",
                     "parameters": {}
                 },
                 {
@@ -159,31 +113,11 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/default/in/offhandGrenade"
-                        }
-                    },
-                    "mode": "button",
-                    "path": "/user/hand/left/input/x",
-                    "parameters": {}
-                },
-                {
-                    "inputs": {
-                        "click": {
                             "output": "/actions/default/in/Reload"
                         }
                     },
                     "mode": "button",
                     "path": "/user/hand/right/input/b",
-                    "parameters": {}
-                },
-                {
-                    "inputs": {
-                        "click": {
-                            "output": "/actions/default/in/offhandReload"
-                        }
-                    },
-                    "mode": "button",
-                    "path": "/user/hand/left/input/y",
                     "parameters": {}
                 },
                 {
@@ -199,16 +133,6 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/default/in/OffhandInteract"
-                        }
-                    },
-                    "mode": "button",
-                    "path": "/user/hand/left/input/y",
-                    "parameters": {}
-                },
-                {
-                    "inputs": {
-                        "click": {
                             "output": "/actions/default/in/Zoom"
                         }
                     },
@@ -219,31 +143,11 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/default/in/offhandZoom"
-                        }
-                    },
-                    "mode": "button",
-                    "path": "/user/hand/right/input/trigger",
-                    "parameters": {}
-                },
-                {
-                    "inputs": {
-                        "click": {
                             "output": "/actions/default/in/Fire"
                         }
                     },
                     "mode": "button",
                     "path": "/user/hand/right/input/trigger",
-                    "parameters": {}
-                },
-                {
-                    "inputs": {
-                        "click": {
-                            "output": "/actions/default/in/OffhandFire"
-                        }
-                    },
-                    "mode": "button",
-                    "path": "/user/hand/left/input/trigger",
                     "parameters": {}
                 },
                 {
@@ -277,6 +181,167 @@
                     "path": "/user/hand/right/input/skeleton/right"
                 }
             ]
+        },
+        "/actions/lefthand": {
+            "haptics": [],
+            "poses": [],
+            "sources": [
+                {
+                    "inputs": {
+                        "north": {
+                            "output": "/actions/lefthand/in/Jump"
+                        }
+                    },
+                    "mode": "dpad",
+                    "path": "/user/hand/right/input/joystick",
+                    "parameters": {
+                        "sub_mode": "touch"
+                    }
+                },
+                {
+                    "inputs": {
+                        "click": {
+                            "output": "/actions/lefthand/in/OffhandTwoHandGrip"
+                        }
+                    },
+                    "mode": "button",
+                    "path": "/user/hand/right/input/grip",
+                    "parameters": {
+                        "click_activate_threshold": 0.8,
+                        "click_deactivate_threshold": 0.7
+                    }
+                },
+                {
+                    "inputs": {
+                        "click": {
+                            "output": "/actions/lefthand/in/OffhandSwitchWeapons"
+                        }
+                    },
+                    "mode": "button",
+                    "path": "/user/hand/left/input/grip",
+                    "parameters": {
+                        "click_activate_threshold": 0.8,
+                        "click_deactivate_threshold": 0.7
+                    }
+                },
+                {
+                    "inputs": {
+                        "click": {
+                            "output": "/actions/lefthand/in/SwapWeaponHands"
+                        }
+                    },
+                    "mode": "button",
+                    "path": "/user/hand/left/input/grip",
+                    "parameters": {
+                        "click_activate_threshold": 0.8,
+                        "click_deactivate_threshold": 0.7
+                    }
+                },
+                {
+                    "inputs": {
+                        "click": {
+                            "output": "/actions/lefthand/in/OffhandSwapWeaponHands"
+                        }
+                    },
+                    "mode": "button",
+                    "path": "/user/hand/right/input/grip",
+                    "parameters": {
+                        "click_activate_threshold": 0.8,
+                        "click_deactivate_threshold": 0.7
+                    }
+                },
+                {
+                    "inputs": {
+                        "click": {
+                            "output": "/actions/lefthand/in/OffhandMenuBack"
+                        }
+                    },
+                    "mode": "button",
+                    "path": "/user/hand/right/input/b",
+                    "parameters": {}
+                },
+                {
+                    "inputs": {
+                        "click": {
+                            "output": "/actions/lefthand/in/offhandSwitchGrenades"
+                        }
+                    },
+                    "mode": "button",
+                    "path": "/user/hand/right/input/a",
+                    "parameters": {}
+                },
+                {
+                    "inputs": {
+                        "click": {
+                            "output": "/actions/lefthand/in/offhandGrenade"
+                        }
+                    },
+                    "mode": "button",
+                    "path": "/user/hand/left/input/x",
+                    "parameters": {}
+                },
+                {
+                    "inputs": {
+                        "click": {
+                            "output": "/actions/lefthand/in/offhandReload"
+                        }
+                    },
+                    "mode": "button",
+                    "path": "/user/hand/left/input/y",
+                    "parameters": {}
+                },
+                {
+                    "inputs": {
+                        "click": {
+                            "output": "/actions/lefthand/in/OffhandInteract"
+                        }
+                    },
+                    "mode": "button",
+                    "path": "/user/hand/left/input/y",
+                    "parameters": {}
+                },
+                {
+                    "inputs": {
+                        "click": {
+                            "output": "/actions/lefthand/in/offhandZoom"
+                        }
+                    },
+                    "mode": "button",
+                    "path": "/user/hand/right/input/trigger",
+                    "parameters": {}
+                },
+                {
+                    "inputs": {
+                        "click": {
+                            "output": "/actions/lefthand/in/OffhandFire"
+                        }
+                    },
+                    "mode": "button",
+                    "path": "/user/hand/left/input/trigger",
+                    "parameters": {}
+                },
+                {
+                    "inputs": {
+                        "position": {
+                            "output": "/actions/lefthand/in/Look"
+                        }
+                    },
+                    "mode": "joystick",
+                    "path": "/user/hand/right/input/joystick",
+                    "parameters": {}
+                },
+                {
+                    "inputs": {
+                        "position": {
+                            "output": "/actions/lefthand/in/Move"
+                        }
+                    },
+                    "mode": "joystick",
+                    "path": "/user/hand/left/input/joystick",
+                    "parameters": {}
+                }
+            ],
+            "skeleton": []
         }
     },
     "controller_type": "oculus_touch",

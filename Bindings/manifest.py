@@ -7,30 +7,30 @@ vec2Actions = ["Look", "Move"]
 poseActions = ["Tip"]
 
 bindings = {
-    "Jump" : { "h" : "right", "b" : "joystick|north", "f" : True},
-    "TwoHandGrip" : {"h" : "left", "b" : "grip", "f" : True},
-    "OffhandTwoHandGrip" : {"h" : "right", "b" : "grip", "f" : True},
-    "SwitchWeapons" : {"h" : "right", "b" : "grip", "f" : True},
-    "OffhandSwitchWeapons" : {"h" : "left", "b" : "grip", "f" : True},
-    "SwapWeaponHands" : {"h" : "left", "b" : "grip", "f" : True},
-    "OffhandSwapWeaponHands" : {"h" : "right", "b" : "grip", "f" : True},
-    "MenuBack" : {"h" : "left", "b" : "y", "f" : True},
-    "OffhandMenuBack" : {"h" : "right", "b" : "b", "f" : True},
-    "SwitchGrenades" : {"h" : "left", "b" : "x", "f" : True},
-    "offhandSwitchGrenades" : {"h" : "right", "b" : "a", "f" : True}, 
-    "Grenade" : {"h" : "right", "b" : "a", "f" : True},
-    "offhandGrenade" : {"h" : "left", "b" : "x", "f" : True},
-    "Reload" : {"h" : "right", "b" : "b", "f" : True},
-    "offhandReload" : {"h" : "left", "b" : "y", "f" : True},
-    "Interact" : {"h" : "right", "b" : "b", "f" : True},
-    "OffhandInteract" : {"h" : "left", "b" : "y", "f" : True},
-    "Zoom" : {"h" : "left", "b" : "trigger", "f" : True},
-    "offhandZoom" : {"h" : "right", "b" : "trigger", "f" : True},
-    "Fire" : {"h" : "right", "b" : "trigger", "f" : True},
-    "OffhandFire" : {"h" : "left", "b" : "trigger", "f" : True},
-    "Crouch" : {"h" : "right", "b" : "joystick|south", "f" : True},
-    "Look" : {"h" : "right", "b" : "joystick", "f" : True},
-    "Move" : {"h" : "left", "b" : "joystick", "f" : True}
+    "Jump" : { "h" : "right", "b" : "joystick|north", "f" : True, "actionsets" : ["default", "lefthand"]},
+    "TwoHandGrip" : {"h" : "left", "b" : "grip", "f" : True, "actionsets" : ["default"]},
+    "OffhandTwoHandGrip" : {"h" : "right", "b" : "grip", "f" : True, "actionsets" : ["lefthand"]},
+    "SwitchWeapons" : {"h" : "right", "b" : "grip", "f" : True, "actionsets" : ["default"]},
+    "OffhandSwitchWeapons" : {"h" : "left", "b" : "grip", "f" : True, "actionsets" : ["lefthand"]},
+    "SwapWeaponHands" : {"h" : "left", "b" : "grip", "f" : True, "actionsets" : ["default", "lefthand"]},
+    "OffhandSwapWeaponHands" : {"h" : "right", "b" : "grip", "f" : True, "actionsets" : ["default", "lefthand"]},
+    "MenuBack" : {"h" : "left", "b" : "y", "f" : True, "actionsets" : ["default"]},
+    "OffhandMenuBack" : {"h" : "right", "b" : "b", "f" : True, "actionsets" : ["lefthand"]},
+    "SwitchGrenades" : {"h" : "left", "b" : "x", "f" : True, "actionsets" : ["default"]},
+    "offhandSwitchGrenades" : {"h" : "right", "b" : "a", "f" : True, "actionsets" : ["lefthand"]}, 
+    "Grenade" : {"h" : "right", "b" : "a", "f" : True, "actionsets" : ["default"]},
+    "offhandGrenade" : {"h" : "left", "b" : "x", "f" : True, "actionsets" : ["lefthand"]},
+    "Reload" : {"h" : "right", "b" : "b", "f" : True, "actionsets" : ["default"]},
+    "offhandReload" : {"h" : "left", "b" : "y", "f" : True, "actionsets" : ["lefthand"]},
+    "Interact" : {"h" : "right", "b" : "b", "f" : True, "actionsets" : ["default"]},
+    "OffhandInteract" : {"h" : "left", "b" : "y", "f" : True, "actionsets" : ["lefthand"]},
+    "Zoom" : {"h" : "left", "b" : "trigger", "f" : True, "actionsets" : ["default"]},
+    "offhandZoom" : {"h" : "right", "b" : "trigger", "f" : True, "actionsets" : ["lefthand"]},
+    "Fire" : {"h" : "right", "b" : "trigger", "f" : True, "actionsets" : ["default"]},
+    "OffhandFire" : {"h" : "left", "b" : "trigger", "f" : True, "actionsets" : ["lefthand"]},
+    "Crouch" : {"h" : "right", "b" : "joystick|south", "f" : True, "actionsets" : ["default", "lefthand"]},
+    "Look" : {"h" : "right", "b" : "joystick", "f" : True, "actionsets" : ["default", "lefthand"]},
+    "Move" : {"h" : "left", "b" : "joystick", "f" : True, "actionsets" : ["default", "lefthand"]}
 }
 
 manifest = {
@@ -40,6 +40,10 @@ manifest = {
         {
             "name" : "/actions/default",
             "usage" : "leftright"
+        },
+        {
+            "name" : "/actions/lefthand",
+            "usage" : "left"
         }
     ]
 }
@@ -57,19 +61,26 @@ for v in variants:
 
 for b in boolActions:
     manifest["actions"].append({"name" : "/actions/default/in/" + b, "requirement" : "suggested", "type" : "boolean"})
+    manifest["actions"].append({"name" : "/actions/lefthand/in/" + b, "requirement" : "suggested", "type" : "boolean"})
 
 for v in vec1Actions:
     manifest["actions"].append({"name" : "/actions/default/in/" + v, "requirement" : "suggested", "type" : "vector1"})
+    manifest["actions"].append({"name" : "/actions/lefthand/in/" + v, "requirement" : "suggested", "type" : "vector1"})
     
 for v in vec2Actions:
     manifest["actions"].append({"name" : "/actions/default/in/" + v, "requirement" : "suggested", "type" : "vector2"})
+    manifest["actions"].append({"name" : "/actions/lefthand/in/" + v, "requirement" : "suggested", "type" : "vector2"})
 
 for p in poseActions:
     manifest["actions"].append({"name" : "/actions/default/in/Left" + p, "requirement" : "suggested", "type" : "pose"})
     manifest["actions"].append({"name" : "/actions/default/in/Right" + p, "requirement" : "suggested", "type" : "pose"})
+    #manifest["actions"].append({"name" : "/actions/lefthand/in/Left" + p, "requirement" : "suggested", "type" : "pose"})
+    #manifest["actions"].append({"name" : "/actions/lefthand/in/Right" + p, "requirement" : "suggested", "type" : "pose"})
 
 manifest["actions"].append({"name" : "/actions/default/in/LeftHand", "type" : "skeleton", "skeleton": "/skeleton/hand/left"})
 manifest["actions"].append({"name" : "/actions/default/in/RightHand", "type" : "skeleton", "skeleton": "/skeleton/hand/right"})
+#manifest["actions"].append({"name" : "/actions/lefthand/in/LeftHand", "type" : "skeleton", "skeleton": "/skeleton/hand/left"})
+#manifest["actions"].append({"name" : "/actions/lefthand/in/RightHand", "type" : "skeleton", "skeleton": "/skeleton/hand/right"})
 
 try:
     with open("actions.json", "w") as f:
@@ -106,6 +117,12 @@ for v in variants:
         controller = {
             "bindings" : {
                 "/actions/default" : {
+                    "haptics" : [],
+                    "poses" : [],
+                    "sources" : [],
+                    "skeleton" : []
+                },
+                "/actions/lefthand" : {
                     "haptics" : [],
                     "poses" : [],
                     "sources" : [],
@@ -181,17 +198,18 @@ for v in variants:
                 if c == "knuckles":
                     inputs[0] = "trackpad"
             
-                       
-            input = {}
-            input[inputtype] = {"output" : "/actions/default/in/" + binding}
-            
-            finalinput = inputs[0]
-            
-            if invert and b["f"] == True and c in swapmap and finalinput in swapmap[c]:
-                finalinput = swapmap[c][finalinput]
 
-            
-            controller["bindings"]["/actions/default"]["sources"].append({"inputs" : input, "mode" : mode, "path" : "/user/hand/" + finalhand + "/input/" + finalinput, "parameters" : parameters})
+            for actionset in b["actionsets"]:
+                actionset = "/actions/" + actionset 
+                
+                input = {}
+                input[inputtype] = {"output" : actionset + "/in/" + binding}
+                finalinput = inputs[0] 
+
+                if invert and b["f"] == True and c in swapmap and finalinput in swapmap[c]:
+                    finalinput = swapmap[c][finalinput]
+
+                controller["bindings"][actionset]["sources"].append({"inputs" : input, "mode" : mode, "path" : "/user/hand/" + finalhand + "/input/" + finalinput, "parameters" : parameters})
         
         try:
             with open(filename+".json", "w") as f:

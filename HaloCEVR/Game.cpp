@@ -43,6 +43,7 @@ void Game::Init()
 
 	vr->Init();
 
+	Game::instance.bLeftHanded = Game::instance.c_LeftHanded->Value();
 	inputHandler.RegisterInputs();
 
 	backBufferWidth = vr->GetViewWidth();
