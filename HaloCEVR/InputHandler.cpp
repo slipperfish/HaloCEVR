@@ -14,9 +14,10 @@ void InputHandler::RegisterInputs()
 {
 	IVR* vr = Game::instance.GetVR();
 
-	RegisterBoolInput("left handed", SwapWeaponHands);
-	OffhandSwapWeaponHands = SwapWeaponHands;
-	RegisterBoolInput("default", SwapWeaponHands);
+	// These bindings will always be the same and won't change depending on action sets
+	RegisterBoolInput("left handed", SwapWeaponHand);
+	OffhandSwapWeaponHand = SwapWeaponHand;
+	RegisterBoolInput("default", SwapWeaponHand);
 
 	UpdateRegisteredInputs();
 }
@@ -27,6 +28,7 @@ void InputHandler::UpdateRegisteredInputs()
 
 	const char* actionSet = Game::instance.bLeftHanded ? "left handed" : "default";
 	
+	// These bindings will change depending on action sets
 	RegisterBoolInput(actionSet, Jump);
 	RegisterBoolInput(actionSet, SwitchGrenades);
 	RegisterBoolInput(actionSet, Interact);
@@ -531,20 +533,20 @@ void InputHandler::UpdateHandsProximity()
 	if (swapHandDistance >= 0.0f && handDistance < swapHandDistance * swapHandDistance)
 	{
 		handsWithinSwapWeaponDistance = true;
-		CheckSwapWeaponHands();
+		CheckSwapWeaponHand();
 	}
 
 	UpdateTwoHandedHold(handDistance, handsWithinSwapWeaponDistance);
 }
 
-void InputHandler::CheckSwapWeaponHands()
+void InputHandler::CheckSwapWeaponHand()
 {
 	IVR* vr = Game::instance.GetVR();
 
 	bool bWeaponHandChanged;
 	bool bOffhandWeaponHandChanged;
-	bool bIsSwitchHandsPressed = vr->GetBoolInput(SwapWeaponHands, bWeaponHandChanged);
-	bool bIsOffhandSwitchHandsPressed = vr->GetBoolInput(OffhandSwapWeaponHands, bOffhandWeaponHandChanged);
+	bool bIsSwitchHandsPressed = vr->GetBoolInput(SwapWeaponHand, bWeaponHandChanged);
+	bool bIsOffhandSwitchHandsPressed = vr->GetBoolInput(OffhandSwapWeaponHand, bOffhandWeaponHandChanged);
 
 	bool offHandGrabbedWeapon = false;
 	bool dominantHandReleasedWeapon = false;

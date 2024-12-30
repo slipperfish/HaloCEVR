@@ -57,7 +57,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/default/in/SwapWeaponHands"
+                            "output": "/actions/default/in/SwapWeaponHand"
                         }
                     },
                     "mode": "button",
@@ -214,7 +214,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/left handed/in/SwapWeaponHands"
+                            "output": "/actions/left handed/in/SwapWeaponHand"
                         }
                     },
                     "mode": "button",

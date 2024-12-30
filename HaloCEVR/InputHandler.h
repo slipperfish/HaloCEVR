@@ -27,7 +27,7 @@ protected:
 
 	// Update Controls that rely on the distance between hands
 	void UpdateHandsProximity();
-	void CheckSwapWeaponHands();
+	void CheckSwapWeaponHand();
 	void UpdateTwoHandedHold(float handDistance, bool handsWithinSwapWeaponDistance);
 
 	char lastSnapState = 0;
@@ -58,8 +58,8 @@ protected:
 	InputBindingID Recentre = 0;
 	InputBindingID TwoHandGrip = 0;
 
-	InputBindingID SwapWeaponHands = 0;
-	InputBindingID OffhandSwapWeaponHands = 0;
+	InputBindingID SwapWeaponHand = 0;
+	InputBindingID OffhandSwapWeaponHand = 0;
 
 private:
 	bool IsHandInHolster(const Vector3& handPos, const Vector3& holsterPos, const float& holsterActivationDistance);

@@ -169,12 +169,12 @@
             "type": "boolean"
         },
         {
-            "name": "/actions/default/in/SwapWeaponHands",
+            "name": "/actions/default/in/SwapWeaponHand",
             "requirement": "suggested",
             "type": "boolean"
         },
         {
-            "name": "/actions/left handed/in/SwapWeaponHands",
+            "name": "/actions/left handed/in/SwapWeaponHand",
             "requirement": "suggested",
             "type": "boolean"
         },
@@ -209,32 +209,12 @@
             "type": "pose"
         },
         {
-            "name": "/actions/left handed/in/LeftTip",
-            "requirement": "suggested",
-            "type": "pose"
-        },
-        {
-            "name": "/actions/left handed/in/RightTip",
-            "requirement": "suggested",
-            "type": "pose"
-        },
-        {
             "name": "/actions/default/in/LeftHand",
             "type": "skeleton",
             "skeleton": "/skeleton/hand/left"
         },
         {
             "name": "/actions/default/in/RightHand",
-            "type": "skeleton",
-            "skeleton": "/skeleton/hand/right"
-        },
-        {
-            "name": "/actions/left handed/in/LeftHand",
-            "type": "skeleton",
-            "skeleton": "/skeleton/hand/left"
-        },
-        {
-            "name": "/actions/left handed/in/RightHand",
             "type": "skeleton",
             "skeleton": "/skeleton/hand/right"
         }

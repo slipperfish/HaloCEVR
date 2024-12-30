@@ -35,7 +35,7 @@
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/right/input/grip",
+                    "path": "/user/hand/left/input/grip",
                     "parameters": {
                         "click_activate_threshold": 0.8,
                         "click_deactivate_threshold": 0.7
@@ -48,17 +48,17 @@
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/left/input/trackpad",
+                    "path": "/user/hand/right/input/trackpad",
                     "parameters": {}
                 },
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/default/in/SwapWeaponHands"
+                            "output": "/actions/default/in/SwapWeaponHand"
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/right/input/grip",
+                    "path": "/user/hand/left/input/grip",
                     "parameters": {
                         "click_activate_threshold": 0.8,
                         "click_deactivate_threshold": 0.7
@@ -71,7 +71,7 @@
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/right/input/b",
+                    "path": "/user/hand/left/input/b",
                     "parameters": {}
                 },
                 {
@@ -81,7 +81,7 @@
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/right/input/a",
+                    "path": "/user/hand/left/input/a",
                     "parameters": {}
                 },
                 {
@@ -91,7 +91,7 @@
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/left/input/a",
+                    "path": "/user/hand/right/input/a",
                     "parameters": {}
                 },
                 {
@@ -101,7 +101,7 @@
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/left/input/b",
+                    "path": "/user/hand/right/input/b",
                     "parameters": {}
                 },
                 {
@@ -111,7 +111,7 @@
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/left/input/b",
+                    "path": "/user/hand/right/input/b",
                     "parameters": {}
                 },
                 {
@@ -121,7 +121,7 @@
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/right/input/trigger",
+                    "path": "/user/hand/left/input/trigger",
                     "parameters": {}
                 },
                 {
@@ -131,7 +131,7 @@
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/left/input/trigger",
+                    "path": "/user/hand/right/input/trigger",
                     "parameters": {}
                 },
                 {
@@ -189,7 +189,7 @@
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/left/input/grip",
+                    "path": "/user/hand/right/input/grip",
                     "parameters": {
                         "click_activate_threshold": 0.8,
                         "click_deactivate_threshold": 0.7
@@ -202,17 +202,17 @@
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/right/input/trackpad",
+                    "path": "/user/hand/left/input/trackpad",
                     "parameters": {}
                 },
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/left handed/in/SwapWeaponHands"
+                            "output": "/actions/left handed/in/SwapWeaponHand"
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/left/input/grip",
+                    "path": "/user/hand/right/input/grip",
                     "parameters": {
                         "click_activate_threshold": 0.8,
                         "click_deactivate_threshold": 0.7
@@ -225,7 +225,7 @@
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/left/input/b",
+                    "path": "/user/hand/right/input/b",
                     "parameters": {}
                 },
                 {
@@ -235,7 +235,7 @@
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/left/input/a",
+                    "path": "/user/hand/right/input/a",
                     "parameters": {}
                 },
                 {
@@ -245,7 +245,7 @@
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/right/input/a",
+                    "path": "/user/hand/left/input/a",
                     "parameters": {}
                 },
                 {
@@ -255,7 +255,7 @@
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/right/input/b",
+                    "path": "/user/hand/left/input/b",
                     "parameters": {}
                 },
                 {
@@ -265,7 +265,7 @@
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/right/input/b",
+                    "path": "/user/hand/left/input/b",
                     "parameters": {}
                 },
                 {
@@ -275,7 +275,7 @@
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/left/input/trigger",
+                    "path": "/user/hand/right/input/trigger",
                     "parameters": {}
                 },
                 {
@@ -285,7 +285,7 @@
                         }
                     },
                     "mode": "button",
-                    "path": "/user/hand/right/input/trigger",
+                    "path": "/user/hand/left/input/trigger",
                     "parameters": {}
                 },
                 {
