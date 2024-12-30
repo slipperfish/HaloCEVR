@@ -6,6 +6,7 @@ class InputHandler
 {
 public:
 	void RegisterInputs();
+	void UpdateRegisteredInputs();
 	void UpdateInputs(bool bInVehicle);
 	void UpdateCamera(float& yaw, float& pitch);
 	void UpdateCameraForVehicles(float& yaw, float& pitch);
@@ -46,7 +47,6 @@ protected:
 	InputBindingID Flashlight = 0;
 	InputBindingID Grenade = 0;
 	InputBindingID Fire = 0;
-	InputBindingID OffhandFire = 0;
 	InputBindingID MenuForward = 0;
 	InputBindingID MenuBack = 0;
 	InputBindingID Crouch = 0;

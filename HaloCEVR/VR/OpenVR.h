@@ -82,8 +82,8 @@ protected:
 	Vector2 mousePos;
 	bool bMouseDown;
 
-	vr::VRActiveActionSet_t actionSets[1];
-	void SetActiveActionSet(const std::string& actionSetName); // New method to switch action sets
+	vr::VRActiveActionSet_t actionSets[2];
+	void SetActiveActionSet(int index, const std::string& actionSetName);
 	
 	vr::VROverlayHandle_t uiOverlay;
 

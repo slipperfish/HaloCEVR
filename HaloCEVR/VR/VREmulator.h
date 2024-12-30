@@ -82,7 +82,7 @@ protected:
 		bool bPressed = false;
 	};
 
-	Binding bindings[15] = {
+	Binding bindings[13] = {
 		{"Jump", VK_SPACE},
 		{"SwitchGrenades", 'G'},
 		{"Interact", 'E'},
@@ -95,8 +95,6 @@ protected:
 		{"Crouch", VK_LCONTROL},
 		{"Zoom", 'Z'},
 		{"Reload", 'R'},
-		{"SwapWeaponHands", 'M'},
-		{"TwoHandGrip", 'M'},
 		{"EMU_MoveHandSwap", 'H'}
 	};
 
