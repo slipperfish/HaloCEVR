@@ -166,14 +166,14 @@
                 }
             ]
         },
-        "/actions/lefthand": {
+        "/actions/left handed": {
             "haptics": [],
             "poses": [],
             "sources": [
                 {
                     "inputs": {
                         "north": {
-                            "output": "/actions/lefthand/in/Jump"
+                            "output": "/actions/left handed/in/Jump"
                         }
                     },
                     "mode": "dpad",
@@ -185,7 +185,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/lefthand/in/TwoHandGrip"
+                            "output": "/actions/left handed/in/TwoHandGrip"
                         }
                     },
                     "mode": "button",
@@ -198,7 +198,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/lefthand/in/SwitchWeapons"
+                            "output": "/actions/left handed/in/SwitchWeapons"
                         }
                     },
                     "mode": "button",
@@ -208,7 +208,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/lefthand/in/SwapWeaponHands"
+                            "output": "/actions/left handed/in/SwapWeaponHands"
                         }
                     },
                     "mode": "button",
@@ -221,7 +221,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/lefthand/in/MenuBack"
+                            "output": "/actions/left handed/in/MenuBack"
                         }
                     },
                     "mode": "button",
@@ -231,7 +231,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/lefthand/in/SwitchGrenades"
+                            "output": "/actions/left handed/in/SwitchGrenades"
                         }
                     },
                     "mode": "button",
@@ -241,7 +241,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/lefthand/in/Grenade"
+                            "output": "/actions/left handed/in/Grenade"
                         }
                     },
                     "mode": "button",
@@ -251,7 +251,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/lefthand/in/Reload"
+                            "output": "/actions/left handed/in/Reload"
                         }
                     },
                     "mode": "button",
@@ -261,7 +261,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/lefthand/in/Interact"
+                            "output": "/actions/left handed/in/Interact"
                         }
                     },
                     "mode": "button",
@@ -271,7 +271,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/lefthand/in/Zoom"
+                            "output": "/actions/left handed/in/Zoom"
                         }
                     },
                     "mode": "button",
@@ -281,7 +281,7 @@
                 {
                     "inputs": {
                         "click": {
-                            "output": "/actions/lefthand/in/Fire"
+                            "output": "/actions/left handed/in/Fire"
                         }
                     },
                     "mode": "button",
@@ -291,7 +291,7 @@
                 {
                     "inputs": {
                         "position": {
-                            "output": "/actions/lefthand/in/Look"
+                            "output": "/actions/left handed/in/Look"
                         }
                     },
                     "mode": "joystick",
@@ -301,7 +301,7 @@
                 {
                     "inputs": {
                         "position": {
-                            "output": "/actions/lefthand/in/Move"
+                            "output": "/actions/left handed/in/Move"
                         }
                     },
                     "mode": "joystick",

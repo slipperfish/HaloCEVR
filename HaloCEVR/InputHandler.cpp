@@ -14,7 +14,7 @@ void InputHandler::RegisterInputs()
 {
 	IVR* vr = Game::instance.GetVR();
 
-	RegisterBoolInput("lefthand", SwapWeaponHands);
+	RegisterBoolInput("left handed", SwapWeaponHands);
 	OffhandSwapWeaponHands = SwapWeaponHands;
 	RegisterBoolInput("default", SwapWeaponHands);
 
@@ -25,7 +25,7 @@ void InputHandler::UpdateRegisteredInputs()
 {
 	IVR* vr = Game::instance.GetVR();
 
-	const char* actionSet = Game::instance.bLeftHanded ? "lefthand" : "default";
+	const char* actionSet = Game::instance.bLeftHanded ? "left handed" : "default";
 	
 	RegisterBoolInput(actionSet, Jump);
 	RegisterBoolInput(actionSet, SwitchGrenades);

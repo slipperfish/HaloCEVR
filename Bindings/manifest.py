@@ -1,26 +1,26 @@
 import json
 
 controllers = ["oculus_touch", "knuckles"]
-boolActions = ["Jump","SwitchGrenades", "Interact","SwitchWeapons","Melee","Flashlight","Grenade","Fire","MenuForward","MenuBack","Crouch","Zoom","Reload","Recentre","TwoHandGrip","SwapWeaponHands"]
+boolActions = ["Jump","SwitchGrenades","Interact","SwitchWeapons","Melee","Flashlight","Grenade","Fire","MenuForward","MenuBack","Crouch","Zoom","Reload","Recentre","TwoHandGrip","SwapWeaponHands"]
 vec1Actions = []
 vec2Actions = ["Look", "Move"]
 poseActions = ["Tip"]
 
 bindings = {
-    "Jump" : { "h" : "right", "b" : "joystick|north", "f" : True, "actionsets" : ["default", "lefthand"], "swapActionSetHand" : False},
-    "TwoHandGrip" : {"h" : "left", "b" : "grip", "f" : True, "actionsets" : ["default", "lefthand"], "swapActionSetHand" : True},
-    "SwitchWeapons" : {"h" : "right", "b" : "grip", "f" : True, "actionsets" : ["default", "lefthand"], "swapActionSetHand" : True},
-    "SwapWeaponHands" : {"h" : "left", "b" : "grip", "f" : True, "actionsets" : ["default", "lefthand"], "swapActionSetHand" : True},
-    "MenuBack" : {"h" : "left", "b" : "y", "f" : True, "actionsets" : ["default", "lefthand"], "swapActionSetHand" : True},
-    "SwitchGrenades" : {"h" : "left", "b" : "x", "f" : True, "actionsets" : ["default", "lefthand"], "swapActionSetHand" : True},
-    "Grenade" : {"h" : "right", "b" : "a", "f" : True, "actionsets" : ["default", "lefthand"], "swapActionSetHand" : True},
-    "Reload" : {"h" : "right", "b" : "b", "f" : True, "actionsets" : ["default", "lefthand"], "swapActionSetHand" : True},
-    "Interact" : {"h" : "right", "b" : "b", "f" : True, "actionsets" : ["default", "lefthand"], "swapActionSetHand" : True},
-    "Zoom" : {"h" : "left", "b" : "trigger", "f" : True, "actionsets" : ["default", "lefthand"], "swapActionSetHand" : True},
-    "Fire" : {"h" : "right", "b" : "trigger", "f" : True, "actionsets" : ["default", "lefthand"], "swapActionSetHand" : True},
-    "Crouch" : {"h" : "right", "b" : "joystick|south", "f" : True, "actionsets" : ["default", "lefthand"], "swapActionSetHand" : True},
-    "Look" : {"h" : "right", "b" : "joystick", "f" : True, "actionsets" : ["default", "lefthand"], "swapActionSetHand" : False},
-    "Move" : {"h" : "left", "b" : "joystick", "f" : True, "actionsets" : ["default", "lefthand"], "swapActionSetHand" : False}
+    "Jump" : { "h" : "right", "b" : "joystick|north", "f" : True, "actionsets" : ["default", "left handed"], "swapActionSetHand" : False},
+    "TwoHandGrip" : {"h" : "left", "b" : "grip", "f" : True, "actionsets" : ["default", "left handed"], "swapActionSetHand" : True},
+    "SwitchWeapons" : {"h" : "right", "b" : "grip", "f" : True, "actionsets" : ["default", "left handed"], "swapActionSetHand" : True},
+    "SwapWeaponHands" : {"h" : "left", "b" : "grip", "f" : True, "actionsets" : ["default", "left handed"], "swapActionSetHand" : True},
+    "MenuBack" : {"h" : "left", "b" : "y", "f" : True, "actionsets" : ["default", "left handed"], "swapActionSetHand" : True},
+    "SwitchGrenades" : {"h" : "left", "b" : "x", "f" : True, "actionsets" : ["default", "left handed"], "swapActionSetHand" : True},
+    "Grenade" : {"h" : "right", "b" : "a", "f" : True, "actionsets" : ["default", "left handed"], "swapActionSetHand" : True},
+    "Reload" : {"h" : "right", "b" : "b", "f" : True, "actionsets" : ["default", "left handed"], "swapActionSetHand" : True},
+    "Interact" : {"h" : "right", "b" : "b", "f" : True, "actionsets" : ["default", "left handed"], "swapActionSetHand" : True},
+    "Zoom" : {"h" : "left", "b" : "trigger", "f" : True, "actionsets" : ["default", "left handed"], "swapActionSetHand" : True},
+    "Fire" : {"h" : "right", "b" : "trigger", "f" : True, "actionsets" : ["default", "left handed"], "swapActionSetHand" : True},
+    "Crouch" : {"h" : "right", "b" : "joystick|south", "f" : True, "actionsets" : ["default", "left handed"], "swapActionSetHand" : True},
+    "Look" : {"h" : "right", "b" : "joystick", "f" : True, "actionsets" : ["default", "left handed"], "swapActionSetHand" : False},
+    "Move" : {"h" : "left", "b" : "joystick", "f" : True, "actionsets" : ["default", "left handed"], "swapActionSetHand" : False}
 }
 
 manifest = {
@@ -32,7 +32,7 @@ manifest = {
             "usage" : "leftright"
         },
         {
-            "name" : "/actions/lefthand",
+            "name" : "/actions/left handed",
             "usage" : "left"
         }
     ]
@@ -51,26 +51,26 @@ for v in variants:
 
 for b in boolActions:
     manifest["actions"].append({"name" : "/actions/default/in/" + b, "requirement" : "suggested", "type" : "boolean"})
-    manifest["actions"].append({"name" : "/actions/lefthand/in/" + b, "requirement" : "suggested", "type" : "boolean"})
+    manifest["actions"].append({"name" : "/actions/left handed/in/" + b, "requirement" : "suggested", "type" : "boolean"})
 
 for v in vec1Actions:
     manifest["actions"].append({"name" : "/actions/default/in/" + v, "requirement" : "suggested", "type" : "vector1"})
-    manifest["actions"].append({"name" : "/actions/lefthand/in/" + v, "requirement" : "suggested", "type" : "vector1"})
+    manifest["actions"].append({"name" : "/actions/left handed/in/" + v, "requirement" : "suggested", "type" : "vector1"})
     
 for v in vec2Actions:
     manifest["actions"].append({"name" : "/actions/default/in/" + v, "requirement" : "suggested", "type" : "vector2"})
-    manifest["actions"].append({"name" : "/actions/lefthand/in/" + v, "requirement" : "suggested", "type" : "vector2"})
+    manifest["actions"].append({"name" : "/actions/left handed/in/" + v, "requirement" : "suggested", "type" : "vector2"})
 
 for p in poseActions:
     manifest["actions"].append({"name" : "/actions/default/in/Left" + p, "requirement" : "suggested", "type" : "pose"})
     manifest["actions"].append({"name" : "/actions/default/in/Right" + p, "requirement" : "suggested", "type" : "pose"})
-    #manifest["actions"].append({"name" : "/actions/lefthand/in/Left" + p, "requirement" : "suggested", "type" : "pose"})
-    #manifest["actions"].append({"name" : "/actions/lefthand/in/Right" + p, "requirement" : "suggested", "type" : "pose"})
+    manifest["actions"].append({"name" : "/actions/left handed/in/Left" + p, "requirement" : "suggested", "type" : "pose"})
+    manifest["actions"].append({"name" : "/actions/left handed/in/Right" + p, "requirement" : "suggested", "type" : "pose"})
 
 manifest["actions"].append({"name" : "/actions/default/in/LeftHand", "type" : "skeleton", "skeleton": "/skeleton/hand/left"})
 manifest["actions"].append({"name" : "/actions/default/in/RightHand", "type" : "skeleton", "skeleton": "/skeleton/hand/right"})
-#manifest["actions"].append({"name" : "/actions/lefthand/in/LeftHand", "type" : "skeleton", "skeleton": "/skeleton/hand/left"})
-#manifest["actions"].append({"name" : "/actions/lefthand/in/RightHand", "type" : "skeleton", "skeleton": "/skeleton/hand/right"})
+manifest["actions"].append({"name" : "/actions/left handed/in/LeftHand", "type" : "skeleton", "skeleton": "/skeleton/hand/left"})
+manifest["actions"].append({"name" : "/actions/left handed/in/RightHand", "type" : "skeleton", "skeleton": "/skeleton/hand/right"})
 
 try:
     with open("actions.json", "w") as f:
@@ -112,7 +112,7 @@ for v in variants:
                     "sources" : [],
                     "skeleton" : []
                 },
-                "/actions/lefthand" : {
+                "/actions/left handed" : {
                     "haptics" : [],
                     "poses" : [],
                     "sources" : [],
@@ -192,7 +192,7 @@ for v in variants:
                 # Swap hands for left Hand action set
                 actionsetHand = finalhand
                 actionsetHandSwapped = False
-                if b["swapActionSetHand"] and actionset == "lefthand":
+                if b["swapActionSetHand"] and actionset == "left handed":
                     if finalhand == "right":
                         actionsetHand = "left"
                         actionsetHandSwapped = True

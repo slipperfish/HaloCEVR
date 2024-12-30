@@ -802,9 +802,8 @@ void OpenVR::SetActiveActionSet(int index, const std::string& actionSetName)
 
 void OpenVR::UpdateInputs()
 {	
-	//Game::instance.bLeftHanded ? SetActiveActionSet("/actions/lefthand") : SetActiveActionSet("/actions/default");
 	SetActiveActionSet(0, "/actions/default");
-	SetActiveActionSet(1, "/actions/lefthand");
+	SetActiveActionSet(1, "/actions/left handed");
 
 	VR_PROFILE_SCOPE(OpenVR_UpdateInputs);
 
