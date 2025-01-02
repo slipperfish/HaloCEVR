@@ -54,6 +54,8 @@ void OpenVR::Init()
 		return;
 	}
 
+	keyboardBuffer = new char[256];
+
 	vrOverlay->CreateOverlay("UIOverlay", "UIOverlay", &uiOverlay);
 	vrOverlay->SetOverlayFlag(uiOverlay, vr::VROverlayFlags_MakeOverlaysInteractiveIfVisible, true);
 	vrOverlay->SetOverlayFlag(uiOverlay, vr::VROverlayFlags_IsPremultiplied, true);
@@ -271,6 +273,7 @@ void OpenVR::CreateTexAndSurface(int index, UINT Width, UINT Height, DWORD Usage
 	Logger::log << "[OpenVR] Created shared texture " << index << ", " << desc.Width << "x" << desc.Height << std::endl;
 }
 
+#pragma optimize("", off)
 void OpenVR::UpdatePoses()
 {
 	VR_PROFILE_SCOPE(OpenVR_UpdatePoses);
@@ -309,11 +312,16 @@ void OpenVR::UpdatePoses()
 		case vr::VREvent_MouseButtonUp:
 			bMouseDown = false;
 			break;
+		case vr::VREvent_KeyboardClosed_Global:
+		case vr::VREvent_KeyboardDone:
+			Game::instance.uiRenderer->UpdateActiveButton(nullptr);
+			break;
 		default:
 			break;
 		}
 	}
 }
+#pragma optimize("", on)
 
 void OpenVR::UpdateSkeleton(ControllerRole hand)
 {
@@ -868,4 +876,63 @@ Vector2 OpenVR::GetMousePos()
 bool OpenVR::GetMouseDown()
 {
 	return bMouseDown;
+}
+
+void OpenVR::ShowKeyboard(const std::string& textBuffer)
+{
+	if (!vrOverlay)
+	{
+		return;
+	}
+
+	strncpy(keyboardBuffer, textBuffer.c_str(), 256);
+
+	vrOverlay->ShowKeyboardForOverlay(uiOverlay, vr::k_EGamepadTextInputModeSubmit, vr::k_EGamepadTextInputLineModeSingleLine, vr::KeyboardFlag_Modal, "VR Settings", 256, textBuffer.c_str(), 0);
+	bKeyboardVisible = true;
+}
+
+bool OpenVR::IsKeyboardVisible()
+{
+	return bKeyboardVisible;
+}
+
+void OpenVR::HideKeyboard()
+{
+	if (!vrOverlay)
+	{
+		return;
+	}
+
+	vrOverlay->HideKeyboard();
+	bKeyboardVisible = false;
+}
+
+std::string OpenVR::GetKeyboardInput()
+{
+	if (!vrOverlay)
+	{
+		return std::string();
+	}
+
+	vrOverlay->GetKeyboardText(keyboardBuffer, 256);
+	return keyboardBuffer;
+}
+
+std::string OpenVR::GetDeviceName()
+{
+	if (!vrSystem)
+	{
+		return "Unknown";
+	}
+
+	char str[128] = {};
+
+	uint32_t size = vrSystem->GetStringTrackedDeviceProperty(vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_ModelNumber_String, str, 128);
+
+	if (size == 0)
+	{
+		return "Unknown";
+	}
+
+	return str;
 }
