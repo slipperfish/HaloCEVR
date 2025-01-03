@@ -21,6 +21,7 @@
 #endif
 
 #include "UI/UIRenderer.h"
+#include "Helpers/Version.h"
 
 void Game::Init()
 {
@@ -35,6 +36,11 @@ void Game::Init()
 	CreateConsole();
 
 	PatchGame();
+
+	Logger::log << "[Game] Found Game Type: " << Helpers::GetGameTypeString() << std::endl;
+	Logger::log << "[Game] Found Game Version: " << Helpers::GetVersionString() << std::endl;
+
+	bIsCustom = std::strcmp("halor", Helpers::GetGameTypeString()) != 0;
 
 #if EMULATE_VR
 	vr = new VREmulator();
@@ -820,6 +826,14 @@ void Game::SetMousePosition(int& x, int& y)
 	if (Helpers::IsMouseVisible())
 	{
 		uiRenderer->MoveCursor(static_cast<float>(x), static_cast<float>(y));
+#if !EMULATE_VR
+		// Stop menu hover events happening while ui is up
+		if (settingsMenu->bVisible)
+		{
+			x = 0;
+			y = 0;
+		}
+#endif
 	}
 }
 
@@ -926,7 +940,7 @@ void Game::SetupConfigs()
 	c_MenuOverlayScale = config.RegisterFloat("MenuOverlayScale", "Width of the menu overlay in metres", 10.0f);
 	c_CrosshairScale = config.RegisterFloat("CrosshairScale", "Width of the crosshair overlay in metres", 10.0f);
 	c_UIOverlayCurvature = config.RegisterFloat("UIOverlayCurvature", "Curvature of the UI Overlay, on a scale of 0 to 1", 0.1f);
-	c_UIOverlayWidth = config.RegisterInt("UIOverlayWidth", "Width of the UI overlay in pixels", 800);
+	c_UIOverlayWidth = config.RegisterInt("UIOverlayWidth", "Width of the UI overlay in pixels", 600);
 	c_UIOverlayHeight = config.RegisterInt("UIOverlayHeight", "Height of the UI overlay in pixels", 600);
 	c_ShowCrosshair = config.RegisterBool("ShowCrosshair", "Display a floating crosshair in the world at the location you are aiming", true);
 	// Control settings

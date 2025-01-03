@@ -104,6 +104,8 @@ public:
 	bool bLoadedConfig = false;
 	bool bSavedConfig = false;
 
+	bool bIsCustom = false;
+
 #if USE_PROFILER
 	Profiler profiler;
 #endif

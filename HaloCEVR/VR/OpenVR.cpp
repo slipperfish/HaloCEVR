@@ -278,7 +278,6 @@ void OpenVR::CreateTexAndSurface(int index, UINT Width, UINT Height, DWORD Usage
 	Logger::log << "[OpenVR] Created shared texture " << index << ", " << desc.Width << "x" << desc.Height << std::endl;
 }
 
-#pragma optimize("", off)
 void OpenVR::UpdatePoses()
 {
 	VR_PROFILE_SCOPE(OpenVR_UpdatePoses);
@@ -326,7 +325,6 @@ void OpenVR::UpdatePoses()
 		}
 	}
 }
-#pragma optimize("", on)
 
 void OpenVR::UpdateSkeleton(ControllerRole hand)
 {

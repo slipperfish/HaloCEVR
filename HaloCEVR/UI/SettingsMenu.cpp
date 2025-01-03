@@ -11,6 +11,7 @@
 #include "UIImageButton.h"
 #include "UIIntBox.h"
 #include "UIFloatBox.h"
+#include "../Helpers/Version.h"
 
 // TODO: Hook this up to some sort of github action
 #define MOD_VERSION "1.3.0"
@@ -387,6 +388,8 @@ void SettingsMenu::PopulateAboutTab(UIPanel* aboutPanel)
 {
 	std::stringstream aboutStream;
 
+	aboutStream << "Halo Edition: " << (Game::instance.bIsCustom ? "Custom Edition" : "Retail") << std::endl;
+	aboutStream << "Halo Version: " << Helpers::GetVersionString() << std::endl;
 	aboutStream << "Mod Version: " << MOD_VERSION << std::endl;
 	aboutStream << "Chimera: " << (Game::instance.bDetectedChimera ? "" : "NOT ") << "installed" << std::endl;
 	aboutStream << "First launch: " << (Game::instance.bLoadedConfig ? "False" : "True") << std::endl;
