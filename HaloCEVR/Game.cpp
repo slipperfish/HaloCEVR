@@ -603,7 +603,10 @@ void Game::PostDrawMenu()
 		return;
 	}
 
-	uiRenderer->Render();
+	if (Helpers::IsMouseVisible())
+	{
+		uiRenderer->Render();
+	}
 
 	Helpers::GetRenderTargets()[1].renderSurface = uiRealSurface;
 	Helpers::GetDirect3DDevice9()->SetRenderTarget(0, uiRealSurface);
