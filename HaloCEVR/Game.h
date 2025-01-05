@@ -13,6 +13,8 @@
 #include "InputHandler.h"
 #include "InGameRenderer.h"
 #include "Profiler.h"
+#include "UI/UIRenderer.h"
+#include "UI/SettingsMenu.h"
 
 enum class ERenderState { UNKNOWN, LEFT_EYE, RIGHT_EYE, GAME, SCOPE};
 
@@ -90,11 +92,20 @@ public:
 	bool bUseTwoHandAim = false;
 	bool bLeftHanded = false;
 
+	Config config;
+
 	InGameRenderer inGameRenderer;
 	InGameRenderer scopeRenderer;
+	UIRenderer* uiRenderer;
+	SettingsMenu* settingsMenu;
 
 	bool bDetectedChimera = false;
 	Vector3 LastLookDir;
+
+	bool bLoadedConfig = false;
+	bool bSavedConfig = false;
+
+	bool bIsCustom = false;
 
 #if USE_PROFILER
 	Profiler profiler;
@@ -132,8 +143,6 @@ protected:
 	} fpsTracker;
 
 	FILE* consoleOut = nullptr;
-
-	Config config;
 
 	IVR* vr;
 
