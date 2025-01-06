@@ -12,6 +12,9 @@
 #include "WeaponHandler.h"
 #include "InputHandler.h"
 #include "InGameRenderer.h"
+#include "Profiler.h"
+#include "UI/UIRenderer.h"
+#include "UI/SettingsMenu.h"
 
 enum class ERenderState { UNKNOWN, LEFT_EYE, RIGHT_EYE, GAME, SCOPE};
 
@@ -32,7 +35,7 @@ public:
 	void PreDrawMirror(struct Renderer* renderer, float deltaTime);
 	void PostDrawMirror(struct Renderer* renderer, float deltaTime);
 	void PostDrawFrame(struct Renderer* renderer, float deltaTime);
-	Vector3 GetSmoothedInput();
+	Vector3 GetSmoothedInput() const;
 
 	bool PreDrawHUD();
 	void PostDrawHUD();
@@ -55,6 +58,8 @@ public:
 	void PreThrowGrenade(HaloID& playerID);
 	void PostThrowGrenade(HaloID& playerID);
 	bool GetCalculatedHandPositions(Matrix4& controllerTransform, Vector3& dominantHandPos, Vector3& offHand); 
+	void ReloadStart(HaloID param1, short param2, bool param3);
+	void ReloadEnd(short param1, HaloID param2);
 
 	void UpdateInputs();
 	void CalculateSmoothedInput();
@@ -86,11 +91,24 @@ public:
 	bool bNeedsRecentre = true;
 	bool bUseTwoHandAim = false;
 
+	Config config;
+
 	InGameRenderer inGameRenderer;
 	InGameRenderer scopeRenderer;
+	UIRenderer* uiRenderer;
+	SettingsMenu* settingsMenu;
 
 	bool bDetectedChimera = false;
 	Vector3 LastLookDir;
+
+	bool bLoadedConfig = false;
+	bool bSavedConfig = false;
+
+	bool bIsCustom = false;
+
+#if USE_PROFILER
+	Profiler profiler;
+#endif
 protected:
 
 	void CreateConsole();
@@ -100,6 +118,9 @@ protected:
 	void SetupConfigs();
 
 	void CalcFPS(float deltaTime);
+#if USE_PROFILER
+	void DumpProfilerData();
+#endif
 
 	void UpdateCrosshairAndScope();
 	void SetScopeTransform(Matrix4& newTransform, bool bIsVisible);
@@ -121,8 +142,6 @@ protected:
 	} fpsTracker;
 
 	FILE* consoleOut = nullptr;
-
-	Config config;
 
 	IVR* vr;
 
