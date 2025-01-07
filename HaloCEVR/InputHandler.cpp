@@ -607,9 +607,12 @@ void InputHandler::CalculateSmoothedInput()
 	}
 	else
 	{
-		float t = Game::instance.lastDeltaTime * 7.0f / clampedValue;
-		t = std::clamp(t, 0.0f, 1.0f);
-		// Apply the smoothing using linear interpolation with the adjusted deltaTime
+		const float scaleFactor = (-20.0f / 9.0f);
+
+		float h = 90.0f * log2(1.0f - exp(clampedValue * scaleFactor));
+
+		float t = 1.0f - pow(2.0f, Game::instance.lastDeltaTime * h);
+
 		smoothedPosition = Helpers::Lerp(smoothedPosition, actualControllerPos + toOffHand, t);
 	}
 }
