@@ -27,21 +27,6 @@ void Game::Init()
 {
 	Logger::log << "[Game] HaloCEVR initialising..." << std::endl;
 
-#if USE_PROFILER
-	profiler.Init();
-#endif
-
-	SetupConfigs();
-
-	CreateConsole();
-
-	PatchGame();
-
-	Logger::log << "[Game] Found Game Type: " << Helpers::GetGameTypeString() << std::endl;
-	Logger::log << "[Game] Found Game Version: " << Helpers::GetVersionString() << std::endl;
-
-	bIsCustom = std::strcmp("halor", Helpers::GetGameTypeString()) != 0;
-
 #if EMULATE_VR
 	vr = new VREmulator();
 #else
@@ -56,6 +41,21 @@ void Game::Init()
 	backBufferHeight = vr->GetViewHeight();
 
 	bHasShutdown = false;
+
+#if USE_PROFILER
+	profiler.Init();
+#endif
+
+	SetupConfigs();
+
+	CreateConsole();
+
+	PatchGame();
+
+	Logger::log << "[Game] Found Game Type: " << Helpers::GetGameTypeString() << std::endl;
+	Logger::log << "[Game] Found Game Version: " << Helpers::GetVersionString() << std::endl;
+
+	bIsCustom = std::strcmp("halor", Helpers::GetGameTypeString()) != 0;
 
 	Logger::log << "[Game] HaloCEVR initialised" << std::endl;
 }
