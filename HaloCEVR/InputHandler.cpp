@@ -600,7 +600,7 @@ void InputHandler::CalculateSmoothedInput()
 		userInput = Game::instance.c_WeaponSmoothingAmountTwoZoom->Value();
 	}
 
-	float clampedValue = std::clamp(userInput, 0.0f, 1.0f);
+	float clampedValue = std::clamp(userInput, 0.0f, 2.0f);
 	if (clampedValue == 0.0f)
 	{
 		smoothedPosition = actualControllerPos + toOffHand;
