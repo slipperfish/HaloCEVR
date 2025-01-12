@@ -600,14 +600,21 @@ void InputHandler::CalculateSmoothedInput()
 		userInput = Game::instance.c_WeaponSmoothingAmountTwoZoom->Value();
 	}
 
-	float clampedValue = std::clamp(userInput, 0.0f, 1.0f);
+	float clampedValue = std::clamp(userInput, 0.0f, 2.0f);
+	if (clampedValue == 0.0f)
+	{
+		smoothedPosition = actualControllerPos + toOffHand;
+	}
+	else
+	{
+		const float scaleFactor = (-20.0f / 9.0f);
 
-	float maxSmoothing = 20.0f;		//20 is already a bit ridiculous but just incase people need that much smoothing. 
-	float speedRampup = 10.0f;		//This helps control the slowdown curve of the interpolation
+		float h = 90.0f * log2(1.0f - exp(clampedValue * scaleFactor));
 
-	// Apply the smoothing using linear interpolation with the adjusted deltaTime
-	float t = (clampedValue * maxSmoothing) * Game::instance.lastDeltaTime;
-	smoothedPosition = Helpers::Lerp(smoothedPosition, actualControllerPos + toOffHand, exp(-t * speedRampup));
+		float t = 1.0f - pow(2.0f, Game::instance.lastDeltaTime * h);
+
+		smoothedPosition = Helpers::Lerp(smoothedPosition, actualControllerPos + toOffHand, t);
+	}
 }
 
 
