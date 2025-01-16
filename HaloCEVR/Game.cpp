@@ -27,21 +27,6 @@ void Game::Init()
 {
 	Logger::log << "[Game] HaloCEVR initialising..." << std::endl;
 
-#if EMULATE_VR
-	vr = new VREmulator();
-#else
-	vr = new OpenVR();
-#endif
-
-	vr->Init();
-
-	inputHandler.RegisterInputs();
-
-	backBufferWidth = vr->GetViewWidth();
-	backBufferHeight = vr->GetViewHeight();
-
-	bHasShutdown = false;
-
 #if USE_PROFILER
 	profiler.Init();
 #endif
@@ -56,6 +41,21 @@ void Game::Init()
 	Logger::log << "[Game] Found Game Version: " << Helpers::GetVersionString() << std::endl;
 
 	bIsCustom = std::strcmp("halor", Helpers::GetGameTypeString()) != 0;
+
+#if EMULATE_VR
+	vr = new VREmulator();
+#else
+	vr = new OpenVR();
+#endif
+
+	vr->Init();
+
+	inputHandler.RegisterInputs();
+
+	backBufferWidth = vr->GetViewWidth();
+	backBufferHeight = vr->GetViewHeight();
+
+	bHasShutdown = false;
 
 	Logger::log << "[Game] HaloCEVR initialised" << std::endl;
 }
@@ -111,6 +111,10 @@ void Game::OnInitDirectX()
 	}
 
 	SetForegroundWindow(GetActiveWindow());
+
+	// Ideally these values would be in a 4:3 ratio, but this causes the mouse position to stop aligning correctly
+	overlayWidth = static_cast<UINT>(std::max(vr->GetViewHeight(), vr->GetViewWidth()) * c_UIOverlayRenderScale->Value());
+	overlayHeight = overlayWidth;
 
 	vr->OnGameFinishInit();
 
@@ -529,16 +533,16 @@ bool Game::PreDrawHUD()
 	Helpers::GetRenderTargets()[1].renderSurface = uiSurface;
 	realUIWidth = Helpers::GetRenderTargets()[1].width;
 	realUIHeight = Helpers::GetRenderTargets()[1].height;
-	Helpers::GetRenderTargets()[1].width = c_UIOverlayWidth->Value();
-	Helpers::GetRenderTargets()[1].height = c_UIOverlayHeight->Value();
+	Helpers::GetRenderTargets()[1].width = overlayWidth;
+	Helpers::GetRenderTargets()[1].height = overlayHeight;
 
 	sRect* windowMain = Helpers::GetCurrentRect();
 	realRect = *windowMain;
 
 	windowMain->top = 0;
 	windowMain->left = 0;
-	windowMain->right = c_UIOverlayWidth->Value();
-	windowMain->bottom = c_UIOverlayHeight->Value();
+	windowMain->right = overlayWidth;
+	windowMain->bottom = overlayHeight;
 
 	return true;
 }
@@ -944,8 +948,6 @@ void Game::SetupConfigs()
 	c_CrosshairScale = config.RegisterFloat("CrosshairScale", "Width of the crosshair overlay in metres", 10.0f);
 	c_UIOverlayCurvature = config.RegisterFloat("UIOverlayCurvature", "Curvature of the UI Overlay, on a scale of 0 to 1", 0.1f);
 	c_UIOverlayRenderScale = config.RegisterFloat("c_UIOverlayRenderScale", "Resolution of the UI overlay, expressed as a proportion of the headset's render scale (e.g. 0.5 = half resolution)", 0.5f);
-	c_UIOverlayWidth  = new IntProperty( static_cast<int>( std::max( vr->GetViewHeight() , vr->GetViewWidth() ) * c_UIOverlayRenderScale->Value() ) , "" );  // 
-	c_UIOverlayHeight = new IntProperty( static_cast<int>( std::max( vr->GetViewHeight() , vr->GetViewWidth() ) * c_UIOverlayRenderScale->Value() ) , "" ); // = Choose the larger of UIOverlayWidth/Height, then * UIOverlayRenderScale 
 	c_ShowCrosshair = config.RegisterBool("ShowCrosshair", "Display a floating crosshair in the world at the location you are aiming", true);
 	// Control settings
 	c_LeftHanded = config.RegisterBool("LeftHanded", "Make the left hand the dominant hand. Does not affect bindings, change these in the SteamVR overlay", false);

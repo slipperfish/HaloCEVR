@@ -106,6 +106,9 @@ public:
 
 	bool bIsCustom = false;
 
+	UINT overlayWidth = 600;
+	UINT overlayHeight = 600;
+
 #if USE_PROFILER
 	Profiler profiler;
 #endif
@@ -195,8 +198,6 @@ public:
 	FloatProperty* c_MenuOverlayScale = nullptr;
 	FloatProperty* c_UIOverlayCurvature = nullptr;
 	FloatProperty* c_UIOverlayRenderScale = nullptr;
-	IntProperty* c_UIOverlayWidth = nullptr;
-	IntProperty* c_UIOverlayHeight = nullptr;
 	BoolProperty* c_ShowCrosshair = nullptr;
 	BoolProperty* c_SnapTurn = nullptr;
 	FloatProperty* c_SnapTurnAmount = nullptr;
