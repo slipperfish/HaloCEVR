@@ -310,11 +310,14 @@ bool Game::PreDrawScope(Renderer* renderer, float deltaTime)
 
 	Vector3 aimPos, aimDir, upDir;
 
-	weaponHandler.GetWorldWeaponAim(aimPos, aimDir);
+	weaponHandler.GetWorldWeaponAim(aimPos, aimDir, upDir);
 
-	upDir = Vector3(0.0f, 0.0f, 1.0f);
-	upDir = aimDir.cross(upDir);
-	upDir = upDir.cross(aimDir);
+	if (!Game::instance.c_LockScopeRoll->Value())
+	{
+		upDir = Vector3(0.0f, 0.0f, 1.0f);
+		upDir = aimDir.cross(upDir);
+		upDir = upDir.cross(aimDir);
+	}
 
 	renderer->frustum.position = aimPos;
 	renderer->frustum2.position = aimPos;
@@ -967,7 +970,7 @@ void Game::SetupConfigs()
 	c_ControllerRotation = config.RegisterVector3("ControllerRotation", "Rotation added to the controller when calculating the in game hand rotation", Vector3(0.0f, 0.0f, 0.0f));
 	c_ScopeRenderScale = config.RegisterFloat("ScopeRenderScale", "Size of the scope render target, expressed as a proportion of the headset's render scale (e.g. 0.5 = half resolution)", 1.0f);
 	c_ScopeScale = config.RegisterFloat("ScopeScale", "Width of the scope view in metres", 0.05f);
-	c_LockScopeRoll = config.RegisterBool("LockScopeRoll", "Set to true to keep the horizon level at all times in scopes. Leaving as false causes the scope view to rotate with the gun", false);
+	c_LockScopeRoll = config.RegisterBool("LockScopeRoll", "Set to true to keep the horizon level at all times in scopes. Leaving as false causes the scope view to rotate with the gun (pre-v1.3.0 behaviour)", true);
 	c_ScopeOffsetPistol = config.RegisterVector3("ScopeOffsetPistol", "Offset of the scope view relative to the pistol's location", Vector3(-0.1f, 0.0f, 0.15f));
 	c_ScopeOffsetSniper = config.RegisterVector3("ScopeOffsetSniper", "Offset of the scope view relative to the pistol's location", Vector3(-0.15f, 0.0f, 0.15f));
 	c_ScopeOffsetRocket = config.RegisterVector3("ScopeOffsetRocket", "Offset of the scope view relative to the pistol's location", Vector3(0.1f, 0.2f, 0.1f));
@@ -1141,7 +1144,7 @@ void Game::UpdateCrosshairAndScope()
 		m.translate(pos);
 		};
 
-	Vector3 aimPos, aimDir;
+	Vector3 aimPos, aimDir, upDir;
 
 	if (bInVehicle && !bHasWeapon)
 	{
@@ -1150,7 +1153,7 @@ void Game::UpdateCrosshairAndScope()
 	}
 	else
 	{
-		bool bHasCrosshair = weaponHandler.GetLocalWeaponAim(aimPos, aimDir);
+		bool bHasCrosshair = weaponHandler.GetLocalWeaponAim(aimPos, aimDir, upDir);
 
 		if (!bHasCrosshair)
 		{
@@ -1176,8 +1179,6 @@ void Game::UpdateCrosshairAndScope()
 	overlayTransform.identity();
 
 	short zoom = Helpers::GetInputData().zoomLevel;
-
-	Vector3 upDir = Vector3(0.0f, 0.0f, 1.0f);
 
 	bool bHasScope = (zoom != -1) && weaponHandler.GetLocalWeaponScope(aimPos, aimDir, upDir);
 

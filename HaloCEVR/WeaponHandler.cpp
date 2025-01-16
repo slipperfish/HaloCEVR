@@ -652,7 +652,7 @@ Matrix4 WeaponHandler::GetDominantHandTransform() const
 	return controllerTransform;
 }
 
-bool WeaponHandler::GetLocalWeaponAim(Vector3& outPosition, Vector3& outAim) const
+bool WeaponHandler::GetLocalWeaponAim(Vector3& outPosition, Vector3& outAim, Vector3& upDir) const
 {
 	HaloID playerID;
 	if (!Helpers::GetLocalPlayerID(playerID))
@@ -683,6 +683,7 @@ bool WeaponHandler::GetLocalWeaponAim(Vector3& outPosition, Vector3& outAim) con
 
 	outPosition = handPos + handRotation * cachedViewModel.fireOffset * Game::instance.WorldToMetres(1.0f);
 	outAim = finalRot * Vector3(1.0f, 0.0f, 0.0f);
+	upDir = finalRot * Vector3(0.0f, 0.0f, 1.0f);
 
 #if DRAW_DEBUG_AIM
 	// N.b. - This function is in local (i.e. vr) coordinate space, convert to world for debug to be correct
@@ -700,9 +701,9 @@ bool WeaponHandler::GetLocalWeaponAim(Vector3& outPosition, Vector3& outAim) con
 	return true;
 }
 
-bool WeaponHandler::GetWorldWeaponAim(Vector3& outPosition, Vector3& outAim) const
+bool WeaponHandler::GetWorldWeaponAim(Vector3& outPosition, Vector3& outAim, Vector3& upDir) const
 {
-	bool bSuccess = GetLocalWeaponAim(outPosition, outAim);
+	bool bSuccess = GetLocalWeaponAim(outPosition, outAim, upDir);
 
 	outPosition = Helpers::GetCamera().position + outPosition * Game::instance.MetresToWorld(1.0f);
 
@@ -745,11 +746,7 @@ bool WeaponHandler::GetLocalWeaponScope(Vector3& outPosition, Vector3& outAim, V
 
 	outPosition = gunOffset + finalRot * scopeOffset;
 	outAim = finalRot * Vector3(1.0f, 0.0f, 0.0f);
-
-	upDir = Vector3(0.0f, 0.0f, 1.0f);
-	if (!Game::instance.c_LockScopeRoll->Value()) {
-		upDir = finalRot * upDir;
-	}
+	upDir = finalRot * Vector3(1.0f, 0.0f, 1.0f);
 
 #if DRAW_DEBUG_AIM
 	// N.b. - This function is in local (i.e. vr) coordinate space, convert to world for debug to be correct

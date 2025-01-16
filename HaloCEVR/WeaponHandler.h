@@ -21,8 +21,8 @@ public:
 	void PreThrowGrenade(HaloID& playerID);
 	void PostThrowGrenade(HaloID& playerID);
 
-	bool GetLocalWeaponAim(Vector3& outPosition, Vector3& outAim) const;
-	bool GetWorldWeaponAim(Vector3& outPosition, Vector3& outAim) const;
+	bool GetLocalWeaponAim(Vector3& outPosition, Vector3& outAim, Vector3& upDir) const;
+	bool GetWorldWeaponAim(Vector3& outPosition, Vector3& outAim, Vector3& upDir) const;
 	bool GetLocalWeaponScope(Vector3& outPosition, Vector3& outAim, Vector3& upDir) const;
 	bool GetWorldWeaponScope(Vector3& outPosition, Vector3& outAim, Vector3& upDir) const;
 
