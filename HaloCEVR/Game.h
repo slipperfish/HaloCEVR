@@ -215,6 +215,7 @@ public:
 	Vector3Property* c_ControllerRotation = nullptr;
 	FloatProperty* c_ScopeRenderScale = nullptr;
 	FloatProperty* c_ScopeScale = nullptr;
+	BoolProperty* c_LockScopeRoll = nullptr;
 	Vector3Property* c_ScopeOffsetPistol = nullptr;
 	Vector3Property* c_ScopeOffsetSniper = nullptr;
 	Vector3Property* c_ScopeOffsetRocket = nullptr;

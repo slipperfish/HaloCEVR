@@ -745,7 +745,11 @@ bool WeaponHandler::GetLocalWeaponScope(Vector3& outPosition, Vector3& outAim, V
 
 	outPosition = gunOffset + finalRot * scopeOffset;
 	outAim = finalRot * Vector3(1.0f, 0.0f, 0.0f);
-	upDir = finalRot * Vector3(0.0f, 0.0f, 1.0f);
+
+	upDir = Vector3(0.0f, 0.0f, 1.0f);
+	if (!Game::instance.c_LockScopeRoll->Value()) {
+		upDir = finalRot * upDir;
+	}
 
 #if DRAW_DEBUG_AIM
 	// N.b. - This function is in local (i.e. vr) coordinate space, convert to world for debug to be correct
