@@ -114,6 +114,9 @@ void Game::OnInitDirectX()
 
 	// Ideally these values would be in a 4:3 ratio, but this causes the mouse position to stop aligning correctly
 	overlayWidth = static_cast<UINT>(std::max(vr->GetViewHeight(), vr->GetViewWidth()) * c_UIOverlayRenderScale->Value());
+	if (overlayWidth < 640) { // Clamp low to 640px so user can't degrade/break the config UI 
+		overlayWidth = 640; 
+	}
 	overlayHeight = overlayWidth;
 
 	vr->OnGameFinishInit();
