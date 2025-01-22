@@ -125,7 +125,6 @@ void InputHandler::UpdateInputs(bool bInVehicle)
 	if (Game::instance.c_EnableWeaponHolsters->Value())
 	{
 		unsigned char HolsterSwitchWeapons = UpdateHolsterSwitchWeapons();
-		bool bSwitchWeaponsChanged;
 		bool bSwitchWeaponsPressed = vr->GetBoolInput(SwitchWeapons);
 
 		if (HolsterSwitchWeapons > 0 && bSwitchWeaponsPressed)
