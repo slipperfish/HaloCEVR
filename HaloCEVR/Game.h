@@ -106,8 +106,8 @@ public:
 
 	bool bIsCustom = false;
 
-	UINT overlayWidth = 600;
-	UINT overlayHeight = 600;
+	UINT overlayWidth = 640;
+	UINT overlayHeight = 640;
 
 #if USE_PROFILER
 	Profiler profiler;
