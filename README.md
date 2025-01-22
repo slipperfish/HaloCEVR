@@ -141,13 +141,13 @@ This mod was designed for singleplayer, it is untested in multiplayer and as suc
 
 Also it does not work in Co-op because this version of the game does not have that mode.
 ### Does this work with Custom Edition?
-Not currently.
+Yes, although there is no guarantee that mods/custom content designed for custom edition will be compatible with vr.
 ### Does this work with MCC Edition?
 No.
 ### Does this work with SPV3?
-No, SPV3 depends on Halo Custom Edition which is presently incompatible.
+More or less.
 ### Does this work with other mods?
-Maybe, if they only need the PC edition and do not change the underlying structure of the game in a way that interferes with the VR mod. The focus of this mod is making sure the base game works in VR.
+Maybe, if they do not change the underlying structure of the game in a way that interferes with the VR mod. The focus of this mod is making sure the base game works in VR.
 ### Help! The game launches in VR but I cannot interact with the main menu! My buttons do not work!
 Make sure the game window on your desktop is in focus (switch back to desktop view and click on the window).  If that does not work make sure you're actually using a SteamVR runtime.
 ### Help! I've tried EVERYTHING to the letter and something is still wrong.
