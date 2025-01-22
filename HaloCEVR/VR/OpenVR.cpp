@@ -189,8 +189,8 @@ void OpenVR::OnGameFinishInit()
 	CreateTexAndSurface(0, recommendedWidth, recommendedHeight, desc.Usage, desc.Format);
 	CreateTexAndSurface(1, recommendedWidth, recommendedHeight, desc.Usage, desc.Format);
 	// UI Layers
-	CreateTexAndSurface(uiSurface, Game::instance.c_UIOverlayWidth->Value(), Game::instance.c_UIOverlayHeight->Value(), desc2.Usage, desc2.Format);
-	CreateTexAndSurface(crosshairSurface, Game::instance.c_UIOverlayWidth->Value(), Game::instance.c_UIOverlayHeight->Value(), desc2.Usage, desc2.Format);
+	CreateTexAndSurface(uiSurface, Game::instance.overlayWidth, Game::instance.overlayHeight, desc2.Usage, desc2.Format);
+	CreateTexAndSurface(crosshairSurface, Game::instance.overlayWidth, Game::instance.overlayHeight, desc2.Usage, desc2.Format);
 	scopeWidth = static_cast<uint32_t>(Game::instance.c_ScopeRenderScale->Value() * recommendedWidth);
 	scopeHeight = static_cast<uint32_t>(Game::instance.c_ScopeRenderScale->Value() * recommendedWidth * 0.75f); // Maintain the 4x3 aspect ratio halo works best with
 	CreateTexAndSurface(scopeSurface, scopeWidth, scopeHeight, desc2.Usage, desc2.Format);

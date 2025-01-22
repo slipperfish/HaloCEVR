@@ -824,8 +824,8 @@ void Hooks::H_DrawLoadingScreen2(void* param1)
 	{
 		0,
 		0,
-		static_cast<DWORD>(Game::instance.c_UIOverlayWidth->Value()),
-		static_cast<DWORD>(Game::instance.c_UIOverlayHeight->Value()),
+		static_cast<DWORD>(Game::instance.overlayWidth),
+		static_cast<DWORD>(Game::instance.overlayHeight),
 		0.0f,
 		1.0f
 	};
@@ -845,8 +845,8 @@ void Hooks::H_DrawCinematicBars()
 	{
 		0,
 		0,
-		static_cast<DWORD>(Game::instance.c_UIOverlayWidth->Value()),
-		static_cast<DWORD>(Game::instance.c_UIOverlayHeight->Value()),
+		static_cast<DWORD>(Game::instance.overlayWidth),
+		static_cast<DWORD>(Game::instance.overlayHeight),
 		0.0f,
 		1.0f
 	};

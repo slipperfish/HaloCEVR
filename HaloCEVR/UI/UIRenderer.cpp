@@ -22,8 +22,8 @@ void UIRenderer::Init(IDirect3DDevice9* inDevice)
 	InitFont("VR/Fonts/italics.ttf", 18.0f, fontDesc);
 
 	// Assume the UI is rendering on a 640x480 canvas and just scale everything accordingly
-	widthScale = Game::instance.c_UIOverlayWidth->Value() / 640.0f;
-	heightScale = Game::instance.c_UIOverlayHeight->Value() / 480.0f;
+	widthScale = Game::instance.overlayWidth / 640.0f;
+	heightScale = Game::instance.overlayHeight / 480.0f;
 }
 
 bool UIRenderer::InitFont(const char* fontPath, float fontSize, Font& outFont)

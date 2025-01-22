@@ -112,6 +112,13 @@ void Game::OnInitDirectX()
 
 	SetForegroundWindow(GetActiveWindow());
 
+	// Ideally these values would be in a 4:3 ratio, but this causes the mouse position to stop aligning correctly
+	overlayWidth = static_cast<UINT>(std::max(vr->GetViewHeight(), vr->GetViewWidth()) * c_UIOverlayRenderScale->Value());
+	if (overlayWidth < 640) { // Clamp low to 640px so user can't degrade/break the config UI 
+		overlayWidth = 640; 
+	}
+	overlayHeight = overlayWidth;
+
 	vr->OnGameFinishInit();
 
 	uiSurface = vr->GetUISurface();
@@ -532,16 +539,16 @@ bool Game::PreDrawHUD()
 	Helpers::GetRenderTargets()[1].renderSurface = uiSurface;
 	realUIWidth = Helpers::GetRenderTargets()[1].width;
 	realUIHeight = Helpers::GetRenderTargets()[1].height;
-	Helpers::GetRenderTargets()[1].width = c_UIOverlayWidth->Value();
-	Helpers::GetRenderTargets()[1].height = c_UIOverlayHeight->Value();
+	Helpers::GetRenderTargets()[1].width = overlayWidth;
+	Helpers::GetRenderTargets()[1].height = overlayHeight;
 
 	sRect* windowMain = Helpers::GetCurrentRect();
 	realRect = *windowMain;
 
 	windowMain->top = 0;
 	windowMain->left = 0;
-	windowMain->right = c_UIOverlayWidth->Value();
-	windowMain->bottom = c_UIOverlayHeight->Value();
+	windowMain->right = overlayWidth;
+	windowMain->bottom = overlayHeight;
 
 	return true;
 }
@@ -946,8 +953,7 @@ void Game::SetupConfigs()
 	c_MenuOverlayScale = config.RegisterFloat("MenuOverlayScale", "Width of the menu overlay in metres", 10.0f);
 	c_CrosshairScale = config.RegisterFloat("CrosshairScale", "Width of the crosshair overlay in metres", 10.0f);
 	c_UIOverlayCurvature = config.RegisterFloat("UIOverlayCurvature", "Curvature of the UI Overlay, on a scale of 0 to 1", 0.1f);
-	c_UIOverlayWidth = config.RegisterInt("UIOverlayWidth", "Width of the UI overlay in pixels", 600);
-	c_UIOverlayHeight = config.RegisterInt("UIOverlayHeight", "Height of the UI overlay in pixels", 600);
+	c_UIOverlayRenderScale = config.RegisterFloat("UIOverlayRenderScale", "Resolution of the UI overlay, expressed as a proportion of the headset's render scale (e.g. 0.5 = half resolution), low values default to 640px", 0.5f);
 	c_ShowCrosshair = config.RegisterBool("ShowCrosshair", "Display a floating crosshair in the world at the location you are aiming", true);
 	// Control settings
 	c_LeftHanded = config.RegisterBool("LeftHanded", "Make the left hand the dominant hand. Does not affect bindings, change these in the SteamVR overlay", false);
